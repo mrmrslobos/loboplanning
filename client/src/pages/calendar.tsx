@@ -208,13 +208,15 @@ export default function Calendar() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Calendar</h1>
+        <Button 
+          data-testid="button-new-event"
+          onClick={() => setIsNewEventOpen(true)}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Event
+        </Button>
+        
         <Dialog open={isNewEventOpen} onOpenChange={setIsNewEventOpen}>
-          <DialogTrigger asChild>
-            <Button data-testid="button-new-event">
-              <Plus className="w-4 h-4 mr-2" />
-              New Event
-            </Button>
-          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New Event</DialogTitle>

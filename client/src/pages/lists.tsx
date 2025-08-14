@@ -77,7 +77,7 @@ export default function ListsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
-      if (selectedList?.id === arguments[0]) {
+      if (selectedList?.id === id) {
         setSelectedList(null);
       }
       toast({ title: "List deleted successfully" });
@@ -188,13 +188,16 @@ export default function ListsPage() {
                 Organize with categories and templates
               </p>
             </div>
+            <Button 
+              size="sm" 
+              data-testid="button-create-list"
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New List
+            </Button>
+            
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" data-testid="button-create-list">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New List
-                </Button>
-              </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Create New List</DialogTitle>
@@ -261,6 +264,7 @@ export default function ListsPage() {
                             <Textarea 
                               placeholder="Enter list description" 
                               {...field} 
+                              value={field.value || ""}
                               data-testid="input-list-description"
                             />
                           </FormControl>
@@ -274,7 +278,7 @@ export default function ListsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Category (Optional)</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
                             <FormControl>
                               <SelectTrigger data-testid="select-category">
                                 <SelectValue placeholder="Select category" />
@@ -453,6 +457,7 @@ export default function ListsPage() {
                                 <Input 
                                   placeholder="e.g., 2, 1kg, 3 boxes" 
                                   {...field} 
+                                  value={field.value || ""}
                                   data-testid="input-item-quantity"
                                 />
                               </FormControl>
@@ -470,6 +475,7 @@ export default function ListsPage() {
                                 <Textarea 
                                   placeholder="Additional notes" 
                                   {...field} 
+                                  value={field.value || ""}
                                   data-testid="input-item-notes"
                                 />
                               </FormControl>
@@ -487,6 +493,7 @@ export default function ListsPage() {
                                 <Input 
                                   placeholder="e.g., Produce, Dairy, Personal" 
                                   {...field} 
+                                  value={field.value || ""}
                                   data-testid="input-item-category"
                                 />
                               </FormControl>
@@ -539,7 +546,7 @@ export default function ListsPage() {
                       data-testid={`item-${item.id}`}
                     >
                       <Checkbox
-                        checked={item.completed}
+                        checked={item.completed || false}
                         onCheckedChange={(checked) => 
                           handleItemToggle(item.id, checked as boolean)
                         }

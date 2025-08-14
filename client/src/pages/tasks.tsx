@@ -156,13 +156,15 @@ export default function TasksPage() {
             Manage and track your family tasks
           </p>
         </div>
+        <Button 
+          data-testid="button-create-task"
+          onClick={() => setIsCreateDialogOpen(true)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Task
+        </Button>
+        
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button data-testid="button-create-task">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Task
-            </Button>
-          </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Create New Task</DialogTitle>
