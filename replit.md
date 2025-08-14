@@ -30,7 +30,7 @@ LoboHub is a comprehensive family hub web application built with a modern full-s
 - **Navigation controls** for browsing months with today highlighting
 - **Visual legend** for understanding different item types and colors
 
-### Advanced Budget Module
+### Advanced Budget Module with Charts & Visualizations
 - **Complete financial tracking** with income and expense categories
 - **Monthly summaries** showing total income, expenses, and net income
 - **Visual spending breakdown** by category with progress bars and percentages
@@ -39,6 +39,14 @@ LoboHub is a comprehensive family hub web application built with a modern full-s
 - **Color-coded categories** for easy visual identification
 - **Tabbed interface** for Overview, Transactions, Categories, and Analytics
 - **Private/shared transactions** supporting family budgeting workflows
+- **Advanced Analytics Dashboard** with comprehensive financial visualizations:
+  - **6-Month Trend Charts**: Area charts showing income, expenses, and net income trends
+  - **Category Pie Charts**: Interactive spending breakdown by category with percentages
+  - **Monthly Comparison Bar Charts**: Side-by-side income vs expense comparison
+  - **Daily Spending Patterns**: Line charts tracking daily expense patterns
+  - **Savings Rate Analysis**: Color-coded savings performance with benchmarks
+  - **Financial Metrics Overview**: Key performance indicators and averages
+  - **Responsive Charts**: Full Recharts integration with tooltips, legends, and interactive elements
 
 ### Comprehensive Meal Planning Module
 - **Weekly meal planner** with breakfast, lunch, and dinner slots for each day

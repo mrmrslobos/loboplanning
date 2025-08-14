@@ -12,11 +12,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
+import { format, startOfMonth, endOfMonth, parseISO, subMonths, eachMonthOfInterval } from "date-fns";
 import { 
   Plus, Edit, Trash2, DollarSign, TrendingUp, TrendingDown, 
-  PieChart, BarChart3, Calendar, Target
+  PieChart, BarChart3, Calendar, Target, Activity, TrendingRightIcon
 } from "lucide-react";
+import { 
+  PieChart as RechartsPieChart, 
+  Pie,
+  Cell, 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend,
+  LineChart,
+  Line,
+  Area,
+  AreaChart
+} from "recharts";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -213,6 +230,120 @@ export default function Budget() {
   });
 
   // Calculate monthly summaries
+  // Enhanced analytics data
+  const analyticsData = useMemo(() => {
+    // Get last 6 months data for trends
+    const last6Months = Array.from({ length: 6 }, (_, i) => {
+      return subMonths(currentMonth, 5 - i);
+    });
+
+    const monthlyTrends = last6Months.map(month => {
+      const monthStart = startOfMonth(month);
+      const monthEnd = endOfMonth(month);
+      
+      const monthTransactions = transactions.filter(transaction => {
+        const transactionDate = parseISO(transaction.date);
+        return transactionDate >= monthStart && transactionDate <= monthEnd;
+      });
+
+      const income = monthTransactions
+        .filter(t => {
+          const category = categories.find(c => c.id === t.categoryId);
+          return category?.type === 'income';
+        })
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const expenses = monthTransactions
+        .filter(t => {
+          const category = categories.find(c => c.id === t.categoryId);
+          return category?.type === 'expense';
+        })
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      return {
+        month: format(month, 'MMM yy'),
+        monthFull: format(month, 'MMMM yyyy'),
+        income,
+        expenses,
+        net: income - expenses,
+        savings: Math.max(0, income - expenses),
+      };
+    });
+
+    // Category analysis for pie chart
+    const categoryAnalysis = categories
+      .filter(c => c.type === 'expense')
+      .map(category => {
+        const spent = transactions
+          .filter(t => {
+            const transactionDate = parseISO(t.date);
+            const monthStart = startOfMonth(currentMonth);
+            const monthEnd = endOfMonth(currentMonth);
+            return t.categoryId === category.id && 
+                   transactionDate >= monthStart && 
+                   transactionDate <= monthEnd;
+          })
+          .reduce((sum, t) => sum + t.amount, 0);
+        
+        return {
+          name: category.name,
+          value: spent,
+          color: category.color,
+          percentage: 0, // Will be calculated below
+        };
+      })
+      .filter(c => c.value > 0)
+      .sort((a, b) => b.value - a.value);
+
+    // Calculate percentages
+    const totalSpending = categoryAnalysis.reduce((sum, c) => sum + c.value, 0);
+    categoryAnalysis.forEach(category => {
+      category.percentage = totalSpending > 0 ? (category.value / totalSpending) * 100 : 0;
+    });
+
+    // Daily spending trend for current month
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const currentMonthTransactions = transactions.filter(transaction => {
+      const transactionDate = parseISO(transaction.date);
+      return transactionDate >= monthStart && transactionDate <= monthEnd;
+    });
+
+    // Group by day for daily spending
+    const dailySpending = currentMonthTransactions
+      .filter(t => {
+        const category = categories.find(c => c.id === t.categoryId);
+        return category?.type === 'expense';
+      })
+      .reduce((acc, transaction) => {
+        const day = format(parseISO(transaction.date), 'dd');
+        acc[day] = (acc[day] || 0) + transaction.amount;
+        return acc;
+      }, {} as Record<string, number>);
+
+    const dailyData = Object.entries(dailySpending)
+      .map(([day, amount]) => ({
+        day: parseInt(day),
+        amount,
+        formattedDay: `${day}`,
+      }))
+      .sort((a, b) => a.day - b.day);
+
+    return {
+      monthlyTrends,
+      categoryAnalysis,
+      dailyData,
+      totalCategories: categories.length,
+      totalTransactions: transactions.length,
+      averageMonthlyIncome: monthlyTrends.length > 0 
+        ? monthlyTrends.reduce((sum, m) => sum + m.income, 0) / monthlyTrends.length 
+        : 0,
+      averageMonthlyExpenses: monthlyTrends.length > 0 
+        ? monthlyTrends.reduce((sum, m) => sum + m.expenses, 0) / monthlyTrends.length 
+        : 0,
+    };
+  }, [transactions, categories, currentMonth]);
+
   const monthlyData = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -828,39 +959,309 @@ export default function Budget() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
+          {/* Analytics Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-blue-600">
+                  <Activity className="w-5 h-5" />
+                  <span className="font-medium">Avg Monthly Income</span>
+                </div>
+                <div className="text-2xl font-bold text-blue-900" data-testid="avg-income">
+                  ${analyticsData.averageMonthlyIncome.toFixed(2)}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-red-600">
+                  <TrendingDown className="w-5 h-5" />
+                  <span className="font-medium">Avg Monthly Expenses</span>
+                </div>
+                <div className="text-2xl font-bold text-red-900" data-testid="avg-expenses">
+                  ${analyticsData.averageMonthlyExpenses.toFixed(2)}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-green-600">
+                  <Target className="w-5 h-5" />
+                  <span className="font-medium">Total Categories</span>
+                </div>
+                <div className="text-2xl font-bold text-green-900" data-testid="total-categories">
+                  {analyticsData.totalCategories}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-purple-600">
+                  <BarChart3 className="w-5 h-5" />
+                  <span className="font-medium">Total Transactions</span>
+                </div>
+                <div className="text-2xl font-bold text-purple-900" data-testid="total-transactions">
+                  {analyticsData.totalTransactions}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 6-Month Trend Chart */}
           <Card>
             <CardHeader>
-              <CardTitle>Budget Analytics</CardTitle>
+              <CardTitle>6-Month Financial Trends</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics Dashboard</h3>
-                <p className="text-gray-600 mb-4">
-                  Advanced charts and insights coming soon. For now, use the Overview tab for spending summaries.
+              <div style={{ width: '100%', height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={analyticsData.monthlyTrends}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                    <Tooltip 
+                      formatter={(value: number, name: string) => [
+                        `$${value.toFixed(2)}`, 
+                        name === 'income' ? 'Income' : 
+                        name === 'expenses' ? 'Expenses' : 
+                        name === 'net' ? 'Net Income' : name
+                      ]}
+                      labelFormatter={(label) => {
+                        const monthData = analyticsData.monthlyTrends.find(m => m.month === label);
+                        return monthData?.monthFull || label;
+                      }}
+                    />
+                    <Legend />
+                    <Area 
+                      type="monotone" 
+                      dataKey="income" 
+                      stackId="1"
+                      stroke="#10b981" 
+                      fill="#10b981" 
+                      fillOpacity={0.6}
+                      name="Income"
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="expenses" 
+                      stackId="2"
+                      stroke="#ef4444" 
+                      fill="#ef4444" 
+                      fillOpacity={0.6}
+                      name="Expenses"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="net" 
+                      stroke="#6366f1" 
+                      strokeWidth={3}
+                      dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}
+                      name="Net Income"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Category Spending Pie Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Spending by Category</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Current month: {format(currentMonth, 'MMMM yyyy')}
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="text-sm text-blue-600 font-medium">Categories</div>
-                    <div className="text-2xl font-bold text-blue-900">{categories.length}</div>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="text-sm text-green-600 font-medium">Transactions</div>
-                    <div className="text-2xl font-bold text-green-900">{transactions.length}</div>
-                  </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="text-sm text-purple-600 font-medium">Income Sources</div>
-                    <div className="text-2xl font-bold text-purple-900">
-                      {categories.filter(c => c.type === 'income').length}
+              </CardHeader>
+              <CardContent>
+                {analyticsData.categoryAnalysis.length > 0 ? (
+                  <div className="space-y-4">
+                    <div style={{ width: '100%', height: 250 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsPieChart>
+                          <Pie
+                            data={analyticsData.categoryAnalysis}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percentage }) => 
+                              percentage > 5 ? `${name} ${percentage.toFixed(1)}%` : ''
+                            }
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {analyticsData.categoryAnalysis.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']}
+                          />
+                        </RechartsPieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    
+                    {/* Category Legend */}
+                    <div className="grid grid-cols-1 gap-2">
+                      {analyticsData.categoryAnalysis.slice(0, 6).map((category) => (
+                        <div key={category.name} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <span>{category.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">${category.value.toFixed(2)}</span>
+                            <span className="text-gray-500">({category.percentage.toFixed(1)}%)</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <div className="text-sm text-orange-600 font-medium">Expense Categories</div>
-                    <div className="text-2xl font-bold text-orange-900">
-                      {categories.filter(c => c.type === 'expense').length}
-                    </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <PieChart className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p>No spending data for this month</p>
                   </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Monthly Comparison Bar Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Monthly Income vs Expenses</CardTitle>
+                <p className="text-sm text-gray-600">Last 6 months comparison</p>
+              </CardHeader>
+              <CardContent>
+                <div style={{ width: '100%', height: 300 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analyticsData.monthlyTrends}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(value) => `$${value}`}
+                      />
+                      <Tooltip 
+                        formatter={(value: number, name: string) => [
+                          `$${value.toFixed(2)}`, 
+                          name === 'income' ? 'Income' : 'Expenses'
+                        ]}
+                        labelFormatter={(label) => {
+                          const monthData = analyticsData.monthlyTrends.find(m => m.month === label);
+                          return monthData?.monthFull || label;
+                        }}
+                      />
+                      <Legend />
+                      <Bar 
+                        dataKey="income" 
+                        fill="#10b981" 
+                        name="Income"
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar 
+                        dataKey="expenses" 
+                        fill="#ef4444" 
+                        name="Expenses"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Daily Spending Trend */}
+          {analyticsData.dailyData.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Daily Spending Pattern</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Daily expenses for {format(currentMonth, 'MMMM yyyy')}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div style={{ width: '100%', height: 200 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analyticsData.dailyData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="formattedDay" 
+                        tick={{ fontSize: 12 }}
+                        label={{ value: 'Day of Month', position: 'insideBottom', offset: -5 }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(value) => `$${value}`}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount Spent']}
+                        labelFormatter={(label) => `Day ${label}`}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="amount" 
+                        stroke="#f59e0b" 
+                        strokeWidth={2}
+                        dot={{ fill: '#f59e0b', strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, stroke: '#f59e0b', strokeWidth: 2, fill: '#fff' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Savings Rate Indicator */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Savings Analysis</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {analyticsData.monthlyTrends.slice(-3).map((month, index) => {
+                  const savingsRate = month.income > 0 ? (month.savings / month.income) * 100 : 0;
+                  return (
+                    <div key={month.month} className="text-center p-4 border rounded-lg">
+                      <div className="text-lg font-bold text-gray-700">{month.monthFull}</div>
+                      <div className="text-2xl font-bold mt-2" 
+                           style={{ 
+                             color: savingsRate >= 20 ? '#10b981' : 
+                                    savingsRate >= 10 ? '#f59e0b' : '#ef4444' 
+                           }}>
+                        {savingsRate.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-gray-500">Savings Rate</div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        ${month.savings.toFixed(2)} saved
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 text-sm text-gray-600">
+                <p><strong>Savings Rate Guide:</strong></p>
+                <p>• <span style={{ color: '#10b981' }}>Green (20%+)</span>: Excellent savings rate</p>
+                <p>• <span style={{ color: '#f59e0b' }}>Yellow (10-20%)</span>: Good savings rate</p>
+                <p>• <span style={{ color: '#ef4444' }}>Red (&lt;10%)</span>: Consider reducing expenses</p>
               </div>
             </CardContent>
           </Card>
