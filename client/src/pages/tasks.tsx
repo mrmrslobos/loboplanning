@@ -158,7 +158,10 @@ export default function TasksPage() {
         </div>
         <Button 
           data-testid="button-create-task"
-          onClick={() => setIsCreateDialogOpen(true)}
+          onClick={() => {
+            console.log("Tasks button clicked!");
+            setIsCreateDialogOpen(true);
+          }}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Task

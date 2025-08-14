@@ -75,9 +75,9 @@ export default function ListsPage() {
     mutationFn: async (id: string) => {
       return await apiRequest("DELETE", `/api/lists/${id}`);
     },
-    onSuccess: () => {
+    onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
-      if (selectedList?.id === id) {
+      if (selectedList?.id === deletedId) {
         setSelectedList(null);
       }
       toast({ title: "List deleted successfully" });
@@ -191,7 +191,10 @@ export default function ListsPage() {
             <Button 
               size="sm" 
               data-testid="button-create-list"
-              onClick={() => setIsCreateDialogOpen(true)}
+              onClick={() => {
+                console.log("Lists button clicked!");
+                setIsCreateDialogOpen(true);
+              }}
             >
               <Plus className="h-4 w-4 mr-2" />
               New List
@@ -278,7 +281,7 @@ export default function ListsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Category (Optional)</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value || ""}>
+                          <Select onValueChange={field.onChange} value={field.value ?? ""}>
                             <FormControl>
                               <SelectTrigger data-testid="select-category">
                                 <SelectValue placeholder="Select category" />

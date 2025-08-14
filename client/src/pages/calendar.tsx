@@ -210,7 +210,10 @@ export default function Calendar() {
         <h1 className="text-3xl font-bold">Calendar</h1>
         <Button 
           data-testid="button-new-event"
-          onClick={() => setIsNewEventOpen(true)}
+          onClick={() => {
+            console.log("Calendar button clicked!");
+            setIsNewEventOpen(true);
+          }}
         >
           <Plus className="w-4 h-4 mr-2" />
           New Event
