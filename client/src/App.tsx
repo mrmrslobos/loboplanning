@@ -19,9 +19,11 @@ import FamilySetup from "@/components/family/family-setup";
 import NotFound from "@/pages/not-found";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileHeader } from "@/components/layout/mobile-header";
+import { useState } from "react";
 
 function AuthenticatedApp() {
   const { user, isLoading } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -47,8 +49,8 @@ function AuthenticatedApp() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar />
-      <MobileHeader />
+      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      <MobileHeader onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <div className="lg:ml-64 pt-16 lg:pt-0">
         <Switch>
           <Route path="/" component={Dashboard} />

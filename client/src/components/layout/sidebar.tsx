@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn, generateInitials } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { useState } from "react";
 import { 
   Home, ListTodo, List, Calendar, MessageCircle, 
   Wallet, Utensils, BookOpen, CalendarDays, 
@@ -30,10 +29,14 @@ const navItems: NavItem[] = [
   { href: "/events", label: "Events", icon: CalendarDays },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -92,31 +95,31 @@ export function Sidebar() {
               const isActive = location === item.href;
               
               return (
-                <Link key={item.href} href={item.href}>
-                  <a
-                    className={cn(
-                      "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                      isActive 
-                        ? "bg-primary text-white" 
-                        : "text-gray-600 hover:bg-gray-100"
-                    )}
-                    data-testid={`nav-link-${item.label.toLowerCase().replace(' ', '-')}`}
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    {item.label}
-                    {item.badge && (
-                      <Badge 
-                        variant={item.color as any || "secondary"} 
-                        className="ml-auto"
-                        data-testid={`badge-${item.label.toLowerCase().replace(' ', '-')}`}
-                      >
-                        {item.badge}
-                      </Badge>
-                    )}
-                    {item.href === "/chat" && (
-                      <span className="ml-auto w-2 h-2 bg-accent rounded-full" data-testid="indicator-chat-online"></span>
-                    )}
-                  </a>
+                <Link 
+                  key={item.href} 
+                  href={item.href}
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                    isActive 
+                      ? "bg-primary text-white" 
+                      : "text-gray-600 hover:bg-gray-100"
+                  )}
+                  data-testid={`nav-link-${item.label.toLowerCase().replace(' ', '-')}`}
+                >
+                  <Icon className="w-5 h-5 mr-3" />
+                  {item.label}
+                  {item.badge && (
+                    <Badge 
+                      variant={item.color as any || "secondary"} 
+                      className="ml-auto"
+                      data-testid={`badge-${item.label.toLowerCase().replace(' ', '-')}`}
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
+                  {item.href === "/chat" && (
+                    <span className="ml-auto w-2 h-2 bg-accent rounded-full" data-testid="indicator-chat-online"></span>
+                  )}
                 </Link>
               );
             })}
