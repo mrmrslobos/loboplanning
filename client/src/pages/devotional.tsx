@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,23 +9,55 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   Plus, BookOpen, Calendar, MessageSquare, 
-  Users, User, Heart, Share2, Edit, Trash2
+  Users, User, Heart, Share2, Edit, Trash2, 
+  RefreshCw, Sparkles, Pray, Quote
 } from "lucide-react";
 import { cn, formatDate, formatDateTime, generateInitials } from "@/lib/utils";
 import type { DevotionalPost, DevotionalComment } from "@shared/schema";
+
+// Daily inspirational verses pool
+const DAILY_VERSES = [
+  { verse: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.", reference: "Jeremiah 29:11" },
+  { verse: "Trust in the Lord with all your heart, and do not lean on your own understanding.", reference: "Proverbs 3:5" },
+  { verse: "And we know that for those who love God all things work together for good, for those who are called according to his purpose.", reference: "Romans 8:28" },
+  { verse: "Be strong and courageous. Do not fear or be in dread of them, for it is the Lord your God who goes with you.", reference: "Deuteronomy 31:6" },
+  { verse: "The Lord is my shepherd; I shall not want.", reference: "Psalm 23:1" },
+  { verse: "Cast all your anxieties on him, because he cares for you.", reference: "1 Peter 5:7" },
+  { verse: "I can do all things through him who strengthens me.", reference: "Philippians 4:13" },
+  { verse: "The Lord your God is in your midst, a mighty one who will save; he will rejoice over you with gladness.", reference: "Zephaniah 3:17" },
+  { verse: "Come to me, all who labor and are heavy laden, and I will give you rest.", reference: "Matthew 11:28" },
+  { verse: "Peace I leave with you; my peace I give to you. Not as the world gives do I give to you.", reference: "John 14:27" },
+  { verse: "He gives power to the faint, and to him who has no might he increases strength.", reference: "Isaiah 40:29" },
+  { verse: "The Lord is near to the brokenhearted and saves the crushed in spirit.", reference: "Psalm 34:18" },
+  { verse: "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God.", reference: "Philippians 4:6" },
+  { verse: "The steadfast love of the Lord never ceases; his mercies never come to an end; they are new every morning.", reference: "Lamentations 3:22-23" },
+  { verse: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles.", reference: "Isaiah 40:31" },
+];
 
 export default function Devotional() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showPostForm, setShowPostForm] = useState(false);
+  const [showReflectionForm, setShowReflectionForm] = useState(false);
+  const [showPrayerForm, setShowPrayerForm] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<DevotionalPost | null>(null);
+  const [dailyVerse, setDailyVerse] = useState<{verse: string, reference: string} | null>(null);
+
+  // Get daily verse based on current date
+  useEffect(() => {
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+    const verseIndex = dayOfYear % DAILY_VERSES.length;
+    setDailyVerse(DAILY_VERSES[verseIndex]);
+  }, []);
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ['/api/devotional/posts'],
@@ -35,6 +67,44 @@ export default function Devotional() {
   const { data: comments } = useQuery({
     queryKey: ['/api/devotional/posts', selectedPost?.id, 'comments'],
     enabled: !!selectedPost?.id,
+  });
+
+  const createReflectionMutation = useMutation({
+    mutationFn: async (data: {
+      title: string;
+      reading?: string;
+      topic?: string;
+      questions?: string;
+      prayer?: string;
+      date: string;
+      familyId?: string;
+    }) => {
+      return apiRequest('POST', '/api/devotional/posts', data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/devotional/posts'] });
+      setShowReflectionForm(false);
+      toast({ title: "Success", description: "Reflection shared successfully" });
+    },
+  });
+
+  const createPrayerRequestMutation = useMutation({
+    mutationFn: async (data: {
+      title: string;
+      reading?: string;
+      topic?: string;
+      questions?: string;
+      prayer?: string;
+      date: string;
+      familyId?: string;
+    }) => {
+      return apiRequest('POST', '/api/devotional/posts', data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/devotional/posts'] });
+      setShowPrayerForm(false);
+      toast({ title: "Success", description: "Prayer request shared successfully" });
+    },
   });
 
   const createPostMutation = useMutation({
@@ -67,6 +137,18 @@ export default function Devotional() {
     },
   });
 
+  const [reflectionForm, setReflectionForm] = useState({
+    title: "",
+    content: "",
+    isShared: false,
+  });
+
+  const [prayerForm, setPrayerForm] = useState({
+    title: "",
+    content: "",
+    isShared: false,
+  });
+
   const [postForm, setPostForm] = useState({
     title: "",
     reading: "",
@@ -80,6 +162,61 @@ export default function Devotional() {
   const [commentForm, setCommentForm] = useState({
     comment: "",
   });
+
+  const handleReflectOnVerse = () => {
+    if (dailyVerse) {
+      setReflectionForm({
+        title: `Reflection on ${dailyVerse.reference}`,
+        content: `"${dailyVerse.verse}" - ${dailyVerse.reference}\n\nMy thoughts: `,
+        isShared: false,
+      });
+      setShowReflectionForm(true);
+    }
+  };
+
+  const handleCreateReflection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reflectionForm.title.trim() || !reflectionForm.content.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createReflectionMutation.mutate({
+      title: `🌟 ${reflectionForm.title.trim()}`,
+      reading: reflectionForm.content.trim(),
+      topic: "Personal Reflection",
+      date: new Date().toISOString(),
+      familyId: reflectionForm.isShared && user?.familyId ? user.familyId : undefined,
+    });
+
+    setReflectionForm({ title: "", content: "", isShared: false });
+  };
+
+  const handleCreatePrayerRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prayerForm.title.trim() || !prayerForm.content.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createPrayerRequestMutation.mutate({
+      title: `🙏 ${prayerForm.title.trim()}`,
+      prayer: prayerForm.content.trim(),
+      topic: "Prayer Request",
+      date: new Date().toISOString(),
+      familyId: prayerForm.isShared && user?.familyId ? user.familyId : undefined,
+    });
+
+    setPrayerForm({ title: "", content: "", isShared: false });
+  };
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +263,9 @@ export default function Devotional() {
   };
 
   const sortedPosts = posts?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) || [];
+  const reflectionPosts = sortedPosts.filter(post => post.topic === "Personal Reflection");
+  const prayerPosts = sortedPosts.filter(post => post.topic === "Prayer Request");
+  const devotionalPosts = sortedPosts.filter(post => !post.topic || (post.topic !== "Personal Reflection" && post.topic !== "Prayer Request"));
 
   if (isLoading) {
     return (
@@ -141,315 +281,639 @@ export default function Devotional() {
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Devotional</h1>
-            <p className="mt-1 text-sm text-gray-600">Share daily devotions and spiritual thoughts with your family</p>
+            <h1 className="text-2xl font-bold text-gray-900">Daily Devotional</h1>
+            <p className="mt-1 text-sm text-gray-600">Grow together in faith through daily verses, reflections, and prayer</p>
           </div>
-          <Button onClick={() => setShowPostForm(true)} data-testid="button-create-devotional">
-            <Plus className="h-4 w-4 mr-2" />
-            New Devotional
-          </Button>
+          <div className="flex space-x-2 mt-4 sm:mt-0">
+            <Button variant="outline" onClick={() => setShowPrayerForm(true)} data-testid="button-prayer-request">
+              <Heart className="h-4 w-4 mr-2" />
+              Prayer Request
+            </Button>
+            <Button onClick={() => setShowPostForm(true)} data-testid="button-create-devotional">
+              <Plus className="h-4 w-4 mr-2" />
+              New Devotional
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Posts List */}
-          <div className="lg:col-span-2 space-y-6">
-            {sortedPosts.length === 0 ? (
-              <Card data-testid="card-no-devotionals">
-                <CardContent className="p-12">
-                  <div className="text-center">
-                    <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-medium text-gray-900 mb-2">No devotionals yet</h3>
-                    <p className="text-gray-500 mb-4">Start sharing daily devotions with your family</p>
-                    <Button onClick={() => setShowPostForm(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create First Devotional
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              sortedPosts.map((post) => (
-                <Card 
-                  key={post.id} 
-                  className="hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setSelectedPost(post)}
-                  data-testid={`devotional-post-${post.id}`}
+      <main className="p-6 space-y-6">
+        {/* Daily Verse Card */}
+        {dailyVerse && (
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200" data-testid="card-daily-verse">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-900">
+                <Sparkles className="h-6 w-6" />
+                Today's Verse
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <blockquote className="text-lg italic text-blue-800 border-l-4 border-blue-300 pl-4">
+                  "{dailyVerse.verse}"
+                </blockquote>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-blue-700">— {dailyVerse.reference}</p>
+                  <Button 
+                    onClick={handleReflectOnVerse}
+                    className="bg-blue-600 hover:bg-blue-700"
+                    data-testid="button-reflect-verse"
+                  >
+                    <Heart className="h-4 w-4 mr-2" />
+                    Reflect on This
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Content Tabs */}
+        <Tabs defaultValue="reflections" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="reflections" data-testid="tab-reflections">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Reflections ({reflectionPosts.length})
+            </TabsTrigger>
+            <TabsTrigger value="prayers" data-testid="tab-prayers">
+              <Heart className="h-4 w-4 mr-2" />
+              Prayer Requests ({prayerPosts.length})
+            </TabsTrigger>
+            <TabsTrigger value="devotionals" data-testid="tab-devotionals">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Devotionals ({devotionalPosts.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Reflections Tab */}
+          <TabsContent value="reflections">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Personal & Shared Reflections</h3>
+                <Button 
+                  onClick={() => setShowReflectionForm(true)} 
+                  size="sm"
+                  data-testid="button-new-reflection"
                 >
-                  <CardHeader className="border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-medium">
-                          <BookOpen className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{post.title}</CardTitle>
-                          <div className="flex items-center text-sm text-gray-500 mt-1 space-x-3">
-                            <div className="flex items-center">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              <span>{formatDate(post.date)}</span>
-                            </div>
-                            <Badge variant="outline">
-                              {post.familyId ? (
-                                <><Users className="h-3 w-3 mr-1" />Shared</>
-                              ) : (
-                                <><User className="h-3 w-3 mr-1" />Private</>
-                              )}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm font-medium">
-                        {generateInitials(user?.name || "U")}
-                      </div>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  New Reflection
+                </Button>
+              </div>
+              
+              {reflectionPosts.length === 0 ? (
+                <Card data-testid="card-no-reflections">
+                  <CardContent className="p-8">
+                    <div className="text-center">
+                      <Sparkles className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No reflections yet</h3>
+                      <p className="text-gray-500 mb-4">Share your thoughts on daily verses and spiritual insights</p>
+                      <Button onClick={() => setShowReflectionForm(true)}>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Write First Reflection
+                      </Button>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      {post.topic && (
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-700 mb-1">Today's Topic</h4>
-                          <p className="text-gray-900">{post.topic}</p>
-                        </div>
-                      )}
-                      
-                      {post.reading && (
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-700 mb-1">Scripture Reading</h4>
-                          <p className="text-gray-900 italic">{post.reading}</p>
-                        </div>
-                      )}
-                      
-                      {post.questions && (
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-700 mb-1">Discussion Questions</h4>
-                          <p className="text-gray-900">{post.questions}</p>
-                        </div>
-                      )}
-                      
-                      {post.prayer && (
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-700 mb-1">Prayer</h4>
-                          <p className="text-gray-900 italic">{post.prayer}</p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {post.familyId && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedPost(post);
-                            setShowCommentForm(post.id);
-                          }}
-                          data-testid={`button-comment-${post.id}`}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Add Comment
-                        </Button>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
-              ))
-            )}
-          </div>
-
-          {/* Comments Sidebar */}
-          <div>
-            {selectedPost ? (
-              <Card data-testid="card-devotional-comments">
-                <CardHeader className="border-b border-gray-200">
-                  <CardTitle className="text-lg">Comments</CardTitle>
-                  <p className="text-sm text-gray-600">{selectedPost.title}</p>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="max-h-96 overflow-y-auto">
-                    {comments?.length === 0 ? (
-                      <div className="text-center py-8 px-6">
-                        <MessageSquare className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm">No comments yet</p>
-                        {selectedPost.familyId && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowCommentForm(selectedPost.id)}
-                            className="mt-2"
-                          >
-                            Be the first to comment
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-4 p-4">
-                        {comments?.map((comment) => (
-                          <div key={comment.id} className="flex space-x-3" data-testid={`comment-${comment.id}`}>
-                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 text-sm font-medium">
-                              {generateInitials("User")}
+              ) : (
+                <div className="grid gap-4">
+                  {reflectionPosts.map((post) => (
+                    <Card key={post.id} className="hover:shadow-md transition-shadow" data-testid={`reflection-${post.id}`}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                              <Sparkles className="h-5 w-5" />
                             </div>
-                            <div className="flex-1">
-                              <div className="bg-gray-50 rounded-lg p-3">
-                                <p className="text-sm text-gray-900">{comment.comment}</p>
+                            <div>
+                              <CardTitle className="text-lg">{post.title}</CardTitle>
+                              <div className="flex items-center text-sm text-gray-500 mt-1 space-x-3">
+                                <div className="flex items-center">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  <span>{formatDate(post.date)}</span>
+                                </div>
+                                <Badge variant="outline">
+                                  {post.familyId ? (
+                                    <><Users className="h-3 w-3 mr-1" />Shared</>
+                                  ) : (
+                                    <><User className="h-3 w-3 mr-1" />Private</>
+                                  )}
+                                </Badge>
                               </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {formatDateTime(comment.createdAt || new Date())}
-                              </p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {selectedPost.familyId && showCommentForm === selectedPost.id && (
-                    <div className="border-t border-gray-200 p-4">
-                      <form onSubmit={handleCreateComment} className="space-y-3">
-                        <Textarea
-                          value={commentForm.comment}
-                          onChange={(e) => setCommentForm({ comment: e.target.value })}
-                          placeholder="Share your thoughts..."
-                          rows={3}
-                          data-testid="textarea-comment"
-                        />
-                        <div className="flex items-center justify-end space-x-2">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowCommentForm(null)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            type="submit"
-                            size="sm"
-                            disabled={!commentForm.comment.trim() || createCommentMutation.isPending}
-                            data-testid="button-submit-comment"
-                          >
-                            {createCommentMutation.isPending ? "Posting..." : "Post Comment"}
-                          </Button>
                         </div>
-                      </form>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {post.reading && (
+                            <div>
+                              <p className="text-gray-900 whitespace-pre-wrap">{post.reading}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {post.familyId && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPost(post);
+                                setShowCommentForm(post.id);
+                              }}
+                              data-testid={`button-comment-${post.id}`}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Add Comment
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Prayer Requests Tab */}
+          <TabsContent value="prayers">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Prayer Requests & Shared Thoughts</h3>
+                <Button 
+                  onClick={() => setShowPrayerForm(true)} 
+                  size="sm"
+                  data-testid="button-new-prayer"
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  New Prayer Request
+                </Button>
+              </div>
+              
+              {prayerPosts.length === 0 ? (
+                <Card data-testid="card-no-prayers">
+                  <CardContent className="p-8">
+                    <div className="text-center">
+                      <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No prayer requests yet</h3>
+                      <p className="text-gray-500 mb-4">Share prayer requests and spiritual needs with your family</p>
+                      <Button onClick={() => setShowPrayerForm(true)}>
+                        <Heart className="h-4 w-4 mr-2" />
+                        Share First Prayer Request
+                      </Button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <Card data-testid="card-select-devotional">
-                <CardContent className="p-8">
-                  <div className="text-center">
-                    <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Select a devotional</h3>
-                    <p className="text-gray-500">Choose a devotional post to view comments and discussions</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {prayerPosts.map((post) => (
+                    <Card key={post.id} className="hover:shadow-md transition-shadow" data-testid={`prayer-${post.id}`}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-medium">
+                              <Heart className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-lg">{post.title}</CardTitle>
+                              <div className="flex items-center text-sm text-gray-500 mt-1 space-x-3">
+                                <div className="flex items-center">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  <span>{formatDate(post.date)}</span>
+                                </div>
+                                <Badge variant="outline">
+                                  {post.familyId ? (
+                                    <><Users className="h-3 w-3 mr-1" />Shared</>
+                                  ) : (
+                                    <><User className="h-3 w-3 mr-1" />Private</>
+                                  )}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {post.prayer && (
+                            <div>
+                              <p className="text-gray-900 whitespace-pre-wrap italic">{post.prayer}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {post.familyId && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPost(post);
+                                setShowCommentForm(post.id);
+                              }}
+                              data-testid={`button-comment-${post.id}`}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Add Comment
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Devotionals Tab */}
+          <TabsContent value="devotionals">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Family Devotionals</h3>
+                <Button 
+                  onClick={() => setShowPostForm(true)} 
+                  size="sm"
+                  data-testid="button-new-devotional"
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  New Devotional
+                </Button>
+              </div>
+              
+              {devotionalPosts.length === 0 ? (
+                <Card data-testid="card-no-devotionals">
+                  <CardContent className="p-8">
+                    <div className="text-center">
+                      <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No devotionals yet</h3>
+                      <p className="text-gray-500 mb-4">Start sharing daily devotions with your family</p>
+                      <Button onClick={() => setShowPostForm(true)}>
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Create First Devotional
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {devotionalPosts.map((post) => (
+                    <Card key={post.id} className="hover:shadow-md transition-shadow" data-testid={`devotional-${post.id}`}>
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center text-white font-medium">
+                              <BookOpen className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-lg">{post.title}</CardTitle>
+                              <div className="flex items-center text-sm text-gray-500 mt-1 space-x-3">
+                                <div className="flex items-center">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  <span>{formatDate(post.date)}</span>
+                                </div>
+                                <Badge variant="outline">
+                                  {post.familyId ? (
+                                    <><Users className="h-3 w-3 mr-1" />Shared</>
+                                  ) : (
+                                    <><User className="h-3 w-3 mr-1" />Private</>
+                                  )}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {post.topic && (
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-700 mb-1">Today's Topic</h4>
+                              <p className="text-gray-900">{post.topic}</p>
+                            </div>
+                          )}
+                          
+                          {post.reading && (
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-700 mb-1">Scripture Reading</h4>
+                              <p className="text-gray-900 italic">{post.reading}</p>
+                            </div>
+                          )}
+                          
+                          {post.questions && (
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-700 mb-1">Discussion Questions</h4>
+                              <p className="text-gray-900">{post.questions}</p>
+                            </div>
+                          )}
+                          
+                          {post.prayer && (
+                            <div>
+                              <h4 className="text-sm font-medium text-gray-700 mb-1">Prayer</h4>
+                              <p className="text-gray-900 italic">{post.prayer}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {post.familyId && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPost(post);
+                                setShowCommentForm(post.id);
+                              }}
+                              data-testid={`button-comment-${post.id}`}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Add Comment
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
-      {/* Create Devotional Modal */}
+      {/* Reflection Form Dialog */}
+      <Dialog open={showReflectionForm} onOpenChange={setShowReflectionForm}>
+        <DialogContent className="max-w-md" data-testid="dialog-reflection-form">
+          <DialogHeader>
+            <DialogTitle>Share Your Reflection</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateReflection} className="space-y-4">
+            <div>
+              <Label htmlFor="reflection-title">Title</Label>
+              <Input
+                id="reflection-title"
+                value={reflectionForm.title}
+                onChange={(e) => setReflectionForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="What are you reflecting on?"
+                data-testid="input-reflection-title"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="reflection-content">Your Thoughts</Label>
+              <Textarea
+                id="reflection-content"
+                value={reflectionForm.content}
+                onChange={(e) => setReflectionForm(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Share your spiritual insights and reflections..."
+                className="min-h-24"
+                data-testid="textarea-reflection-content"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="reflection-shared"
+                checked={reflectionForm.isShared}
+                onCheckedChange={(checked) => setReflectionForm(prev => ({ ...prev, isShared: checked }))}
+                data-testid="switch-reflection-shared"
+              />
+              <Label htmlFor="reflection-shared" className="text-sm">
+                Share with family
+              </Label>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowReflectionForm(false)}
+                data-testid="button-cancel-reflection"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={createReflectionMutation.isPending}
+                data-testid="button-save-reflection"
+              >
+                {createReflectionMutation.isPending ? "Saving..." : "Share Reflection"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Prayer Request Form Dialog */}
+      <Dialog open={showPrayerForm} onOpenChange={setShowPrayerForm}>
+        <DialogContent className="max-w-md" data-testid="dialog-prayer-form">
+          <DialogHeader>
+            <DialogTitle>Share a Prayer Request</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreatePrayerRequest} className="space-y-4">
+            <div>
+              <Label htmlFor="prayer-title">Prayer Request Title</Label>
+              <Input
+                id="prayer-title"
+                value={prayerForm.title}
+                onChange={(e) => setPrayerForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="What can we pray for?"
+                data-testid="input-prayer-title"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="prayer-content">Prayer Details</Label>
+              <Textarea
+                id="prayer-content"
+                value={prayerForm.content}
+                onChange={(e) => setPrayerForm(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Share details about this prayer request..."
+                className="min-h-24"
+                data-testid="textarea-prayer-content"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="prayer-shared"
+                checked={prayerForm.isShared}
+                onCheckedChange={(checked) => setPrayerForm(prev => ({ ...prev, isShared: checked }))}
+                data-testid="switch-prayer-shared"
+              />
+              <Label htmlFor="prayer-shared" className="text-sm">
+                Share with family
+              </Label>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowPrayerForm(false)}
+                data-testid="button-cancel-prayer"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={createPrayerRequestMutation.isPending}
+                data-testid="button-save-prayer"
+              >
+                {createPrayerRequestMutation.isPending ? "Saving..." : "Share Prayer Request"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Comment Form Dialog */}
+      {showCommentForm && selectedPost && (
+        <Dialog open={!!showCommentForm} onOpenChange={() => setShowCommentForm(null)}>
+          <DialogContent className="max-w-md" data-testid="dialog-comment-form">
+            <DialogHeader>
+              <DialogTitle>Add Comment</DialogTitle>
+              <p className="text-sm text-gray-600">{selectedPost.title}</p>
+            </DialogHeader>
+            <form onSubmit={handleCreateComment} className="space-y-4">
+              <div>
+                <Label htmlFor="comment">Your Comment</Label>
+                <Textarea
+                  id="comment"
+                  value={commentForm.comment}
+                  onChange={(e) => setCommentForm(prev => ({ ...prev, comment: e.target.value }))}
+                  placeholder="Share your thoughts..."
+                  className="min-h-20"
+                  data-testid="textarea-comment"
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowCommentForm(null)}
+                  data-testid="button-cancel-comment"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createCommentMutation.isPending}
+                  data-testid="button-save-comment"
+                >
+                  {createCommentMutation.isPending ? "Adding..." : "Add Comment"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Regular Devotional Form Dialog */}
       <Dialog open={showPostForm} onOpenChange={setShowPostForm}>
-        <DialogContent className="sm:max-w-2xl" data-testid="modal-create-devotional">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" data-testid="dialog-devotional-form">
           <DialogHeader>
             <DialogTitle>Create New Devotional</DialogTitle>
           </DialogHeader>
-          
           <form onSubmit={handleCreatePost} className="space-y-4">
-            <div>
-              <Label htmlFor="devotionalTitle">Title</Label>
-              <Input
-                id="devotionalTitle"
-                value={postForm.title}
-                onChange={(e) => setPostForm(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Enter devotional title"
-                data-testid="input-devotional-title"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="post-title">Title</Label>
+                <Input
+                  id="post-title"
+                  value={postForm.title}
+                  onChange={(e) => setPostForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Devotional title"
+                  data-testid="input-post-title"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="post-date">Date</Label>
+                <Input
+                  id="post-date"
+                  type="date"
+                  value={postForm.date}
+                  onChange={(e) => setPostForm(prev => ({ ...prev, date: e.target.value }))}
+                  data-testid="input-post-date"
+                />
+              </div>
             </div>
             
             <div>
-              <Label htmlFor="devotionalDate">Date</Label>
+              <Label htmlFor="post-topic">Topic</Label>
               <Input
-                id="devotionalDate"
-                type="date"
-                value={postForm.date}
-                onChange={(e) => setPostForm(prev => ({ ...prev, date: e.target.value }))}
-                data-testid="input-devotional-date"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="devotionalTopic">Topic (optional)</Label>
-              <Input
-                id="devotionalTopic"
+                id="post-topic"
                 value={postForm.topic}
                 onChange={(e) => setPostForm(prev => ({ ...prev, topic: e.target.value }))}
-                placeholder="What's today's focus?"
-                data-testid="input-devotional-topic"
+                placeholder="Today's topic or theme"
+                data-testid="input-post-topic"
               />
             </div>
             
             <div>
-              <Label htmlFor="devotionalReading">Scripture Reading (optional)</Label>
+              <Label htmlFor="post-reading">Scripture Reading</Label>
               <Textarea
-                id="devotionalReading"
+                id="post-reading"
                 value={postForm.reading}
                 onChange={(e) => setPostForm(prev => ({ ...prev, reading: e.target.value }))}
-                placeholder="Enter scripture passage or reference"
-                rows={3}
-                data-testid="textarea-devotional-reading"
+                placeholder="Bible verse or passage"
+                className="min-h-20"
+                data-testid="textarea-post-reading"
               />
             </div>
             
             <div>
-              <Label htmlFor="devotionalQuestions">Discussion Questions (optional)</Label>
+              <Label htmlFor="post-questions">Discussion Questions</Label>
               <Textarea
-                id="devotionalQuestions"
+                id="post-questions"
                 value={postForm.questions}
                 onChange={(e) => setPostForm(prev => ({ ...prev, questions: e.target.value }))}
                 placeholder="Questions for family discussion"
-                rows={3}
-                data-testid="textarea-devotional-questions"
+                className="min-h-20"
+                data-testid="textarea-post-questions"
               />
             </div>
             
             <div>
-              <Label htmlFor="devotionalPrayer">Prayer (optional)</Label>
+              <Label htmlFor="post-prayer">Prayer</Label>
               <Textarea
-                id="devotionalPrayer"
+                id="post-prayer"
                 value={postForm.prayer}
                 onChange={(e) => setPostForm(prev => ({ ...prev, prayer: e.target.value }))}
-                placeholder="Prayer for today"
-                rows={3}
-                data-testid="textarea-devotional-prayer"
+                placeholder="Closing prayer"
+                className="min-h-20"
+                data-testid="textarea-post-prayer"
               />
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <span className="text-sm font-medium text-gray-900">Share with family</span>
-                <p className="text-xs text-gray-500">Make this devotional visible to all family members</p>
-              </div>
+            <div className="flex items-center space-x-2">
               <Switch
+                id="post-shared"
                 checked={postForm.isShared}
                 onCheckedChange={(checked) => setPostForm(prev => ({ ...prev, isShared: checked }))}
-                data-testid="switch-devotional-shared"
+                data-testid="switch-post-shared"
               />
+              <Label htmlFor="post-shared" className="text-sm">
+                Share with family
+              </Label>
             </div>
             
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowPostForm(false)}>
+            <div className="flex justify-end space-x-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowPostForm(false)}
+                data-testid="button-cancel-post"
+              >
                 Cancel
               </Button>
               <Button 
                 type="submit" 
                 disabled={createPostMutation.isPending}
-                data-testid="button-create-devotional-submit"
+                data-testid="button-save-post"
               >
                 {createPostMutation.isPending ? "Creating..." : "Create Devotional"}
               </Button>

@@ -2,6 +2,21 @@
 
 LoboHub is a comprehensive family hub web application built with a modern full-stack architecture. The application serves as a centralized digital platform for families to manage tasks, lists, calendars, budgets, meal planning, devotionals, events, and real-time chat communication. The system implements a sophisticated family-based sharing model where content can be either private to individual users or shared across family members.
 
+## Recent Changes (August 2025)
+
+### Enhanced Devotional Module
+- **Complete redesign** of the devotional page with modern tabbed interface
+- **Daily inspirational verses** - Rotating pool of 15 carefully selected Bible verses that change daily
+- **"Reflect on This" feature** - One-click button to create personal reflections based on daily verses
+- **Separated content types** with dedicated tabs:
+  - **Reflections Tab**: Personal spiritual insights and verse-based thoughts (marked with 🌟)
+  - **Prayer Requests Tab**: Family prayer needs and spiritual support requests (marked with 🙏)
+  - **Devotionals Tab**: Traditional structured devotional posts with readings, questions, and prayers
+- **Visual enhancements**: Gradient cards, themed icons, and improved spacing
+- **Smart filtering**: Each tab shows only relevant content with accurate counts
+- **Private/Shared toggle**: All content types support individual privacy settings
+- **Pre-filled reflection forms**: Daily verse automatically populates reflection content for easy spiritual journaling
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
