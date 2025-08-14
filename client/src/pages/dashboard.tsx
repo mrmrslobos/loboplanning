@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { ChatWindow } from "@/components/chat/chat-window";
 import { TaskForm } from "@/components/tasks/task-form";
@@ -11,8 +10,8 @@ import { InviteModal } from "@/components/family/invite-modal";
 import { useState } from "react";
 import { 
   AlertTriangle, Calendar, DollarSign, Users, Plus, 
-  CalendarPlus, Receipt, BookOpen, UserPlus, CheckCircle,
-  Clock, MapPin, User
+  CalendarPlus, Receipt, BookOpen, UserPlus, 
+  Clock, MapPin
 } from "lucide-react";
 import { cn, formatDate, formatTime, isOverdue, generateInitials } from "@/lib/utils";
 
@@ -65,20 +64,21 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900" data-testid="text-dashboard-greeting">
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900" data-testid="text-dashboard-greeting">
               Good morning, {user?.name?.split(' ')[0]}!
             </h1>
             <p className="mt-1 text-sm text-gray-600">Here's what's happening with your family today</p>
           </div>
-          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <Button 
               variant="outline"
               onClick={() => setShowTaskForm(true)}
+              className="touch-target"
               data-testid="button-quick-add"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -86,6 +86,7 @@ export default function Dashboard() {
             </Button>
             <Button 
               onClick={() => setShowInviteModal(true)}
+              className="touch-target"
               data-testid="button-invite-family"
             >
               <UserPlus className="h-4 w-4 mr-2" />
@@ -95,289 +96,184 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="p-6">
+      <div className="space-y-6">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <Card data-testid="card-overdue-tasks">
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                  <AlertTriangle className="h-5 w-5 lg:h-6 lg:w-6 text-red-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900" data-testid="text-overdue-count">
+                <div className="ml-3 lg:ml-4">
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900" data-testid="text-overdue-count">
                     {overdueTasks.length}
                   </p>
-                  <p className="text-sm text-gray-600">Overdue Tasks</p>
+                  <p className="text-xs lg:text-sm text-gray-600">Overdue Tasks</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card data-testid="card-todays-events">
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-blue-600" />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900" data-testid="text-events-count">
+                <div className="ml-3 lg:ml-4">
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900" data-testid="text-events-count">
                     {todaysEvents.length}
                   </p>
-                  <p className="text-sm text-gray-600">Today's Events</p>
+                  <p className="text-xs lg:text-sm text-gray-600">Today's Events</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="card-budget-used">
-            <CardContent className="p-6">
+          <Card data-testid="card-budget-usage">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-green-600" />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900" data-testid="text-budget-percentage">
+                <div className="ml-3 lg:ml-4">
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900" data-testid="text-budget-percentage">
                     {budgetUsedPercentage}%
                   </p>
-                  <p className="text-sm text-gray-600">Budget Used</p>
+                  <p className="text-xs lg:text-sm text-gray-600">Budget Used</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="card-family-online">
-            <CardContent className="p-6">
+          <Card data-testid="card-family-members">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="h-6 w-6 text-purple-600" />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900" data-testid="text-online-count">
-                    3/4
+                <div className="ml-3 lg:ml-4">
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900" data-testid="text-family-count">
+                    2
                   </p>
-                  <p className="text-sm text-gray-600">Online Now</p>
+                  <p className="text-xs lg:text-sm text-gray-600">Family Members</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Recent Tasks */}
-          <div className="lg:col-span-2">
-            <Card data-testid="card-recent-tasks">
-              <CardHeader className="border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Recent Tasks</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm">View All</Button>
-                    <Button size="sm" onClick={() => setShowTaskForm(true)}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Task
-                    </Button>
-                  </div>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4 mb-6 lg:mb-8">
+          {quickActions.map((action, index) => (
+            <Card 
+              key={index} 
+              className="cursor-pointer hover:shadow-md transition-shadow duration-200 touch-target" 
+              onClick={action.action}
+              data-testid={`card-action-${action.label.toLowerCase().replace(' ', '-')}`}
+            >
+              <CardContent className="p-3 lg:p-4 flex flex-col items-center text-center">
+                <div className={cn("w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3", action.color)}>
+                  <action.icon className="h-5 w-5 lg:h-6 lg:w-6" />
                 </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {recentTasks.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>No tasks yet. Create your first task!</p>
-                    </div>
-                  ) : (
-                    recentTasks.map((task) => (
-                      <div 
-                        key={task.id}
-                        className={cn(
-                          "flex items-center justify-between p-4 border rounded-lg",
-                          task.priority === 'high' && "task-priority-high",
-                          task.priority === 'medium' && "task-priority-medium",
-                          task.priority === 'low' && "task-priority-low",
-                          task.status === 'done' && "bg-gray-50"
-                        )}
-                        data-testid={`task-item-${task.id}`}
-                      >
-                        <div className="flex items-center">
-                          <input 
-                            type="checkbox" 
-                            checked={task.status === 'done'}
-                            className="w-4 h-4 text-primary border-gray-300 rounded"
-                            readOnly
-                          />
-                          <div className="ml-4">
-                            <h4 className={cn(
-                              "text-sm font-medium",
-                              task.status === 'done' ? "text-gray-500 line-through" : "text-gray-900"
-                            )}>
-                              {task.title}
-                            </h4>
-                            <div className="flex items-center mt-1 space-x-3">
-                              <Badge variant={
-                                task.priority === 'high' ? 'destructive' : 
-                                task.priority === 'medium' ? 'default' : 
-                                'secondary'
-                              }>
-                                {task.priority} Priority
-                              </Badge>
-                              {task.dueDate && (
-                                <span className="text-xs text-gray-500">
-                                  Due: {formatDate(task.dueDate)}
-                                </span>
-                              )}
-                              <Badge variant="outline">
-                                {task.familyId ? 'Shared' : 'Private'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-medium">
-                          {generateInitials(user?.name || "U")}
-                        </div>
+                <p className="text-xs lg:text-sm font-medium text-gray-900">{action.label}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Recent Activity Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+          {/* Recent Tasks */}
+          <Card data-testid="card-recent-tasks">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-gray-900">Recent Tasks</CardTitle>
+                <Button variant="ghost" size="sm" className="text-xs">View All</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {recentTasks.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">No tasks yet</p>
+              ) : (
+                recentTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{task.title}</p>
+                        <p className="text-xs text-gray-500">
+                          {task.dueDate ? `Due ${formatDate(task.dueDate)}` : 'No due date'}
+                        </p>
                       </div>
-                    ))
-                  )}
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {task.status}
+                    </Badge>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Upcoming Events */}
+          <Card data-testid="card-upcoming-events">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg font-semibold text-gray-900">Upcoming Events</CardTitle>
+                <Button variant="ghost" size="sm" className="text-xs">View All</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {upcomingEvents.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">No upcoming events</p>
+              ) : (
+                upcomingEvents.map((event) => (
+                  <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{event.title}</p>
+                        <p className="text-xs text-gray-500">
+                          {formatDate(event.startTime)} at {formatTime(event.startTime)}
+                        </p>
+                      </div>
+                    </div>
+                    {event.location && (
+                      <div className="flex items-center text-xs text-gray-500">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span className="truncate max-w-20">{event.location}</span>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Chat Window */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
+          <div className="xl:col-span-2">
+            <Card data-testid="card-family-activity">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-gray-900">Family Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p>Family activity feed will appear here</p>
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Family Chat */}
-          <div className="h-96">
+          
+          <div className="h-[400px] lg:h-[500px]">
             <ChatWindow />
           </div>
         </div>
-
-        {/* Secondary Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Upcoming Events */}
-          <Card data-testid="card-upcoming-events">
-            <CardHeader className="border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <CardTitle>Upcoming Events</CardTitle>
-                <Button variant="ghost" size="sm">View Calendar</Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {upcomingEvents.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No upcoming events. Create your first event!</p>
-                  </div>
-                ) : (
-                  upcomingEvents.map((event) => (
-                    <div 
-                      key={event.id}
-                      className="flex items-center p-3 bg-blue-50 border border-blue-200 rounded-lg"
-                      data-testid={`event-item-${event.id}`}
-                    >
-                      <div className="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-lg flex flex-col items-center justify-center text-white">
-                        <span className="text-xs font-medium">
-                          {new Date(event.startTime).toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}
-                        </span>
-                        <span className="text-sm font-bold">
-                          {new Date(event.startTime).getDate()}
-                        </span>
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <h4 className="text-sm font-medium text-gray-900">{event.title}</h4>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                        </p>
-                        {event.location && (
-                          <div className="flex items-center mt-1">
-                            <MapPin className="h-3 w-3 text-gray-400 mr-1" />
-                            <span className="text-xs text-gray-500">{event.location}</span>
-                          </div>
-                        )}
-                        <Badge variant="outline" className="mt-1">
-                          {event.familyId ? 'Shared Event' : 'Private Event'}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Budget Overview */}
-          <Card data-testid="card-budget-overview">
-            <CardHeader className="border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <CardTitle>March Budget</CardTitle>
-                <Button variant="ghost" size="sm">View Details</Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Total Spent</span>
-                  <span className="text-sm font-bold text-gray-900">
-                    ${totalSpent.toFixed(2)} / ${totalBudget.toFixed(2)}
-                  </span>
-                </div>
-                <Progress value={budgetUsedPercentage} className="h-3" />
-              </div>
-              
-              <div className="space-y-3">
-                {budgetCategories?.slice(0, 4).map((category, index) => {
-                  const categorySpent = budgetTransactions?.filter(t => 
-                    t.categoryId === category.id && t.type === 'expense'
-                  ).reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
-                  
-                  const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500'];
-                  
-                  return (
-                    <div key={category.id} className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className={cn("w-3 h-3 rounded-full mr-3", colors[index % colors.length])}></div>
-                        <span className="text-sm text-gray-700">{category.name}</span>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">
-                        ${categorySpent.toFixed(2)}
-                      </span>
-                    </div>
-                  );
-                }) || (
-                  <div className="text-center py-4 text-gray-500">
-                    <p>No budget categories yet</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions Panel */}
-        <Card data-testid="card-quick-actions">
-          <CardHeader className="border-b border-gray-200">
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    className="flex flex-col items-center p-4 h-auto bg-gray-50 hover:bg-gray-100"
-                    onClick={action.action}
-                    data-testid={`button-quick-${action.label.toLowerCase().replace(' ', '-')}`}
-                  >
-                    <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-2", action.color)}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">{action.label}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      </main>
+      </div>
 
       {/* Modals */}
       <TaskForm

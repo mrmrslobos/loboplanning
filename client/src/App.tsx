@@ -48,22 +48,24 @@ function AuthenticatedApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 custom-scrollbar">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       <MobileHeader onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-      <div className="lg:ml-64 pt-16 lg:pt-0">
-        <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/tasks" component={Tasks} />
-          <Route path="/lists" component={Lists} />
-          <Route path="/calendar" component={Calendar} />
-          <Route path="/chat" component={Chat} />
-          <Route path="/budget" component={Budget} />
-          <Route path="/devotional" component={Devotional} />
-          <Route path="/events" component={Events} />
-          <Route path="/meal-planning" component={MealPlanning} />
-          <Route component={NotFound} />
-        </Switch>
+      <div className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+        <main className="p-4 lg:p-6 pb-safe safe-area-bottom">
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/tasks" component={Tasks} />
+            <Route path="/lists" component={Lists} />
+            <Route path="/calendar" component={Calendar} />
+            <Route path="/chat" component={Chat} />
+            <Route path="/budget" component={Budget} />
+            <Route path="/devotional" component={Devotional} />
+            <Route path="/events" component={Events} />
+            <Route path="/meal-planning" component={MealPlanning} />
+            <Route component={NotFound} />
+          </Switch>
+        </main>
       </div>
     </div>
   );

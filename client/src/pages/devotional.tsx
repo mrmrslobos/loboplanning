@@ -377,20 +377,29 @@ export default function Devotional() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Daily Devotional</h1>
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Daily Devotional</h1>
             <p className="mt-1 text-sm text-gray-600">Grow together in faith through daily verses, reflections, and prayer</p>
           </div>
-          <div className="flex space-x-2 mt-4 sm:mt-0">
-            <Button variant="outline" onClick={() => setShowPrayerForm(true)} data-testid="button-prayer-request">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowPrayerForm(true)} 
+              className="touch-target"
+              data-testid="button-prayer-request"
+            >
               <Heart className="h-4 w-4 mr-2" />
               Prayer Request
             </Button>
-            <Button onClick={() => setShowPostForm(true)} data-testid="button-create-devotional">
+            <Button 
+              onClick={() => setShowPostForm(true)} 
+              className="touch-target"
+              data-testid="button-create-devotional"
+            >
               <Plus className="h-4 w-4 mr-2" />
               New Devotional
             </Button>
@@ -398,7 +407,7 @@ export default function Devotional() {
         </div>
       </header>
 
-      <main className="p-6 space-y-6">
+      <div className="space-y-4 lg:space-y-6 p-4 lg:p-6">
         {/* Daily Verse Card */}
         {dailyVerse && (
           <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200" data-testid="card-daily-verse">
@@ -430,8 +439,8 @@ export default function Devotional() {
         )}
 
         {/* Content Tabs */}
-        <Tabs defaultValue="reflections" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="reflections" className="space-y-4 lg:space-y-6">
+          <TabsList className="grid w-full grid-cols-3 gap-1">
             <TabsTrigger value="reflections" data-testid="tab-reflections">
               <Sparkles className="h-4 w-4 mr-2" />
               Reflections ({reflectionPosts.length})
@@ -762,7 +771,7 @@ export default function Devotional() {
             </div>
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
 
       {/* Reflection Form Dialog */}
       <Dialog open={showReflectionForm} onOpenChange={setShowReflectionForm}>
