@@ -114,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('WebSocket message error:', error);
       }
     });

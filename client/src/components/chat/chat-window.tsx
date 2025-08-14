@@ -22,7 +22,7 @@ export function ChatWindow() {
   });
 
   useEffect(() => {
-    if (initialMessages) {
+    if (initialMessages && Array.isArray(initialMessages)) {
       setInitialMessages(initialMessages);
     }
   }, [initialMessages, setInitialMessages]);
