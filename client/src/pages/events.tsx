@@ -76,16 +76,12 @@ export default function EventsPage() {
 
   const createEventMutation = useMutation({
     mutationFn: async (data: EventFormData) => {
-      const eventData = {
-        ...data,
-        date: new Date(`${data.eventDate}T${data.eventTime || '12:00'}`),
+      const { eventDate, eventTime, ...eventData } = data;
+      const processedData = {
+        ...eventData,
+        date: new Date(`${eventDate}T${eventTime || '12:00'}`),
       };
-      delete eventData.eventDate;
-      delete eventData.eventTime;
-      return await apiRequest("/api/events", {
-        method: "POST",
-        body: JSON.stringify(eventData),
-      });
+      return await apiRequest("POST", "/api/events", processedData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -99,9 +95,7 @@ export default function EventsPage() {
 
   const deleteEventMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/events/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/events/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -112,10 +106,7 @@ export default function EventsPage() {
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: TaskFormData) => {
-      return await apiRequest("/api/event-tasks", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("POST", "/api/event-tasks", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", selectedEvent?.id, "tasks"] });
@@ -127,10 +118,7 @@ export default function EventsPage() {
 
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<EventTask> }) => {
-      return await apiRequest(`/api/event-tasks/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("PATCH", `/api/event-tasks/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", selectedEvent?.id, "tasks"] });
@@ -140,9 +128,7 @@ export default function EventsPage() {
 
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/event-tasks/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/event-tasks/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", selectedEvent?.id, "tasks"] });
@@ -258,7 +244,7 @@ export default function EventsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Template</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                             <FormControl>
                               <SelectTrigger data-testid="select-event-template">
                                 <SelectValue placeholder="Choose a template" />
@@ -309,7 +295,7 @@ export default function EventsPage() {
                             <Textarea 
                               placeholder="Enter event description" 
                               {...field}
-                              value={field.value || ""}
+                              value={field.value ?? ""}
                               data-testid="input-event-description"
                             />
                           </FormControl>
