@@ -27,9 +27,10 @@ export const tasks = pgTable("tasks", {
   title: text("title").notNull(),
   description: text("description"),
   dueDate: timestamp("due_date"),
-  priority: text("priority").notNull().default("medium"), // low, medium, high
-  status: text("status").notNull().default("todo"), // todo, in-progress, done
-  assignedToId: varchar("assigned_to_id").references(() => users.id),
+  status: text("status").notNull().default("pending"), // pending, in-progress, on-hold, complete
+  assignedTo: text("assigned_to").notNull(), // "Me" or "Ana"
+  eventId: varchar("event_id").references(() => events.id), // Link to events for event tasks
+  category: text("category"), // For organizing tasks within events
   userId: varchar("user_id").notNull().references(() => users.id),
   familyId: varchar("family_id").references(() => families.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -40,6 +41,8 @@ export const lists = pgTable("lists", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description"),
+  category: text("category"), // For grouping lists
+  template: text("template"), // shopping, packing, task-checklist, custom
   userId: varchar("user_id").notNull().references(() => users.id),
   familyId: varchar("family_id").references(() => families.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -52,6 +55,7 @@ export const listItems = pgTable("list_items", {
   title: text("title").notNull(),
   quantity: text("quantity"),
   notes: text("notes"),
+  category: text("category"), // For grouping items within lists
   completed: boolean("completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -134,7 +138,9 @@ export const events = pgTable("events", {
   title: text("title").notNull(),
   description: text("description"),
   date: timestamp("date").notNull(),
+  time: text("time"), // Store time separately for easier handling
   location: text("location"),
+  template: text("template"), // birthday, wedding, meeting, custom
   userId: varchar("user_id").notNull().references(() => users.id),
   familyId: varchar("family_id").references(() => families.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -150,12 +156,16 @@ export const eventGuests = pgTable("event_guests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Event checklists table
-export const eventChecklists = pgTable("event_checklists", {
+// Event tasks table (replacing event checklists)
+export const eventTasks = pgTable("event_tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   eventId: varchar("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
+  description: text("description"),
+  category: text("category"), // For organizing tasks within the event
+  assignedTo: text("assigned_to").notNull(), // "Me" or "Ana"
   completed: boolean("completed").default(false),
+  dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -244,7 +254,7 @@ export const insertEventGuestSchema = createInsertSchema(eventGuests).omit({
   createdAt: true,
 });
 
-export const insertEventChecklistSchema = createInsertSchema(eventChecklists).omit({
+export const insertEventTaskSchema = createInsertSchema(eventTasks).omit({
   id: true,
   createdAt: true,
 });
@@ -286,8 +296,8 @@ export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type EventGuest = typeof eventGuests.$inferSelect;
 export type InsertEventGuest = z.infer<typeof insertEventGuestSchema>;
-export type EventChecklist = typeof eventChecklists.$inferSelect;
-export type InsertEventChecklist = z.infer<typeof insertEventChecklistSchema>;
+export type EventTask = typeof eventTasks.$inferSelect;
+export type InsertEventTask = z.infer<typeof insertEventTaskSchema>;
 export type EventBudget = typeof eventBudget.$inferSelect;
 export type InsertEventBudget = z.infer<typeof insertEventBudgetSchema>;
 export type MealieSettings = typeof mealieSettings.$inferSelect;

@@ -19,7 +19,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: Home },
-  { href: "/tasks", label: "ListTodo", icon: ListTodo, badge: "3", color: "destructive" },
+  { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/lists", label: "Lists", icon: List },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/chat", label: "Chat", icon: MessageCircle },

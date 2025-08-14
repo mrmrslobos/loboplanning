@@ -9,7 +9,7 @@ import {
   insertListItemSchema, insertCalendarEventSchema, insertBudgetCategorySchema,
   insertBudgetTransactionSchema, insertChatMessageSchema, insertDevotionalPostSchema,
   insertDevotionalCommentSchema, insertEventSchema, insertEventGuestSchema,
-  insertEventChecklistSchema, insertEventBudgetSchema, insertMealieSettingsSchema
+  insertEventTaskSchema, insertEventBudgetSchema, insertMealieSettingsSchema
 } from "@shared/schema";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -364,6 +364,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/list-items', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const itemData = insertListItemSchema.parse(req.body);
+      const item = await storage.createListItem(itemData);
+      res.json(item);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid input' });
+    }
+  });
+
   app.patch('/api/list-items/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -372,6 +382,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Item not found' });
       }
       res.json(item);
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  app.delete('/api/list-items/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteListItem(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  app.delete('/api/lists/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteList(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'List not found' });
+      }
+      res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Server error' });
     }

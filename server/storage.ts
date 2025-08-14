@@ -5,11 +5,16 @@ import {
   type BudgetCategory, type InsertBudgetCategory, type BudgetTransaction, type InsertBudgetTransaction,
   type ChatMessage, type InsertChatMessage, type DevotionalPost, type InsertDevotionalPost,
   type DevotionalComment, type InsertDevotionalComment, type Event, type InsertEvent,
-  type EventGuest, type InsertEventGuest, type EventChecklist, type InsertEventChecklist,
-  type EventBudget, type InsertEventBudget, type MealieSettings, type InsertMealieSettings
+  type EventGuest, type InsertEventGuest, type EventTask, type InsertEventTask,
+  type EventBudget, type InsertEventBudget, type MealieSettings, type InsertMealieSettings,
+  users, families, tasks, lists, listItems, calendarEvents, 
+  budgetCategories, budgetTransactions, chatMessages, devotionalPosts, 
+  devotionalComments, events, eventGuests, eventTasks, eventBudget, mealieSettings 
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
+import { db } from "./db";
+import { eq, and, or } from "drizzle-orm";
 
 function generateInviteCode(): string {
   const adjectives = ["BLUE", "RED", "GREEN", "GOLDEN", "SILVER", "PURPLE", "ORANGE", "PINK"];
@@ -96,10 +101,11 @@ export interface IStorage {
   createEventGuest(guest: InsertEventGuest): Promise<EventGuest>;
   updateEventGuest(id: string, guest: Partial<EventGuest>): Promise<EventGuest | undefined>;
   
-  // Event checklist methods
-  getEventChecklists(eventId: string): Promise<EventChecklist[]>;
-  createEventChecklist(checklist: InsertEventChecklist): Promise<EventChecklist>;
-  updateEventChecklist(id: string, checklist: Partial<EventChecklist>): Promise<EventChecklist | undefined>;
+  // Event task methods
+  getEventTasks(eventId: string): Promise<EventTask[]>;
+  createEventTask(task: InsertEventTask): Promise<EventTask>;
+  updateEventTask(id: string, task: Partial<EventTask>): Promise<EventTask | undefined>;
+  deleteEventTask(id: string): Promise<boolean>;
   
   // Event budget methods
   getEventBudget(eventId: string): Promise<EventBudget[]>;
@@ -126,7 +132,7 @@ export class MemStorage implements IStorage {
   private devotionalComments: Map<string, DevotionalComment> = new Map();
   private events: Map<string, Event> = new Map();
   private eventGuests: Map<string, EventGuest> = new Map();
-  private eventChecklists: Map<string, EventChecklist> = new Map();
+  private eventTasks: Map<string, EventTask> = new Map();
   private eventBudget: Map<string, EventBudget> = new Map();
   private mealieSettings: Map<string, MealieSettings> = new Map();
 
@@ -499,29 +505,33 @@ export class MemStorage implements IStorage {
     return updatedGuest;
   }
 
-  // Event checklist methods
-  async getEventChecklists(eventId: string): Promise<EventChecklist[]> {
-    return Array.from(this.eventChecklists.values()).filter(checklist => checklist.eventId === eventId);
+  // Event task methods
+  async getEventTasks(eventId: string): Promise<EventTask[]> {
+    return Array.from(this.eventTasks.values()).filter(task => task.eventId === eventId);
   }
 
-  async createEventChecklist(insertChecklist: InsertEventChecklist): Promise<EventChecklist> {
+  async createEventTask(insertTask: InsertEventTask): Promise<EventTask> {
     const id = randomUUID();
-    const checklist: EventChecklist = { 
-      ...insertChecklist, 
+    const task: EventTask = { 
+      ...insertTask, 
       id, 
       createdAt: new Date() 
     };
-    this.eventChecklists.set(id, checklist);
-    return checklist;
+    this.eventTasks.set(id, task);
+    return task;
   }
 
-  async updateEventChecklist(id: string, checklistData: Partial<EventChecklist>): Promise<EventChecklist | undefined> {
-    const checklist = this.eventChecklists.get(id);
-    if (!checklist) return undefined;
+  async updateEventTask(id: string, taskData: Partial<EventTask>): Promise<EventTask | undefined> {
+    const task = this.eventTasks.get(id);
+    if (!task) return undefined;
     
-    const updatedChecklist = { ...checklist, ...checklistData };
-    this.eventChecklists.set(id, updatedChecklist);
-    return updatedChecklist;
+    const updatedTask = { ...task, ...taskData };
+    this.eventTasks.set(id, updatedTask);
+    return updatedTask;
+  }
+
+  async deleteEventTask(id: string): Promise<boolean> {
+    return this.eventTasks.delete(id);
   }
 
   // Event budget methods
@@ -575,4 +585,443 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+
+
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const passwordHash = await bcrypt.hash(insertUser.passwordHash, 10);
+    const [user] = await db
+      .insert(users)
+      .values({ ...insertUser, passwordHash })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  // Family methods
+  async getFamily(id: string): Promise<Family | undefined> {
+    const [family] = await db.select().from(families).where(eq(families.id, id));
+    return family || undefined;
+  }
+
+  async getFamilyByInviteCode(inviteCode: string): Promise<Family | undefined> {
+    const [family] = await db.select().from(families).where(eq(families.inviteCode, inviteCode));
+    return family || undefined;
+  }
+
+  async createFamily(insertFamily: InsertFamily): Promise<Family> {
+    const inviteCode = generateInviteCode();
+    const [family] = await db
+      .insert(families)
+      .values({ ...insertFamily, inviteCode })
+      .returning();
+    return family;
+  }
+
+  async getFamilyMembers(familyId: string): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.familyId, familyId));
+  }
+
+  // Task methods
+  async getTasks(userId: string, familyId?: string): Promise<Task[]> {
+    if (familyId) {
+      return await db.select().from(tasks).where(
+        or(eq(tasks.userId, userId), eq(tasks.familyId, familyId))
+      );
+    }
+    return await db.select().from(tasks).where(eq(tasks.userId, userId));
+  }
+
+  async getTask(id: string): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task || undefined;
+  }
+
+  async createTask(insertTask: InsertTask): Promise<Task> {
+    const [task] = await db
+      .insert(tasks)
+      .values(insertTask)
+      .returning();
+    return task;
+  }
+
+  async updateTask(id: string, taskData: Partial<Task>): Promise<Task | undefined> {
+    const [task] = await db
+      .update(tasks)
+      .set(taskData)
+      .where(eq(tasks.id, id))
+      .returning();
+    return task || undefined;
+  }
+
+  async deleteTask(id: string): Promise<boolean> {
+    const result = await db.delete(tasks).where(eq(tasks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // List methods
+  async getLists(userId: string, familyId?: string): Promise<List[]> {
+    if (familyId) {
+      return await db.select().from(lists).where(
+        or(eq(lists.userId, userId), eq(lists.familyId, familyId))
+      );
+    }
+    return await db.select().from(lists).where(eq(lists.userId, userId));
+  }
+
+  async getList(id: string): Promise<List | undefined> {
+    const [list] = await db.select().from(lists).where(eq(lists.id, id));
+    return list || undefined;
+  }
+
+  async createList(insertList: InsertList): Promise<List> {
+    const [list] = await db
+      .insert(lists)
+      .values(insertList)
+      .returning();
+    return list;
+  }
+
+  async updateList(id: string, listData: Partial<List>): Promise<List | undefined> {
+    const [list] = await db
+      .update(lists)
+      .set(listData)
+      .where(eq(lists.id, id))
+      .returning();
+    return list || undefined;
+  }
+
+  async deleteList(id: string): Promise<boolean> {
+    const result = await db.delete(lists).where(eq(lists.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // List item methods
+  async getListItems(listId: string): Promise<ListItem[]> {
+    return await db.select().from(listItems).where(eq(listItems.listId, listId));
+  }
+
+  async createListItem(insertItem: InsertListItem): Promise<ListItem> {
+    const [item] = await db
+      .insert(listItems)
+      .values(insertItem)
+      .returning();
+    return item;
+  }
+
+  async updateListItem(id: string, itemData: Partial<ListItem>): Promise<ListItem | undefined> {
+    const [item] = await db
+      .update(listItems)
+      .set(itemData)
+      .where(eq(listItems.id, id))
+      .returning();
+    return item || undefined;
+  }
+
+  async deleteListItem(id: string): Promise<boolean> {
+    const result = await db.delete(listItems).where(eq(listItems.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Calendar event methods
+  async getCalendarEvents(userId: string, familyId?: string): Promise<CalendarEvent[]> {
+    if (familyId) {
+      return await db.select().from(calendarEvents).where(
+        or(eq(calendarEvents.userId, userId), eq(calendarEvents.familyId, familyId))
+      );
+    }
+    return await db.select().from(calendarEvents).where(eq(calendarEvents.userId, userId));
+  }
+
+  async createCalendarEvent(insertEvent: InsertCalendarEvent): Promise<CalendarEvent> {
+    const [event] = await db
+      .insert(calendarEvents)
+      .values(insertEvent)
+      .returning();
+    return event;
+  }
+
+  async updateCalendarEvent(id: string, eventData: Partial<CalendarEvent>): Promise<CalendarEvent | undefined> {
+    const [event] = await db
+      .update(calendarEvents)
+      .set(eventData)
+      .where(eq(calendarEvents.id, id))
+      .returning();
+    return event || undefined;
+  }
+
+  async deleteCalendarEvent(id: string): Promise<boolean> {
+    const result = await db.delete(calendarEvents).where(eq(calendarEvents.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Budget methods
+  async getBudgetCategories(userId: string, familyId?: string): Promise<BudgetCategory[]> {
+    if (familyId) {
+      return await db.select().from(budgetCategories).where(
+        or(eq(budgetCategories.userId, userId), eq(budgetCategories.familyId, familyId))
+      );
+    }
+    return await db.select().from(budgetCategories).where(eq(budgetCategories.userId, userId));
+  }
+
+  async createBudgetCategory(insertCategory: InsertBudgetCategory): Promise<BudgetCategory> {
+    const [category] = await db
+      .insert(budgetCategories)
+      .values(insertCategory)
+      .returning();
+    return category;
+  }
+
+  async updateBudgetCategory(id: string, categoryData: Partial<BudgetCategory>): Promise<BudgetCategory | undefined> {
+    const [category] = await db
+      .update(budgetCategories)
+      .set(categoryData)
+      .where(eq(budgetCategories.id, id))
+      .returning();
+    return category || undefined;
+  }
+
+  async deleteBudgetCategory(id: string): Promise<boolean> {
+    const result = await db.delete(budgetCategories).where(eq(budgetCategories.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getBudgetTransactions(userId: string, familyId?: string): Promise<BudgetTransaction[]> {
+    if (familyId) {
+      return await db.select().from(budgetTransactions).where(
+        or(eq(budgetTransactions.userId, userId), eq(budgetTransactions.familyId, familyId))
+      );
+    }
+    return await db.select().from(budgetTransactions).where(eq(budgetTransactions.userId, userId));
+  }
+
+  async createBudgetTransaction(insertTransaction: InsertBudgetTransaction): Promise<BudgetTransaction> {
+    const [transaction] = await db
+      .insert(budgetTransactions)
+      .values(insertTransaction)
+      .returning();
+    return transaction;
+  }
+
+  async updateBudgetTransaction(id: string, transactionData: Partial<BudgetTransaction>): Promise<BudgetTransaction | undefined> {
+    const [transaction] = await db
+      .update(budgetTransactions)
+      .set(transactionData)
+      .where(eq(budgetTransactions.id, id))
+      .returning();
+    return transaction || undefined;
+  }
+
+  async deleteBudgetTransaction(id: string): Promise<boolean> {
+    const result = await db.delete(budgetTransactions).where(eq(budgetTransactions.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Chat methods
+  async getChatMessages(familyId: string, limit = 50): Promise<ChatMessage[]> {
+    return await db.select().from(chatMessages)
+      .where(eq(chatMessages.familyId, familyId))
+      .orderBy(chatMessages.createdAt)
+      .limit(limit);
+  }
+
+  async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
+    const [message] = await db
+      .insert(chatMessages)
+      .values(insertMessage)
+      .returning();
+    return message;
+  }
+
+  // Devotional methods
+  async getDevotionalPosts(userId: string, familyId?: string): Promise<DevotionalPost[]> {
+    if (familyId) {
+      return await db.select().from(devotionalPosts).where(
+        or(eq(devotionalPosts.userId, userId), eq(devotionalPosts.familyId, familyId))
+      );
+    }
+    return await db.select().from(devotionalPosts).where(eq(devotionalPosts.userId, userId));
+  }
+
+  async createDevotionalPost(insertPost: InsertDevotionalPost): Promise<DevotionalPost> {
+    const [post] = await db
+      .insert(devotionalPosts)
+      .values(insertPost)
+      .returning();
+    return post;
+  }
+
+  async updateDevotionalPost(id: string, postData: Partial<DevotionalPost>): Promise<DevotionalPost | undefined> {
+    const [post] = await db
+      .update(devotionalPosts)
+      .set(postData)
+      .where(eq(devotionalPosts.id, id))
+      .returning();
+    return post || undefined;
+  }
+
+  async deleteDevotionalPost(id: string): Promise<boolean> {
+    const result = await db.delete(devotionalPosts).where(eq(devotionalPosts.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getDevotionalComments(postId: string): Promise<DevotionalComment[]> {
+    return await db.select().from(devotionalComments).where(eq(devotionalComments.postId, postId));
+  }
+
+  async createDevotionalComment(insertComment: InsertDevotionalComment): Promise<DevotionalComment> {
+    const [comment] = await db
+      .insert(devotionalComments)
+      .values(insertComment)
+      .returning();
+    return comment;
+  }
+
+  // Event methods
+  async getEvents(userId: string, familyId?: string): Promise<Event[]> {
+    if (familyId) {
+      return await db.select().from(events).where(
+        or(eq(events.userId, userId), eq(events.familyId, familyId))
+      );
+    }
+    return await db.select().from(events).where(eq(events.userId, userId));
+  }
+
+  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    const [event] = await db
+      .insert(events)
+      .values(insertEvent)
+      .returning();
+    return event;
+  }
+
+  async updateEvent(id: string, eventData: Partial<Event>): Promise<Event | undefined> {
+    const [event] = await db
+      .update(events)
+      .set(eventData)
+      .where(eq(events.id, id))
+      .returning();
+    return event || undefined;
+  }
+
+  async deleteEvent(id: string): Promise<boolean> {
+    const result = await db.delete(events).where(eq(events.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Event guest methods
+  async getEventGuests(eventId: string): Promise<EventGuest[]> {
+    return await db.select().from(eventGuests).where(eq(eventGuests.eventId, eventId));
+  }
+
+  async createEventGuest(insertGuest: InsertEventGuest): Promise<EventGuest> {
+    const [guest] = await db
+      .insert(eventGuests)
+      .values(insertGuest)
+      .returning();
+    return guest;
+  }
+
+  async updateEventGuest(id: string, guestData: Partial<EventGuest>): Promise<EventGuest | undefined> {
+    const [guest] = await db
+      .update(eventGuests)
+      .set(guestData)
+      .where(eq(eventGuests.id, id))
+      .returning();
+    return guest || undefined;
+  }
+
+  // Event task methods
+  async getEventTasks(eventId: string): Promise<EventTask[]> {
+    return await db.select().from(eventTasks).where(eq(eventTasks.eventId, eventId));
+  }
+
+  async createEventTask(insertTask: InsertEventTask): Promise<EventTask> {
+    const [task] = await db
+      .insert(eventTasks)
+      .values(insertTask)
+      .returning();
+    return task;
+  }
+
+  async updateEventTask(id: string, taskData: Partial<EventTask>): Promise<EventTask | undefined> {
+    const [task] = await db
+      .update(eventTasks)
+      .set(taskData)
+      .where(eq(eventTasks.id, id))
+      .returning();
+    return task || undefined;
+  }
+
+  async deleteEventTask(id: string): Promise<boolean> {
+    const result = await db.delete(eventTasks).where(eq(eventTasks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Event budget methods
+  async getEventBudget(eventId: string): Promise<EventBudget[]> {
+    return await db.select().from(eventBudget).where(eq(eventBudget.eventId, eventId));
+  }
+
+  async createEventBudget(insertBudget: InsertEventBudget): Promise<EventBudget> {
+    const [budget] = await db
+      .insert(eventBudget)
+      .values(insertBudget)
+      .returning();
+    return budget;
+  }
+
+  async updateEventBudget(id: string, budgetData: Partial<EventBudget>): Promise<EventBudget | undefined> {
+    const [budget] = await db
+      .update(eventBudget)
+      .set(budgetData)
+      .where(eq(eventBudget.id, id))
+      .returning();
+    return budget || undefined;
+  }
+
+  // Mealie settings methods
+  async getMealieSettings(userId: string): Promise<MealieSettings | undefined> {
+    const [settings] = await db.select().from(mealieSettings).where(eq(mealieSettings.userId, userId));
+    return settings || undefined;
+  }
+
+  async createMealieSettings(insertSettings: InsertMealieSettings): Promise<MealieSettings> {
+    const [settings] = await db
+      .insert(mealieSettings)
+      .values(insertSettings)
+      .returning();
+    return settings;
+  }
+
+  async updateMealieSettings(userId: string, settingsData: Partial<MealieSettings>): Promise<MealieSettings | undefined> {
+    const [settings] = await db
+      .update(mealieSettings)
+      .set(settingsData)
+      .where(eq(mealieSettings.userId, userId))
+      .returning();
+    return settings || undefined;
+  }
+}
+
+export const storage = new DatabaseStorage();
