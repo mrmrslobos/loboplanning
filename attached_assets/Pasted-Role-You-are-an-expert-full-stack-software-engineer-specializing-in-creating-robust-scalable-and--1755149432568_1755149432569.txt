@@ -1,0 +1,179 @@
+Role: You are an expert full-stack software engineer specializing in creating robust, scalable, and user-friendly web applications. Your task is to generate the complete source code and deployment instructions for a new family hub application called LoboHub.
+
+Project Overview: LoboHub is an all-in-one web application designed to be the central digital hub for a family. It integrates multiple essential tools into a single, cohesive interface. The most critical architectural feature is the ability for users to have both private data and data that is shared with their linked family members across every module. The goal is for each module to be feature-rich enough to rival popular standalone applications on the Google Play Store.
+
+The final output should be a production-ready application deployed using Docker and served securely over HTTPS by a Caddy web server.
+
+Part 1: Core Technology Stack & Architecture
+Please use the following technology stack:
+
+Backend: Go (using the Gin web framework). The API should be RESTful.
+
+Frontend: Next.js (React) with TypeScript. Use a modern UI library like Tailwind CSS for styling.
+
+Database: PostgreSQL.
+
+Real-time Communication (for Chat): Use WebSockets.
+
+Authentication: JWT (JSON Web Tokens) stored securely in HTTP-only cookies.
+
+Containerization: The entire application stack (backend, frontend, database, Caddy) must be containerized using Docker and orchestrated with a single docker-compose.yml file.
+
+Part 2: User and Family Account System
+This is the most critical part of the application's logic.
+
+User Accounts: Users can register with an email and password. The database users table should contain id, name, email, password_hash, and a nullable family_id.
+
+Family Groups: When a user registers, they are not initially part of a family. They can either create a new family or join an existing one.
+
+Creating a Family: This generates a new entry in the families table and produces a unique, human-readable, and easy-to-share invite code (e.g., BLUE-OCEAN-74). The creating user's family_id is updated.
+
+Joining a Family: A user can input an invite code to join an existing family. Upon successful validation, their family_id is updated to match.
+
+Private vs. Shared Content Model:
+
+This logic must be implemented across all relevant modules (Tasks, Events, Lists, etc.).
+
+For any piece of content (e.g., a task in the tasks table), the table must include two key columns: user_id (the author) and a nullable family_id.
+
+If family_id is NULL, the content is Private and visible only to the user whose user_id matches the author.
+
+If family_id is NOT NULL, the content is Shared and visible to every user who has that same family_id.
+
+The API endpoints must enforce this logic rigorously. A request to fetch data should return private items for the authenticated user plus all shared items for their family.
+
+Part 3: Detailed Module Specifications
+For each module below, create the necessary backend API routes, database tables, and frontend components. The UI should allow users to easily toggle between creating a "Private" or "Shared" item.
+
+1. Tasks
+Create, Read, Update, Delete (CRUD) functionality for tasks.
+
+Properties: Title, description, due date, priority level (low, medium, high), status (to-do, in-progress, done).
+
+Assign tasks to specific family members (if shared).
+
+Notifications for upcoming or overdue tasks.
+
+Filter and sort tasks by due date, priority, or assigned user.
+
+2. Lists
+Create multiple, distinct lists (e.g., "Grocery Shopping," "Hardware Store," "Holiday Packing").
+
+CRUD functionality for lists and list items.
+
+Ability to check/uncheck items.
+
+Allow users to add quantities or notes to each list item.
+
+Feature to "uncheck all" items for recurring lists like groceries.
+
+3. Devotional
+A section for daily or weekly family devotionals.
+
+Allow a user to post a reading, a topic, questions for discussion, and a prayer.
+
+A simple comment/thread section under each devotional post for family members to share their thoughts (shared posts only).
+
+4. Event Planning
+Designed for planning specific events like "Dad's 50th Birthday" or "Summer Vacation."
+
+Properties: Event title, date, location, description.
+
+Integrated sub-modules within an event:
+
+Guest List: Manage RSVPs (Attending, Maybe, Declined).
+
+Checklists: Dedicated to-do lists for the event.
+
+Budget: A simple budget tracker for event-specific expenses.
+
+5. Calendar
+Multiple view options: Month, Week, Day, Agenda.
+
+CRUD for events. Add events with start/end times, location, and description.
+
+Recurring events (daily, weekly, monthly, yearly).
+
+Color-coding for different event types or for different family members.
+
+The calendar must display all of the user's private events and all shared family events.
+
+6. Budgeting
+Track income and expenses.
+
+Create budget categories (e.g., "Groceries," "Utilities," "Entertainment").
+
+Set monthly budget limits for each category.
+
+Visualize spending with charts and graphs (e.g., a pie chart showing spending by category).
+
+Split view: Show personal budget and overall family budget.
+
+7. Meal Planning (Mealie Integration)
+This module will integrate with a user's self-hosted Mealie instance.
+
+Settings: The user must provide their Mealie instance URL and a long-lived API key.
+
+Functionality: Use the Mealie API to:
+
+Fetch and display the user's meal plans on a calendar view.
+
+Browse and search for recipes from their Mealie instance.
+
+Display the shopping list data directly from Mealie within the LoboHub interface.
+
+This module is primarily a client for the Mealie API, presenting the data within the LoboHub UI.
+
+8. Chat
+A real-time family chat room.
+
+Use WebSockets for instant message delivery.
+
+Shows who is currently online.
+
+Supports simple text messages and emojis.
+
+Message history should be persistent.
+
+Part 4: Deployment and Server Configuration
+The application must be configured for easy deployment on a server with the public IP address 202.179.128.61.
+
+DNS Prerequisite (Instruction for README): The user must have an A record for lobohub.au pointing to 202.179.128.61 in their VentraIP DNS settings.
+
+Caddy Web Server: Use Caddy as a reverse proxy. It will handle automatic HTTPS certificate acquisition from Let's Encrypt and terminate SSL/TLS.
+
+Docker Compose: Create a docker-compose.yml file that defines and links the following services:
+
+postgres: The database service, with a persistent volume for data.
+
+backend: The Go API service.
+
+frontend: The Next.js service.
+
+caddy: The web server.
+
+Provide the Caddyfile configuration:
+
+lobohub.au {
+    # Reverse proxy API requests to the backend Go service
+    handle_path /api/* {
+        reverse_proxy backend:8080
+    }
+
+    # Reverse proxy all other requests to the frontend Next.js service
+    handle {
+        reverse_proxy frontend:3000
+    }
+}
+Final Output Request
+Please generate the following:
+
+The complete source code, organized into two main directories: /backend and /frontend.
+
+In the root directory, provide:
+
+docker-compose.yml
+
+Caddyfile
+
+A detailed README.md file that explains the project, the environment variables needed (.env file), and provides step-by-step instructions on how to configure the DNS and deploy the application using the docker compose up -d command.
