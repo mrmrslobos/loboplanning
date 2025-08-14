@@ -1,699 +1,871 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format, startOfMonth, endOfMonth, parseISO } from "date-fns";
 import { 
-  Plus, DollarSign, TrendingUp, TrendingDown, 
-  PieChart, Calendar, Users, User, Edit, Trash2
+  Plus, Edit, Trash2, DollarSign, TrendingUp, TrendingDown, 
+  PieChart, BarChart3, Calendar, Target
 } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
-import type { BudgetCategory, BudgetTransaction } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+
+interface BudgetCategory {
+  id: string;
+  name: string;
+  type: 'income' | 'expense';
+  budgetLimit?: number;
+  color: string;
+  description?: string;
+  userId: string;
+  familyId?: string;
+  createdAt: Date;
+}
+
+interface BudgetTransaction {
+  id: string;
+  amount: number;
+  description: string;
+  categoryId: string;
+  date: string;
+  userId: string;
+  familyId?: string;
+  createdAt: Date;
+}
+
+const categorySchema = z.object({
+  name: z.string().min(1, "Category name is required"),
+  type: z.enum(['income', 'expense']),
+  budgetLimit: z.number().positive().optional(),
+  color: z.string().min(1, "Color is required"),
+  description: z.string().optional(),
+  familyId: z.string().optional(),
+});
+
+const transactionSchema = z.object({
+  amount: z.number().positive("Amount must be positive"),
+  description: z.string().min(1, "Description is required"),
+  categoryId: z.string().min(1, "Category is required"),
+  date: z.string().min(1, "Date is required"),
+  familyId: z.string().optional(),
+});
+
+type CategoryForm = z.infer<typeof categorySchema>;
+type TransactionForm = z.infer<typeof transactionSchema>;
+
+const defaultCategories = [
+  { name: "Salary", type: "income" as const, color: "#10b981" },
+  { name: "Freelance", type: "income" as const, color: "#06b6d4" },
+  { name: "Groceries", type: "expense" as const, color: "#f59e0b" },
+  { name: "Transportation", type: "expense" as const, color: "#ef4444" },
+  { name: "Entertainment", type: "expense" as const, color: "#8b5cf6" },
+  { name: "Bills", type: "expense" as const, color: "#6b7280" },
+];
 
 export default function Budget() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<BudgetTransaction | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const [showTransactionForm, setShowTransactionForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "categories" | "transactions">("overview");
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const categoryForm = useForm<CategoryForm>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: {
+      name: "",
+      type: "expense",
+      budgetLimit: undefined,
+      color: "#f59e0b",
+      description: "",
+      familyId: user?.familyId || undefined,
+    },
+  });
+
+  const transactionForm = useForm<TransactionForm>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      amount: 0,
+      description: "",
+      categoryId: "",
+      date: format(new Date(), 'yyyy-MM-dd'),
+      familyId: user?.familyId || undefined,
+    },
+  });
+
+  // Fetch categories
+  const { data: categories = [] } = useQuery<BudgetCategory[]>({
     queryKey: ['/api/budget/categories'],
-    enabled: !!user?.familyId,
+    enabled: !!user,
   });
 
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
+  // Fetch transactions
+  const { data: transactions = [] } = useQuery<BudgetTransaction[]>({
     queryKey: ['/api/budget/transactions'],
-    enabled: !!user?.familyId,
+    enabled: !!user,
   });
 
+  // Create category mutation
   const createCategoryMutation = useMutation({
-    mutationFn: async (data: {
-      name: string;
-      monthlyLimit?: number;
-      color?: string;
-      familyId?: string;
-    }) => {
-      return apiRequest('POST', '/api/budget/categories', data);
+    mutationFn: async (data: CategoryForm) => {
+      const response = await fetch('/api/budget/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          ...data,
+          userId: user?.id,
+          familyId: data.familyId || null,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to create category');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/budget/categories'] });
-      setShowCategoryForm(false);
+      setIsCategoryDialogOpen(false);
+      categoryForm.reset();
       toast({ title: "Success", description: "Category created successfully" });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
+  // Create transaction mutation
   const createTransactionMutation = useMutation({
-    mutationFn: async (data: {
-      categoryId: string;
-      amount: number;
-      description: string;
-      date: string;
-      type: string;
-      familyId?: string;
-    }) => {
-      return apiRequest('POST', '/api/budget/transactions', data);
+    mutationFn: async (data: TransactionForm) => {
+      const response = await fetch('/api/budget/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          ...data,
+          userId: user?.id,
+          familyId: data.familyId || null,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to create transaction');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/budget/transactions'] });
-      setShowTransactionForm(false);
+      setIsTransactionDialogOpen(false);
+      transactionForm.reset();
       toast({ title: "Success", description: "Transaction added successfully" });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
-  const [categoryForm, setCategoryForm] = useState({
-    name: "",
-    monthlyLimit: "",
-    color: "#3b82f6",
-    isShared: false,
+  // Delete category mutation
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/budget/categories/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to delete category');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/budget/categories'] });
+      toast({ title: "Success", description: "Category deleted successfully" });
+    },
   });
 
-  const [transactionForm, setTransactionForm] = useState({
-    categoryId: "",
-    amount: "",
-    description: "",
-    date: new Date().toISOString().split('T')[0],
-    type: "expense",
-    isShared: false,
+  // Delete transaction mutation
+  const deleteTransactionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/budget/transactions/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to delete transaction');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/budget/transactions'] });
+      toast({ title: "Success", description: "Transaction deleted successfully" });
+    },
   });
 
-  const handleCreateCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!categoryForm.name.trim()) return;
-
-    createCategoryMutation.mutate({
-      name: categoryForm.name.trim(),
-      monthlyLimit: categoryForm.monthlyLimit ? parseFloat(categoryForm.monthlyLimit) : undefined,
-      color: categoryForm.color,
-      familyId: categoryForm.isShared && user?.familyId ? user.familyId : undefined,
+  // Calculate monthly summaries
+  const monthlyData = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    
+    const monthlyTransactions = transactions.filter(transaction => {
+      const transactionDate = parseISO(transaction.date);
+      return transactionDate >= monthStart && transactionDate <= monthEnd;
     });
 
-    setCategoryForm({ name: "", monthlyLimit: "", color: "#3b82f6", isShared: false });
+    const totalIncome = monthlyTransactions
+      .filter(t => {
+        const category = categories.find(c => c.id === t.categoryId);
+        return category?.type === 'income';
+      })
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalExpenses = monthlyTransactions
+      .filter(t => {
+        const category = categories.find(c => c.id === t.categoryId);
+        return category?.type === 'expense';
+      })
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const categorySpending = categories
+      .filter(c => c.type === 'expense')
+      .map(category => {
+        const spent = monthlyTransactions
+          .filter(t => t.categoryId === category.id)
+          .reduce((sum, t) => sum + t.amount, 0);
+        
+        return {
+          ...category,
+          spent,
+          percentage: totalExpenses > 0 ? (spent / totalExpenses) * 100 : 0,
+          overBudget: category.budgetLimit ? spent > category.budgetLimit : false,
+        };
+      })
+      .sort((a, b) => b.spent - a.spent);
+
+    return {
+      totalIncome,
+      totalExpenses,
+      netIncome: totalIncome - totalExpenses,
+      categorySpending,
+      transactions: monthlyTransactions,
+    };
+  }, [transactions, categories, currentMonth]);
+
+  const onSubmitCategory = (data: CategoryForm) => {
+    createCategoryMutation.mutate(data);
   };
 
-  const handleCreateTransaction = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!transactionForm.categoryId || !transactionForm.amount || !transactionForm.description) return;
-
-    createTransactionMutation.mutate({
-      categoryId: transactionForm.categoryId,
-      amount: parseFloat(transactionForm.amount),
-      description: transactionForm.description.trim(),
-      date: new Date(transactionForm.date).toISOString(),
-      type: transactionForm.type,
-      familyId: transactionForm.isShared && user?.familyId ? user.familyId : undefined,
-    });
-
-    setTransactionForm({
-      categoryId: "",
-      amount: "",
-      description: "",
-      date: new Date().toISOString().split('T')[0],
-      type: "expense",
-      isShared: false,
-    });
+  const onSubmitTransaction = (data: TransactionForm) => {
+    createTransactionMutation.mutate(data);
   };
 
-  // Calculate budget stats
-  const totalBudget = categories?.reduce((sum, cat) => sum + parseFloat(cat.monthlyLimit || '0'), 0) || 0;
-  const totalIncome = transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
-  const totalExpenses = transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
-  const budgetUsed = totalBudget > 0 ? Math.round((totalExpenses / totalBudget) * 100) : 0;
-
-  const getCategorySpent = (categoryId: string) => {
-    return transactions?.filter(t => t.categoryId === categoryId && t.type === 'expense')
-      .reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
+  const openCategoryDialog = (category?: BudgetCategory) => {
+    if (category) {
+      setEditingCategory(category);
+      categoryForm.reset({
+        name: category.name,
+        type: category.type,
+        budgetLimit: category.budgetLimit,
+        color: category.color,
+        description: category.description || "",
+        familyId: category.familyId || undefined,
+      });
+    } else {
+      setEditingCategory(null);
+      categoryForm.reset();
+    }
+    setIsCategoryDialogOpen(true);
   };
 
-  const colors = [
-    "#3b82f6", "#10b981", "#f59e0b", "#ef4444", 
-    "#8b5cf6", "#06b6d4", "#84cc16", "#f97316"
-  ];
-
-  if (categoriesLoading || transactionsLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const openTransactionDialog = (transaction?: BudgetTransaction) => {
+    if (transaction) {
+      setEditingTransaction(transaction);
+      transactionForm.reset({
+        amount: transaction.amount,
+        description: transaction.description,
+        categoryId: transaction.categoryId,
+        date: transaction.date,
+        familyId: transaction.familyId || undefined,
+      });
+    } else {
+      setEditingTransaction(null);
+      transactionForm.reset();
+    }
+    setIsTransactionDialogOpen(true);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Budget</h1>
-            <p className="mt-1 text-sm text-gray-600">Track your family's income and expenses</p>
-          </div>
-          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCategoryForm(true)}
-              data-testid="button-create-category"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Category
-            </Button>
-            <Button 
-              onClick={() => setShowTransactionForm(true)}
-              data-testid="button-create-transaction"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Log Expense
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="p-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card data-testid="card-total-budget">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">${totalBudget.toFixed(2)}</p>
-                  <p className="text-sm text-gray-600">Monthly Budget</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-total-income">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">${totalIncome.toFixed(2)}</p>
-                  <p className="text-sm text-gray-600">Total Income</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-total-expenses">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <TrendingDown className="h-6 w-6 text-red-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">${totalExpenses.toFixed(2)}</p>
-                  <p className="text-sm text-gray-600">Total Expenses</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-budget-used">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <PieChart className="h-6 w-6 text-purple-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-2xl font-bold text-gray-900">{budgetUsed}%</p>
-                  <p className="text-sm text-gray-600">Budget Used</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              {[
-                { id: "overview", label: "Overview" },
-                { id: "categories", label: "Categories" },
-                { id: "transactions", label: "Transactions" },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={cn(
-                    "py-2 px-1 border-b-2 font-medium text-sm transition-colors",
-                    activeTab === tab.id
-                      ? "border-primary text-primary"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  )}
-                  data-testid={`tab-${tab.id}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-        {/* Overview Tab */}
-        {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card data-testid="card-budget-overview">
-              <CardHeader>
-                <CardTitle>Budget Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Total Spent</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      ${totalExpenses.toFixed(2)} / ${totalBudget.toFixed(2)}
-                    </span>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Budget</h1>
+        <div className="flex gap-2">
+          <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" data-testid="button-new-category">
+                <Plus className="w-4 h-4 mr-2" />
+                New Category
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingCategory ? 'Edit Category' : 'Create New Category'}
+                </DialogTitle>
+              </DialogHeader>
+              <Form {...categoryForm}>
+                <form onSubmit={categoryForm.handleSubmit(onSubmitCategory)} className="space-y-4">
+                  <FormField
+                    control={categoryForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Category name" 
+                            {...field} 
+                            data-testid="input-category-name"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={categoryForm.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-category-type">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="income">Income</SelectItem>
+                            <SelectItem value="expense">Expense</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={categoryForm.control}
+                    name="budgetLimit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Budget Limit (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                            data-testid="input-budget-limit"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={categoryForm.control}
+                    name="color"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="color" 
+                            {...field} 
+                            data-testid="input-category-color"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={categoryForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Category description" 
+                            {...field} 
+                            data-testid="input-category-description"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={createCategoryMutation.isPending}
+                      data-testid="button-save-category"
+                    >
+                      {createCategoryMutation.isPending ? "Saving..." : "Save Category"}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsCategoryDialogOpen(false)}
+                      data-testid="button-cancel-category"
+                    >
+                      Cancel
+                    </Button>
                   </div>
-                  <Progress value={budgetUsed} className="h-3" />
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
+            <DialogTrigger asChild>
+              <Button data-testid="button-new-transaction">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Transaction
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}
+                </DialogTitle>
+              </DialogHeader>
+              <Form {...transactionForm}>
+                <form onSubmit={transactionForm.handleSubmit(onSubmitTransaction)} className="space-y-4">
+                  <FormField
+                    control={transactionForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Transaction description" 
+                            {...field} 
+                            data-testid="input-transaction-description"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={transactionForm.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Amount</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              data-testid="input-transaction-amount"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={transactionForm.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Date</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="date" 
+                              {...field} 
+                              data-testid="input-transaction-date"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={transactionForm.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-transaction-category">
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map(category => (
+                              <SelectItem key={category.id} value={category.id}>
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: category.color }}
+                                  />
+                                  {category.name}
+                                  {category.type === 'income' ? 
+                                    <TrendingUp className="w-3 h-3 text-green-500" /> : 
+                                    <TrendingDown className="w-3 h-3 text-red-500" />
+                                  }
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={createTransactionMutation.isPending}
+                      data-testid="button-save-transaction"
+                    >
+                      {createTransactionMutation.isPending ? "Saving..." : "Save Transaction"}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsTransactionDialogOpen(false)}
+                      data-testid="button-cancel-transaction"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+          <TabsTrigger value="transactions" data-testid="tab-transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="categories" data-testid="tab-categories">Categories</TabsTrigger>
+          <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {/* Month Navigation */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Monthly Summary</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+                    data-testid="button-prev-month"
+                  >
+                    ←
+                  </Button>
+                  <span className="font-medium">
+                    {format(currentMonth, 'MMMM yyyy')}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                    data-testid="button-next-month"
+                  >
+                    →
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-700">
+                    <TrendingUp className="w-5 h-5" />
+                    <span className="font-medium">Total Income</span>
+                  </div>
+                  <div className="text-2xl font-bold text-green-900" data-testid="total-income">
+                    ${monthlyData.totalIncome.toFixed(2)}
+                  </div>
                 </div>
                 
-                <div className="space-y-3">
-                  {categories?.slice(0, 5).map((category, index) => {
-                    const spent = getCategorySpent(category.id);
-                    const limit = parseFloat(category.monthlyLimit || '0');
-                    const percentage = limit > 0 ? Math.round((spent / limit) * 100) : 0;
-                    
-                    return (
-                      <div key={category.id} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div 
-                            className="w-3 h-3 rounded-full mr-3"
-                            style={{ backgroundColor: category.color || colors[index % colors.length] }}
-                          ></div>
-                          <span className="text-sm text-gray-700">{category.name}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-sm font-medium text-gray-900">
-                            ${spent.toFixed(2)}
-                          </span>
-                          {limit > 0 && (
-                            <div className="text-xs text-gray-500">
-                              {percentage}% of ${limit.toFixed(2)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  }) || (
-                    <div className="text-center py-4 text-gray-500">
-                      <p>No budget categories yet</p>
-                    </div>
-                  )}
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-red-700">
+                    <TrendingDown className="w-5 h-5" />
+                    <span className="font-medium">Total Expenses</span>
+                  </div>
+                  <div className="text-2xl font-bold text-red-900" data-testid="total-expenses">
+                    ${monthlyData.totalExpenses.toFixed(2)}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card data-testid="card-recent-transactions">
-              <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {transactions?.slice(0, 5).map(transaction => {
-                    const category = categories?.find(c => c.id === transaction.categoryId);
-                    return (
-                      <div 
-                        key={transaction.id} 
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                        data-testid={`transaction-${transaction.id}`}
-                      >
-                        <div className="flex items-center">
-                          <div 
-                            className="w-3 h-3 rounded-full mr-3"
-                            style={{ backgroundColor: category?.color || "#6b7280" }}
-                          ></div>
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900">
-                              {transaction.description}
-                            </h4>
-                            <p className="text-xs text-gray-500">
-                              {category?.name} • {formatDate(transaction.date)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className={cn(
-                            "text-sm font-medium",
-                            transaction.type === 'income' ? "text-green-600" : "text-red-600"
-                          )}>
-                            {transaction.type === 'income' ? '+' : '-'}${parseFloat(transaction.amount).toFixed(2)}
-                          </p>
-                          <Badge variant="outline" className="text-xs">
-                            {transaction.familyId ? 'Shared' : 'Private'}
-                          </Badge>
-                        </div>
-                      </div>
-                    );
-                  }) || (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>No transactions yet</p>
-                    </div>
-                  )}
+                
+                <div className={`p-4 rounded-lg ${monthlyData.netIncome >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
+                  <div className="flex items-center gap-2 text-blue-700">
+                    <DollarSign className="w-5 h-5" />
+                    <span className="font-medium">Net Income</span>
+                  </div>
+                  <div className={`text-2xl font-bold ${monthlyData.netIncome >= 0 ? 'text-blue-900' : 'text-orange-900'}`} data-testid="net-income">
+                    ${monthlyData.netIncome.toFixed(2)}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Categories Tab */}
-        {activeTab === "categories" && (
-          <Card data-testid="card-categories-list">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Budget Categories</CardTitle>
-                <Button onClick={() => setShowCategoryForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Category
-                </Button>
               </div>
-            </CardHeader>
-            <CardContent>
-              {categories?.length === 0 ? (
-                <div className="text-center py-12">
-                  <PieChart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No categories yet</h3>
-                  <p className="text-gray-500 mb-4">Create budget categories to start tracking expenses</p>
-                  <Button onClick={() => setShowCategoryForm(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Category
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categories?.map((category, index) => {
-                    const spent = getCategorySpent(category.id);
-                    const limit = parseFloat(category.monthlyLimit || '0');
-                    const percentage = limit > 0 ? Math.round((spent / limit) * 100) : 0;
-                    
-                    return (
-                      <div 
-                        key={category.id}
-                        className="p-4 border rounded-lg hover:bg-gray-50"
-                        data-testid={`category-${category.id}`}
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center">
-                            <div 
-                              className="w-4 h-4 rounded-full mr-3"
-                              style={{ backgroundColor: category.color || colors[index % colors.length] }}
-                            ></div>
-                            <h4 className="font-medium text-gray-900">{category.name}</h4>
-                          </div>
-                          <Badge variant="outline">
-                            {category.familyId ? 'Shared' : 'Private'}
-                          </Badge>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Spent:</span>
-                            <span className="font-medium">${spent.toFixed(2)}</span>
-                          </div>
-                          {limit > 0 && (
-                            <>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Budget:</span>
-                                <span className="font-medium">${limit.toFixed(2)}</span>
-                              </div>
-                              <Progress value={percentage} className="h-2" />
-                              <div className="text-center text-xs text-gray-500">
-                                {percentage}% used
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </CardContent>
           </Card>
-        )}
 
-        {/* Transactions Tab */}
-        {activeTab === "transactions" && (
-          <Card data-testid="card-transactions-list">
+          {/* Category Spending */}
+          <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>All Transactions</CardTitle>
-                <Button onClick={() => setShowTransactionForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Transaction
-                </Button>
-              </div>
+              <CardTitle>Spending by Category</CardTitle>
             </CardHeader>
             <CardContent>
-              {transactions?.length === 0 ? (
-                <div className="text-center py-12">
-                  <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No transactions yet</h3>
-                  <p className="text-gray-500 mb-4">Start tracking your income and expenses</p>
-                  <Button onClick={() => setShowTransactionForm(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Transaction
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {transactions?.map(transaction => {
-                    const category = categories?.find(c => c.id === transaction.categoryId);
-                    return (
+              <div className="space-y-4">
+                {monthlyData.categorySpending.map(category => (
+                  <div key={category.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="font-medium">{category.name}</span>
+                        {category.overBudget && (
+                          <Badge variant="destructive">Over Budget</Badge>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">${category.spent.toFixed(2)}</div>
+                        {category.budgetLimit && (
+                          <div className="text-sm text-gray-500">
+                            of ${category.budgetLimit.toFixed(2)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        key={transaction.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                        data-testid={`transaction-item-${transaction.id}`}
-                      >
-                        <div className="flex items-center">
+                        className="h-2 rounded-full transition-all"
+                        style={{ 
+                          width: `${Math.min(category.percentage, 100)}%`,
+                          backgroundColor: category.overBudget ? '#ef4444' : category.color
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                
+                {monthlyData.categorySpending.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No expenses this month
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="transactions" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {monthlyData.transactions
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map(transaction => {
+                    const category = categories.find(c => c.id === transaction.categoryId);
+                    return (
+                      <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
                           <div 
-                            className="w-4 h-4 rounded-full mr-4"
-                            style={{ backgroundColor: category?.color || "#6b7280" }}
-                          ></div>
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: category?.color || '#6b7280' }}
+                          />
                           <div>
-                            <h4 className="font-medium text-gray-900">{transaction.description}</h4>
-                            <div className="flex items-center text-sm text-gray-500 mt-1 space-x-3">
-                              <span>{category?.name}</span>
+                            <div className="font-medium">{transaction.description}</div>
+                            <div className="text-sm text-gray-500 flex items-center gap-2">
+                              <Calendar className="w-3 h-3" />
+                              {format(parseISO(transaction.date), 'MMM dd, yyyy')}
                               <span>•</span>
-                              <span>{formatDate(transaction.date)}</span>
-                              <Badge variant="outline" className="text-xs">
-                                {transaction.familyId ? (
-                                  <><Users className="h-3 w-3 mr-1" />Shared</>
-                                ) : (
-                                  <><User className="h-3 w-3 mr-1" />Private</>
-                                )}
-                              </Badge>
+                              {category?.name || 'Unknown Category'}
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className={cn(
-                            "text-lg font-semibold",
-                            transaction.type === 'income' ? "text-green-600" : "text-red-600"
-                          )}>
-                            {transaction.type === 'income' ? '+' : '-'}${parseFloat(transaction.amount).toFixed(2)}
-                          </p>
-                          <p className="text-xs text-gray-500 capitalize">{transaction.type}</p>
+                        <div className="flex items-center gap-2">
+                          <div className={`font-bold ${category?.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                            {category?.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => openTransactionDialog(transaction)}
+                            data-testid={`button-edit-transaction-${transaction.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => deleteTransactionMutation.mutate(transaction.id)}
+                            data-testid={`button-delete-transaction-${transaction.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
                     );
                   })}
-                </div>
-              )}
+                
+                {monthlyData.transactions.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No transactions this month
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
-        )}
-      </main>
+        </TabsContent>
 
-      {/* Create Category Modal */}
-      <Dialog open={showCategoryForm} onOpenChange={setShowCategoryForm}>
-        <DialogContent data-testid="modal-create-category">
-          <DialogHeader>
-            <DialogTitle>Create Budget Category</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={handleCreateCategory} className="space-y-4">
-            <div>
-              <Label htmlFor="categoryName">Category Name</Label>
-              <Input
-                id="categoryName"
-                value={categoryForm.name}
-                onChange={(e) => setCategoryForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Groceries, Utilities, Entertainment"
-                data-testid="input-category-name"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="monthlyLimit">Monthly Budget Limit (optional)</Label>
-              <Input
-                id="monthlyLimit"
-                type="number"
-                step="0.01"
-                value={categoryForm.monthlyLimit}
-                onChange={(e) => setCategoryForm(prev => ({ ...prev, monthlyLimit: e.target.value }))}
-                placeholder="0.00"
-                data-testid="input-monthly-limit"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="categoryColor">Color</Label>
-              <div className="flex items-center space-x-2 mt-2">
-                <Input
-                  id="categoryColor"
-                  type="color"
-                  value={categoryForm.color}
-                  onChange={(e) => setCategoryForm(prev => ({ ...prev, color: e.target.value }))}
-                  className="w-16 h-10"
-                  data-testid="input-category-color"
-                />
-                <span className="text-sm text-gray-500">Choose category color</span>
+        <TabsContent value="categories" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Budget Categories</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {categories.map(category => (
+                  <div key={category.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="font-medium">{category.name}</span>
+                        <Badge variant={category.type === 'income' ? 'default' : 'secondary'}>
+                          {category.type}
+                        </Badge>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => openCategoryDialog(category)}
+                          data-testid={`button-edit-category-${category.id}`}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => deleteCategoryMutation.mutate(category.id)}
+                          data-testid={`button-delete-category-${category.id}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {category.description && (
+                      <p className="text-sm text-gray-600 mb-2">{category.description}</p>
+                    )}
+                    
+                    {category.budgetLimit && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Target className="w-3 h-3" />
+                        <span>Budget: ${category.budgetLimit.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {categories.length === 0 && (
+                  <div className="col-span-2 text-center py-8 text-gray-500">
+                    <PieChart className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p>No categories yet</p>
+                    <p className="text-sm">Create your first category to get started</p>
+                  </div>
+                )}
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <span className="text-sm font-medium text-gray-900">Share with family</span>
-                <p className="text-xs text-gray-500">Make this category visible to all family members</p>
-              </div>
-              <Switch
-                checked={categoryForm.isShared}
-                onCheckedChange={(checked) => setCategoryForm(prev => ({ ...prev, isShared: checked }))}
-                data-testid="switch-category-shared"
-              />
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowCategoryForm(false)}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createCategoryMutation.isPending}
-                data-testid="button-create-category-submit"
-              >
-                {createCategoryMutation.isPending ? "Creating..." : "Create Category"}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Create Transaction Modal */}
-      <Dialog open={showTransactionForm} onOpenChange={setShowTransactionForm}>
-        <DialogContent data-testid="modal-create-transaction">
-          <DialogHeader>
-            <DialogTitle>Add Transaction</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={handleCreateTransaction} className="space-y-4">
-            <div>
-              <Label htmlFor="transactionCategory">Category</Label>
-              <Select value={transactionForm.categoryId} onValueChange={(value) => setTransactionForm(prev => ({ ...prev, categoryId: value }))}>
-                <SelectTrigger data-testid="select-transaction-category">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories?.map(category => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="transactionType">Type</Label>
-                <Select value={transactionForm.type} onValueChange={(value) => setTransactionForm(prev => ({ ...prev, type: value }))}>
-                  <SelectTrigger data-testid="select-transaction-type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="expense">Expense</SelectItem>
-                    <SelectItem value="income">Income</SelectItem>
-                  </SelectContent>
-                </Select>
+        <TabsContent value="analytics" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Budget Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics Dashboard</h3>
+                <p className="text-gray-600 mb-4">
+                  Advanced charts and insights coming soon. For now, use the Overview tab for spending summaries.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-sm text-blue-600 font-medium">Categories</div>
+                    <div className="text-2xl font-bold text-blue-900">{categories.length}</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-sm text-green-600 font-medium">Transactions</div>
+                    <div className="text-2xl font-bold text-green-900">{transactions.length}</div>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="text-sm text-purple-600 font-medium">Income Sources</div>
+                    <div className="text-2xl font-bold text-purple-900">
+                      {categories.filter(c => c.type === 'income').length}
+                    </div>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <div className="text-sm text-orange-600 font-medium">Expense Categories</div>
+                    <div className="text-2xl font-bold text-orange-900">
+                      {categories.filter(c => c.type === 'expense').length}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="transactionAmount">Amount</Label>
-                <Input
-                  id="transactionAmount"
-                  type="number"
-                  step="0.01"
-                  value={transactionForm.amount}
-                  onChange={(e) => setTransactionForm(prev => ({ ...prev, amount: e.target.value }))}
-                  placeholder="0.00"
-                  data-testid="input-transaction-amount"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="transactionDescription">Description</Label>
-              <Input
-                id="transactionDescription"
-                value={transactionForm.description}
-                onChange={(e) => setTransactionForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter transaction description"
-                data-testid="input-transaction-description"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="transactionDate">Date</Label>
-              <Input
-                id="transactionDate"
-                type="date"
-                value={transactionForm.date}
-                onChange={(e) => setTransactionForm(prev => ({ ...prev, date: e.target.value }))}
-                data-testid="input-transaction-date"
-              />
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <span className="text-sm font-medium text-gray-900">Share with family</span>
-                <p className="text-xs text-gray-500">Make this transaction visible to all family members</p>
-              </div>
-              <Switch
-                checked={transactionForm.isShared}
-                onCheckedChange={(checked) => setTransactionForm(prev => ({ ...prev, isShared: checked }))}
-                data-testid="switch-transaction-shared"
-              />
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowTransactionForm(false)}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createTransactionMutation.isPending}
-                data-testid="button-create-transaction-submit"
-              >
-                {createTransactionMutation.isPending ? "Adding..." : "Add Transaction"}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
