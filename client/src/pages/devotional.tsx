@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { 
   Plus, BookOpen, Calendar, MessageSquare, 
   Users, User, Heart, Share2, Edit, Trash2, 
-  RefreshCw, Sparkles, Pray, Quote, X
+  RefreshCw, Sparkles, Quote, X
 } from "lucide-react";
 import { cn, formatDate, formatDateTime, generateInitials } from "@/lib/utils";
 import type { DevotionalPost, DevotionalComment } from "@shared/schema";
@@ -64,12 +64,12 @@ export default function Devotional() {
     setDailyVerse(DAILY_VERSES[verseIndex]);
   }, []);
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts = [], isLoading } = useQuery<DevotionalPost[]>({
     queryKey: ['/api/devotional/posts'],
     enabled: !!user?.familyId,
   });
 
-  const { data: comments } = useQuery({
+  const { data: comments = [] } = useQuery<DevotionalComment[]>({
     queryKey: ['/api/devotional/posts', selectedPost?.id, 'comments'],
     enabled: !!selectedPost?.id,
   });
@@ -205,7 +205,7 @@ export default function Devotional() {
     const buildThread = (parentComment: DevotionalComment): DevotionalComment & { replies: DevotionalComment[] } => {
       const replies = commentReplies
         .filter(reply => reply.parentId === parentComment.id)
-        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        .sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
       
       return {
         ...parentComment,
@@ -214,7 +214,7 @@ export default function Devotional() {
     };
 
     return topLevelComments
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime())
       .map(buildThread);
   };
 
@@ -363,7 +363,7 @@ export default function Devotional() {
     }
   };
 
-  const sortedPosts = posts?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) || [];
+  const sortedPosts = posts.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
   const reflectionPosts = sortedPosts.filter(post => post.topic === "Personal Reflection");
   const prayerPosts = sortedPosts.filter(post => post.topic === "Prayer Request");
   const devotionalPosts = sortedPosts.filter(post => !post.topic || (post.topic !== "Personal Reflection" && post.topic !== "Prayer Request"));
@@ -916,7 +916,7 @@ export default function Devotional() {
                   <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
                     <span>by {generateInitials("User")}</span>
                     <span>•</span>
-                    <span>{formatDateTime(selectedPost.createdAt)}</span>
+                    <span>{formatDateTime(selectedPost.createdAt || new Date())}</span>
                     {selectedPost.familyId && (
                       <>
                         <span>•</span>

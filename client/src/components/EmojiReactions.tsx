@@ -22,7 +22,7 @@ export function EmojiReactions({ targetType, targetId, className = "" }: EmojiRe
   const { user } = useAuth();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const { data: reactions = {} } = useQuery({
+  const { data: reactions = {} } = useQuery<Record<string, { count: number; userReacted: boolean }>>({
     queryKey: ['reactions', targetType, targetId],
     enabled: !!user
   });
@@ -31,11 +31,11 @@ export function EmojiReactions({ targetType, targetId, className = "" }: EmojiRe
     mutationFn: async (emoji: string) => {
       return apiRequest('/api/reactions', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           emoji,
           targetType,
           targetId
-        }
+        })
       });
     },
     onSuccess: () => {
@@ -47,7 +47,8 @@ export function EmojiReactions({ targetType, targetId, className = "" }: EmojiRe
   const removeReactionMutation = useMutation({
     mutationFn: async (emoji: string) => {
       return apiRequest(`/api/reactions/${targetType}/${targetId}/${encodeURIComponent(emoji)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        body: JSON.stringify({})
       });
     },
     onSuccess: () => {
