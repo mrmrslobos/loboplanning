@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(210 25% 7.8431%);
+  --card: hsl(180 6.6667% 97.0588%);
+  --card-foreground: hsl(210 25% 7.8431%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(210 25% 7.8431%);
+  --primary: hsl(217.2 91.2% 59.8%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 25% 7.8431%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(210 25% 7.8431%);
+  --accent: hsl(159.8 100% 36.1%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(217.2 91.2% 59.8%);
+  --chart-1: hsl(217.2 91.2% 59.8%);
+  --chart-2: hsl(159.8 100% 36.1%);
+  --chart-3: hsl(43.3 96.4% 56.3%);
+  --chart-4: hsl(27.5 95.7% 54.1%);
+  --chart-5: hsl(340.7 83.2% 47.1%);
+  --sidebar: hsl(180 6.6667% 97.0588%);
+  --sidebar-foreground: hsl(210 25% 7.8431%);
+  --sidebar-primary: hsl(217.2 91.2% 59.8%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(210 40% 96%);
+  --sidebar-accent-foreground: hsl(217.2 91.2% 59.8%);
+  --sidebar-border: hsl(214.3 31.8% 91.4%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --font-sans: Inter, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(200 6.6667% 91.1765%);
+  --card: hsl(0 0% 9%);
+  --card-foreground: hsl(0 0% 85.0980%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(200 6.6667% 91.1765%);
+  --primary: hsl(217.2 91.2% 59.8%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(195.0000 15.3846% 94.9020%);
+  --secondary-foreground: hsl(210 25% 7.8431%);
+  --muted: hsl(0 0% 9.4118%);
+  --muted-foreground: hsl(210 3.3898% 46.2745%);
+  --accent: hsl(159.8 100% 36.1%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(210 5.2632% 14.9020%);
+  --input: hsl(207.6923 27.6596% 18.4314%);
+  --ring: hsl(217.2 91.2% 59.8%);
+  --chart-1: hsl(217.2 91.2% 59.8%);
+  --chart-2: hsl(159.8 100% 36.1%);
+  --chart-3: hsl(43.3 96.4% 56.3%);
+  --chart-4: hsl(27.5 95.7% 54.1%);
+  --chart-5: hsl(340.7 83.2% 47.1%);
+  --sidebar: hsl(0 0% 9%);
+  --sidebar-foreground: hsl(0 0% 85.0980%);
+  --sidebar-primary: hsl(217.2 91.2% 59.8%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(0 0% 9.4118%);
+  --sidebar-accent-foreground: hsl(217.2 91.2% 59.8%);
+  --sidebar-border: hsl(210 5.2632% 14.9020%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom styles for LoboHub */
+.family-gradient {
+  background: linear-gradient(135deg, hsl(217.2 91.2% 59.8%) 0%, hsl(262.1 83.3% 57.8%) 100%);
+}
+
+.task-priority-high {
+  @apply bg-red-50 border-red-200 text-red-900;
+}
+
+.task-priority-medium {
+  @apply bg-yellow-50 border-yellow-200 text-yellow-900;
+}
+
+.task-priority-low {
+  @apply bg-green-50 border-green-200 text-green-900;
+}
+
+.nav-item.active {
+  @apply bg-primary text-primary-foreground;
+}
+
+.chat-message-own {
+  @apply bg-primary text-primary-foreground ml-auto;
+}
+
+.chat-message-other {
+  @apply bg-muted text-muted-foreground mr-auto;
+}
