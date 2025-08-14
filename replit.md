@@ -17,6 +17,34 @@ LoboHub is a comprehensive family hub web application built with a modern full-s
 - **Private/Shared toggle**: All content types support individual privacy settings
 - **Pre-filled reflection forms**: Daily verse automatically populates reflection content for easy spiritual journaling
 
+### Comprehensive Calendar Module
+- **Monthly calendar view** displaying events and tasks with due dates
+- **Color-coded items** by type (events in blue, tasks by status)
+- **Direct event creation** by clicking any calendar date
+- **Integration with Tasks and Events** systems for unified scheduling
+- **Navigation controls** for browsing months with today highlighting
+- **Visual legend** for understanding different item types and colors
+
+### Advanced Budget Module
+- **Complete financial tracking** with income and expense categories
+- **Monthly summaries** showing total income, expenses, and net income
+- **Visual spending breakdown** by category with progress bars and percentages
+- **Budget limits** with over-budget alerts and warnings
+- **Transaction management** with full CRUD operations and category assignment
+- **Color-coded categories** for easy visual identification
+- **Tabbed interface** for Overview, Transactions, Categories, and Analytics
+- **Private/shared transactions** supporting family budgeting workflows
+
+### Comprehensive Meal Planning Module
+- **Weekly meal planner** with breakfast, lunch, and dinner slots for each day
+- **Recipe management** with custom recipe creation and Mealie integration support
+- **Drag-and-drop functionality** for intuitive meal assignment from recipe collection
+- **Custom meal support** allowing freeform meal entries alongside recipes
+- **Saved meal plans** for future reuse and planning efficiency
+- **Recipe collection** with difficulty levels, prep times, servings, and cuisine types
+- **Week navigation** with ability to save and load different weekly plans
+- **Smart meal selection** with both recipe and custom meal options
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

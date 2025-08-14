@@ -7,9 +7,11 @@ import {
   type DevotionalComment, type InsertDevotionalComment, type Event, type InsertEvent,
   type EventGuest, type InsertEventGuest, type EventTask, type InsertEventTask,
   type EventBudget, type InsertEventBudget, type MealieSettings, type InsertMealieSettings,
+  type Recipe, type InsertRecipe, type MealPlan, type InsertMealPlan,
   users, families, tasks, lists, listItems, calendarEvents, 
   budgetCategories, budgetTransactions, chatMessages, devotionalPosts, 
-  devotionalComments, events, eventGuests, eventTasks, eventBudget, mealieSettings 
+  devotionalComments, events, eventGuests, eventTasks, eventBudget, mealieSettings,
+  recipes, mealPlans
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
@@ -112,6 +114,18 @@ export interface IStorage {
   createEventBudget(budget: InsertEventBudget): Promise<EventBudget>;
   updateEventBudget(id: string, budget: Partial<EventBudget>): Promise<EventBudget | undefined>;
   
+  // Recipe methods
+  getRecipes(userId: string, familyId?: string): Promise<Recipe[]>;
+  createRecipe(recipe: InsertRecipe): Promise<Recipe>;
+  updateRecipe(id: string, recipe: Partial<Recipe>, userId: string): Promise<Recipe | undefined>;
+  deleteRecipe(id: string, userId: string): Promise<boolean>;
+  
+  // Meal plan methods
+  getMealPlans(userId: string, familyId?: string): Promise<MealPlan[]>;
+  createMealPlan(mealPlan: InsertMealPlan): Promise<MealPlan>;
+  updateMealPlan(id: string, mealPlan: Partial<MealPlan>, userId: string): Promise<MealPlan | undefined>;
+  deleteMealPlan(id: string, userId: string): Promise<boolean>;
+
   // Mealie settings methods
   getMealieSettings(userId: string): Promise<MealieSettings | undefined>;
   createMealieSettings(settings: InsertMealieSettings): Promise<MealieSettings>;
@@ -134,6 +148,8 @@ export class MemStorage implements IStorage {
   private eventGuests: Map<string, EventGuest> = new Map();
   private eventTasks: Map<string, EventTask> = new Map();
   private eventBudget: Map<string, EventBudget> = new Map();
+  private recipes: Map<string, Recipe> = new Map();
+  private mealPlans: Map<string, MealPlan> = new Map();
   private mealieSettings: Map<string, MealieSettings> = new Map();
 
   // User methods
@@ -1025,6 +1041,70 @@ export class DatabaseStorage implements IStorage {
       .where(eq(eventBudget.id, id))
       .returning();
     return budget || undefined;
+  }
+
+  // Recipe methods
+  async getRecipes(userId: string, familyId?: string): Promise<Recipe[]> {
+    if (familyId) {
+      return await db.select().from(recipes).where(
+        or(eq(recipes.userId, userId), eq(recipes.familyId, familyId))
+      );
+    }
+    return await db.select().from(recipes).where(eq(recipes.userId, userId));
+  }
+
+  async createRecipe(insertRecipe: InsertRecipe): Promise<Recipe> {
+    const [recipe] = await db
+      .insert(recipes)
+      .values(insertRecipe)
+      .returning();
+    return recipe;
+  }
+
+  async updateRecipe(id: string, recipeData: Partial<Recipe>, userId: string): Promise<Recipe | undefined> {
+    const [recipe] = await db
+      .update(recipes)
+      .set(recipeData)
+      .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+      .returning();
+    return recipe || undefined;
+  }
+
+  async deleteRecipe(id: string, userId: string): Promise<boolean> {
+    const result = await db.delete(recipes).where(and(eq(recipes.id, id), eq(recipes.userId, userId)));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Meal plan methods
+  async getMealPlans(userId: string, familyId?: string): Promise<MealPlan[]> {
+    if (familyId) {
+      return await db.select().from(mealPlans).where(
+        or(eq(mealPlans.userId, userId), eq(mealPlans.familyId, familyId))
+      );
+    }
+    return await db.select().from(mealPlans).where(eq(mealPlans.userId, userId));
+  }
+
+  async createMealPlan(insertMealPlan: InsertMealPlan): Promise<MealPlan> {
+    const [mealPlan] = await db
+      .insert(mealPlans)
+      .values(insertMealPlan)
+      .returning();
+    return mealPlan;
+  }
+
+  async updateMealPlan(id: string, mealPlanData: Partial<MealPlan>, userId: string): Promise<MealPlan | undefined> {
+    const [mealPlan] = await db
+      .update(mealPlans)
+      .set(mealPlanData)
+      .where(and(eq(mealPlans.id, id), eq(mealPlans.userId, userId)))
+      .returning();
+    return mealPlan || undefined;
+  }
+
+  async deleteMealPlan(id: string, userId: string): Promise<boolean> {
+    const result = await db.delete(mealPlans).where(and(eq(mealPlans.id, id), eq(mealPlans.userId, userId)));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Mealie settings methods

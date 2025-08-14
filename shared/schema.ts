@@ -179,6 +179,44 @@ export const eventBudget = pgTable("event_budget", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Recipes table for meal planning
+export const recipes = pgTable("recipes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  prepTime: integer("prep_time"), // in minutes
+  cookTime: integer("cook_time"), // in minutes
+  servings: integer("servings"),
+  difficulty: text("difficulty"), // easy, medium, hard
+  cuisine: text("cuisine"),
+  ingredients: jsonb("ingredients").$type<string[]>(),
+  instructions: jsonb("instructions").$type<string[]>(),
+  imageUrl: text("image_url"),
+  tags: jsonb("tags").$type<string[]>(),
+  source: text("source").default("custom"), // custom, mealie
+  mealieId: text("mealie_id"), // External Mealie recipe ID
+  userId: varchar("user_id").notNull().references(() => users.id),
+  familyId: varchar("family_id").references(() => families.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Meal plans table
+export const mealPlans = pgTable("meal_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  weekStartDate: text("week_start_date").notNull(), // YYYY-MM-DD format
+  meals: jsonb("meals").$type<{
+    [day: string]: {
+      breakfast?: { type: 'recipe' | 'custom'; recipeId?: string; customName?: string; };
+      lunch?: { type: 'recipe' | 'custom'; recipeId?: string; customName?: string; };
+      dinner?: { type: 'recipe' | 'custom'; recipeId?: string; customName?: string; };
+    };
+  }>().notNull().default({}),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  familyId: varchar("family_id").references(() => families.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Mealie settings table
 export const mealieSettings = pgTable("mealie_settings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -264,6 +302,16 @@ export const insertEventBudgetSchema = createInsertSchema(eventBudget).omit({
   createdAt: true,
 });
 
+export const insertRecipeSchema = createInsertSchema(recipes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMealPlanSchema = createInsertSchema(mealPlans).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertMealieSettingsSchema = createInsertSchema(mealieSettings).omit({
   id: true,
   createdAt: true,
@@ -300,5 +348,9 @@ export type EventTask = typeof eventTasks.$inferSelect;
 export type InsertEventTask = z.infer<typeof insertEventTaskSchema>;
 export type EventBudget = typeof eventBudget.$inferSelect;
 export type InsertEventBudget = z.infer<typeof insertEventBudgetSchema>;
+export type Recipe = typeof recipes.$inferSelect;
+export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
+export type MealPlan = typeof mealPlans.$inferSelect;
+export type InsertMealPlan = z.infer<typeof insertMealPlanSchema>;
 export type MealieSettings = typeof mealieSettings.$inferSelect;
 export type InsertMealieSettings = z.infer<typeof insertMealieSettingsSchema>;

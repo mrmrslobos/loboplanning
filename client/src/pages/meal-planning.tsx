@@ -1,474 +1,818 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format, startOfWeek, addDays, addWeeks, subWeeks } from "date-fns";
 import { 
-  Utensils, Calendar, ShoppingCart, BookOpen, 
-  Settings, ExternalLink, Search, Plus, 
-  AlertCircle, CheckCircle2, Clock
+  Plus, ChefHat, Calendar, Clock, Users, BookOpen, Star, 
+  ChevronLeft, ChevronRight, Save, Copy, Trash2, Edit3
 } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+
+interface Recipe {
+  id: string;
+  name: string;
+  description?: string;
+  prepTime?: number;
+  cookTime?: number;
+  servings?: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  cuisine?: string;
+  ingredients?: string[];
+  instructions?: string[];
+  imageUrl?: string;
+  tags?: string[];
+  source?: 'mealie' | 'custom';
+  userId: string;
+  familyId?: string;
+  createdAt: Date;
+}
+
+interface MealPlan {
+  id: string;
+  name: string;
+  weekStartDate: string;
+  meals: {
+    [day: string]: {
+      breakfast?: { type: 'recipe' | 'custom'; recipeId?: string; customName?: string; };
+      lunch?: { type: 'recipe' | 'custom'; recipeId?: string; customName?: string; };
+      dinner?: { type: 'recipe' | 'custom'; recipeId?: string; customName?: string; };
+    };
+  };
+  userId: string;
+  familyId?: string;
+  createdAt: Date;
+}
+
+const daysOfWeek = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+];
+
+const mealTypes = ['breakfast', 'lunch', 'dinner'] as const;
+
+const recipeSchema = z.object({
+  name: z.string().min(1, "Recipe name is required"),
+  description: z.string().optional(),
+  prepTime: z.number().positive().optional(),
+  cookTime: z.number().positive().optional(),
+  servings: z.number().positive().optional(),
+  difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+  cuisine: z.string().optional(),
+  ingredients: z.array(z.string()).optional(),
+  instructions: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  familyId: z.string().optional(),
+});
+
+const mealPlanSchema = z.object({
+  name: z.string().min(1, "Meal plan name is required"),
+  familyId: z.string().optional(),
+});
+
+type RecipeForm = z.infer<typeof recipeSchema>;
+type MealPlanForm = z.infer<typeof mealPlanSchema>;
 
 export default function MealPlanning() {
+  const [currentWeek, setCurrentWeek] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [isRecipeDialogOpen, setIsRecipeDialogOpen] = useState(false);
+  const [isMealPlanDialogOpen, setIsMealPlanDialogOpen] = useState(false);
+  const [isMealSelectionOpen, setIsMealSelectionOpen] = useState(false);
+  const [selectedMealSlot, setSelectedMealSlot] = useState<{ day: string; mealType: string } | null>(null);
+  const [currentMealPlan, setCurrentMealPlan] = useState<MealPlan | null>(null);
+  const [draggedRecipe, setDraggedRecipe] = useState<Recipe | null>(null);
+  const [customMealText, setCustomMealText] = useState("");
+
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showSettingsForm, setShowSettingsForm] = useState(false);
 
-  const { data: mealieSettings } = useQuery({
-    queryKey: ['/api/mealie/settings'],
-    enabled: !!user?.id,
+  const recipeForm = useForm<RecipeForm>({
+    resolver: zodResolver(recipeSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      prepTime: undefined,
+      cookTime: undefined,
+      servings: undefined,
+      difficulty: undefined,
+      cuisine: "",
+      ingredients: [],
+      instructions: [],
+      tags: [],
+      familyId: user?.familyId || undefined,
+    },
   });
 
-  const updateSettingsMutation = useMutation({
-    mutationFn: async (data: { instanceUrl: string; apiKey: string }) => {
-      if (mealieSettings) {
-        return apiRequest('PATCH', `/api/mealie/settings/${user?.id}`, data);
-      } else {
-        return apiRequest('POST', '/api/mealie/settings', data);
-      }
+  const mealPlanForm = useForm<MealPlanForm>({
+    resolver: zodResolver(mealPlanSchema),
+    defaultValues: {
+      name: "",
+      familyId: user?.familyId || undefined,
+    },
+  });
+
+  // Fetch recipes
+  const { data: recipes = [] } = useQuery<Recipe[]>({
+    queryKey: ['/api/recipes'],
+    enabled: !!user,
+  });
+
+  // Fetch meal plans
+  const { data: mealPlans = [] } = useQuery<MealPlan[]>({
+    queryKey: ['/api/meal-plans'],
+    enabled: !!user,
+  });
+
+  // Create recipe mutation
+  const createRecipeMutation = useMutation({
+    mutationFn: async (data: RecipeForm) => {
+      const response = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          ...data,
+          source: 'custom',
+          userId: user?.id,
+          familyId: data.familyId || null,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to create recipe');
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/mealie/settings'] });
-      setShowSettingsForm(false);
-      toast({ title: "Success", description: "Mealie settings updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/recipes'] });
+      setIsRecipeDialogOpen(false);
+      recipeForm.reset();
+      toast({ title: "Success", description: "Recipe created successfully" });
     },
-    onError: () => {
-      toast({ 
-        title: "Error", 
-        description: "Failed to update settings. Please check your URL and API key.", 
-        variant: "destructive" 
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Create/update meal plan mutation
+  const saveMealPlanMutation = useMutation({
+    mutationFn: async (data: { name: string; meals: any }) => {
+      const weekStartDate = format(currentWeek, 'yyyy-MM-dd');
+      const response = await fetch('/api/meal-plans', {
+        method: currentMealPlan ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          ...data,
+          weekStartDate,
+          userId: user?.id,
+          familyId: user?.familyId || null,
+          id: currentMealPlan?.id,
+        }),
       });
+      if (!response.ok) throw new Error('Failed to save meal plan');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/meal-plans'] });
+      toast({ title: "Success", description: "Meal plan saved successfully" });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
-  const [settingsForm, setSettingsForm] = useState({
-    instanceUrl: mealieSettings?.instanceUrl || "",
-    apiKey: mealieSettings?.apiKey || "",
-  });
+  // Get current week's meal plan
+  const weekMealPlan = useMemo(() => {
+    const weekStartDate = format(currentWeek, 'yyyy-MM-dd');
+    return mealPlans.find(plan => plan.weekStartDate === weekStartDate) || null;
+  }, [mealPlans, currentWeek]);
 
-  const handleUpdateSettings = async (e: React.FormEvent) => {
+  // Initialize current meal plan
+  useMemo(() => {
+    if (weekMealPlan && !currentMealPlan) {
+      setCurrentMealPlan(weekMealPlan);
+    } else if (!weekMealPlan && currentMealPlan) {
+      setCurrentMealPlan(null);
+    }
+  }, [weekMealPlan, currentMealPlan]);
+
+  const onSubmitRecipe = (data: RecipeForm) => {
+    createRecipeMutation.mutate(data);
+  };
+
+  const handleMealSelection = (recipe: Recipe | null, customName?: string) => {
+    if (!selectedMealSlot) return;
+
+    const newMealPlan = currentMealPlan || {
+      id: '',
+      name: `Week of ${format(currentWeek, 'MMM dd, yyyy')}`,
+      weekStartDate: format(currentWeek, 'yyyy-MM-dd'),
+      meals: {},
+      userId: user?.id || '',
+      familyId: user?.familyId,
+      createdAt: new Date(),
+    };
+
+    const updatedMeals = { ...newMealPlan.meals };
+    if (!updatedMeals[selectedMealSlot.day]) {
+      updatedMeals[selectedMealSlot.day] = {};
+    }
+
+    if (recipe) {
+      updatedMeals[selectedMealSlot.day][selectedMealSlot.mealType as keyof typeof updatedMeals[string]] = {
+        type: 'recipe',
+        recipeId: recipe.id,
+      };
+    } else if (customName) {
+      updatedMeals[selectedMealSlot.day][selectedMealSlot.mealType as keyof typeof updatedMeals[string]] = {
+        type: 'custom',
+        customName,
+      };
+    }
+
+    const updatedMealPlan = { ...newMealPlan, meals: updatedMeals };
+    setCurrentMealPlan(updatedMealPlan);
+    setIsMealSelectionOpen(false);
+    setSelectedMealSlot(null);
+    setCustomMealText("");
+  };
+
+  const handleDragStart = (recipe: Recipe) => {
+    setDraggedRecipe(recipe);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    if (!settingsForm.instanceUrl.trim() || !settingsForm.apiKey.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
+  };
+
+  const handleDrop = (e: React.DragEvent, day: string, mealType: string) => {
+    e.preventDefault();
+    if (!draggedRecipe) return;
+
+    setSelectedMealSlot({ day, mealType });
+    handleMealSelection(draggedRecipe);
+    setDraggedRecipe(null);
+  };
+
+  const openMealSelection = (day: string, mealType: string) => {
+    setSelectedMealSlot({ day, mealType });
+    setIsMealSelectionOpen(true);
+  };
+
+  const removeMeal = (day: string, mealType: string) => {
+    if (!currentMealPlan) return;
+
+    const updatedMeals = { ...currentMealPlan.meals };
+    if (updatedMeals[day]) {
+      delete updatedMeals[day][mealType as keyof typeof updatedMeals[string]];
+      if (Object.keys(updatedMeals[day]).length === 0) {
+        delete updatedMeals[day];
+      }
     }
 
-    // Validate URL format
-    try {
-      new URL(settingsForm.instanceUrl);
-    } catch {
-      toast({
-        title: "Error",
-        description: "Please enter a valid URL",
-        variant: "destructive",
-      });
-      return;
-    }
+    setCurrentMealPlan({ ...currentMealPlan, meals: updatedMeals });
+  };
 
-    updateSettingsMutation.mutate({
-      instanceUrl: settingsForm.instanceUrl.trim(),
-      apiKey: settingsForm.apiKey.trim(),
+  const saveMealPlan = () => {
+    if (!currentMealPlan) return;
+    saveMealPlanMutation.mutate({
+      name: currentMealPlan.name,
+      meals: currentMealPlan.meals,
     });
   };
 
-  // Mock data for demonstration since we can't make actual Mealie API calls without settings
-  const mockMealPlans = [
-    {
-      id: "1",
-      date: "2024-01-15",
-      meal: "Breakfast",
-      recipe: "Pancakes with Fresh Berries",
-      servings: 4,
-    },
-    {
-      id: "2",
-      date: "2024-01-15",
-      meal: "Lunch",
-      recipe: "Grilled Chicken Salad",
-      servings: 4,
-    },
-    {
-      id: "3",
-      date: "2024-01-15",
-      meal: "Dinner",
-      recipe: "Spaghetti Carbonara",
-      servings: 4,
-    },
-  ];
+  const getMealDisplay = (day: string, mealType: string) => {
+    const meal = currentMealPlan?.meals[day]?.[mealType as keyof typeof currentMealPlan.meals[string]];
+    if (!meal) return null;
 
-  const mockRecipes = [
-    {
-      id: "1",
-      name: "Spaghetti Carbonara",
-      description: "Classic Italian pasta dish with eggs, cheese, and pancetta",
-      prepTime: "15 mins",
-      cookTime: "20 mins",
-      servings: 4,
-      tags: ["Italian", "Pasta", "Quick"],
-    },
-    {
-      id: "2",
-      name: "Grilled Chicken Salad",
-      description: "Fresh mixed greens with grilled chicken and vinaigrette",
-      prepTime: "10 mins",
-      cookTime: "15 mins",
-      servings: 2,
-      tags: ["Healthy", "Salad", "Protein"],
-    },
-  ];
+    if (meal.type === 'recipe' && meal.recipeId) {
+      const recipe = recipes.find(r => r.id === meal.recipeId);
+      return recipe ? { name: recipe.name, type: 'recipe', recipe } : null;
+    }
 
-  const mockShoppingList = [
-    { id: "1", item: "Spaghetti pasta", quantity: "1 lb", checked: false },
-    { id: "2", item: "Eggs", quantity: "6", checked: true },
-    { id: "3", item: "Parmesan cheese", quantity: "1 cup", checked: false },
-    { id: "4", item: "Pancetta", quantity: "4 oz", checked: false },
-    { id: "5", item: "Mixed greens", quantity: "2 bags", checked: true },
-  ];
+    if (meal.type === 'custom' && meal.customName) {
+      return { name: meal.customName, type: 'custom' };
+    }
 
-  const isConfigured = !!mealieSettings?.instanceUrl && !!mealieSettings?.apiKey;
+    return null;
+  };
+
+  const getWeekDays = () => {
+    return Array.from({ length: 7 }, (_, i) => addDays(currentWeek, i));
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Meal Planning</h1>
-            <p className="mt-1 text-sm text-gray-600">Plan meals and manage shopping lists with Mealie integration</p>
-          </div>
-          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowSettingsForm(true)}
-              data-testid="button-settings"
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-            {isConfigured && (
-              <Button 
-                onClick={() => window.open(mealieSettings.instanceUrl, '_blank')}
-                data-testid="button-open-mealie"
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open Mealie
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Meal Planning</h1>
+        <div className="flex gap-2">
+          <Dialog open={isRecipeDialogOpen} onOpenChange={setIsRecipeDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" data-testid="button-new-recipe">
+                <ChefHat className="w-4 h-4 mr-2" />
+                New Recipe
               </Button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <main className="p-6">
-        {!isConfigured ? (
-          /* Setup Card */
-          <Card className="max-w-2xl mx-auto" data-testid="card-setup">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Utensils className="h-6 w-6" />
-                Connect to Mealie
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center py-8">
-                <Utensils className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-medium text-gray-900 mb-2">Setup Mealie Integration</h3>
-                <p className="text-gray-500 mb-6">
-                  Connect your self-hosted Mealie instance to manage meal plans, recipes, and shopping lists
-                </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-start">
-                    <AlertCircle className="h-5 w-5 text-blue-600 mr-3 mt-0.5" />
-                    <div className="text-left">
-                      <h4 className="text-sm font-medium text-blue-900 mb-1">Prerequisites</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• A running Mealie instance (self-hosted)</li>
-                        <li>• A valid API key from your Mealie settings</li>
-                        <li>• Network access to your Mealie instance</li>
-                      </ul>
-                    </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Create New Recipe</DialogTitle>
+              </DialogHeader>
+              <Form {...recipeForm}>
+                <form onSubmit={recipeForm.handleSubmit(onSubmitRecipe)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={recipeForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Recipe Name</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter recipe name" 
+                              {...field} 
+                              data-testid="input-recipe-name"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={recipeForm.control}
+                      name="cuisine"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cuisine</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="e.g., Italian, Mexican" 
+                              {...field} 
+                              data-testid="input-recipe-cuisine"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
+                  
+                  <FormField
+                    control={recipeForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Brief description of the recipe" 
+                            {...field} 
+                            data-testid="input-recipe-description"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    <FormField
+                      control={recipeForm.control}
+                      name="prepTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Prep Time (min)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number"
+                              placeholder="30"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                              data-testid="input-recipe-prep-time"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={recipeForm.control}
+                      name="cookTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cook Time (min)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number"
+                              placeholder="45"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                              data-testid="input-recipe-cook-time"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={recipeForm.control}
+                      name="servings"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Servings</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number"
+                              placeholder="4"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                              data-testid="input-recipe-servings"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={recipeForm.control}
+                    name="difficulty"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Difficulty</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-recipe-difficulty">
+                              <SelectValue placeholder="Select difficulty" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="hard">Hard</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      type="submit" 
+                      disabled={createRecipeMutation.isPending}
+                      data-testid="button-save-recipe"
+                    >
+                      {createRecipeMutation.isPending ? "Creating..." : "Create Recipe"}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsRecipeDialogOpen(false)}
+                      data-testid="button-cancel-recipe"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+          
+          <Button onClick={saveMealPlan} disabled={!currentMealPlan || saveMealPlanMutation.isPending} data-testid="button-save-meal-plan">
+            <Save className="w-4 h-4 mr-2" />
+            {saveMealPlanMutation.isPending ? "Saving..." : "Save Meal Plan"}
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="weekly-planner" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="weekly-planner" data-testid="tab-weekly-planner">Weekly Planner</TabsTrigger>
+          <TabsTrigger value="recipes" data-testid="tab-recipes">Recipes</TabsTrigger>
+          <TabsTrigger value="meal-plans" data-testid="tab-meal-plans">Saved Plans</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="weekly-planner" className="space-y-6">
+          {/* Week Navigation */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Week of {format(currentWeek, 'MMM dd, yyyy')}
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}
+                    data-testid="button-prev-week"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+                    data-testid="button-current-week"
+                  >
+                    Today
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
+                    data-testid="button-next-week"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
                 </div>
-                <Button onClick={() => setShowSettingsForm(true)}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Configure Mealie Connection
-                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Meal Planning Grid */}
+              <div className="grid grid-cols-8 gap-2">
+                {/* Header Row */}
+                <div className="font-medium text-center p-2">Meal</div>
+                {getWeekDays().map(day => (
+                  <div key={day.toISOString()} className="font-medium text-center p-2">
+                    <div>{format(day, 'EEE')}</div>
+                    <div className="text-sm text-gray-500">{format(day, 'MMM dd')}</div>
+                  </div>
+                ))}
+                
+                {/* Meal Rows */}
+                {mealTypes.map(mealType => (
+                  <div key={mealType} className="contents">
+                    <div className="font-medium p-2 bg-gray-50 rounded-l-lg flex items-center">
+                      {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+                    </div>
+                    {getWeekDays().map(day => {
+                      const dayKey = format(day, 'yyyy-MM-dd');
+                      const meal = getMealDisplay(dayKey, mealType);
+                      
+                      return (
+                        <div 
+                          key={`${dayKey}-${mealType}`}
+                          className="min-h-[80px] border-2 border-dashed border-gray-200 rounded-lg p-2 hover:border-gray-300 transition-colors"
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, dayKey, mealType)}
+                          data-testid={`meal-slot-${dayKey}-${mealType}`}
+                        >
+                          {meal ? (
+                            <div className="bg-white border rounded p-2 h-full flex flex-col justify-between">
+                              <div>
+                                <div className="font-medium text-sm truncate">{meal.name}</div>
+                                <Badge variant="outline" className="text-xs mt-1">
+                                  {meal.type === 'recipe' ? 'Recipe' : 'Custom'}
+                                </Badge>
+                              </div>
+                              <div className="flex gap-1 mt-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => openMealSelection(dayKey, mealType)}
+                                  data-testid={`button-edit-meal-${dayKey}-${mealType}`}
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => removeMeal(dayKey, mealType)}
+                                  data-testid={`button-remove-meal-${dayKey}-${mealType}`}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div 
+                              className="h-full flex items-center justify-center text-gray-400 cursor-pointer hover:text-gray-600"
+                              onClick={() => openMealSelection(dayKey, mealType)}
+                            >
+                              <Plus className="w-6 h-6" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
-        ) : (
-          /* Main Interface */
-          <div className="space-y-6">
-            {/* Status Banner */}
-            <Card className="bg-green-50 border-green-200" data-testid="card-status">
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mr-3" />
-                  <div>
-                    <h4 className="text-sm font-medium text-green-900">Connected to Mealie</h4>
-                    <p className="text-sm text-green-700">
-                      Syncing with: {mealieSettings.instanceUrl}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        </TabsContent>
 
-            <Tabs defaultValue="meal-plans" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="meal-plans" data-testid="tab-meal-plans">Meal Plans</TabsTrigger>
-                <TabsTrigger value="recipes" data-testid="tab-recipes">Recipes</TabsTrigger>
-                <TabsTrigger value="shopping" data-testid="tab-shopping">Shopping List</TabsTrigger>
-              </TabsList>
-
-              {/* Meal Plans Tab */}
-              <TabsContent value="meal-plans">
-                <Card data-testid="card-meal-plans">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5" />
-                        This Week's Meal Plans
-                      </CardTitle>
-                      <Badge variant="secondary">
-                        {mockMealPlans.length} meals planned
+        <TabsContent value="recipes" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Recipe Collection</CardTitle>
+                <Button onClick={() => setIsRecipeDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Recipe
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {recipes.map(recipe => (
+                  <div 
+                    key={recipe.id}
+                    className="border rounded-lg p-4 cursor-move hover:shadow-md transition-shadow"
+                    draggable
+                    onDragStart={() => handleDragStart(recipe)}
+                    data-testid={`recipe-card-${recipe.id}`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium truncate">{recipe.name}</h3>
+                      <Badge variant={recipe.source === 'mealie' ? 'default' : 'secondary'}>
+                        {recipe.source}
                       </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {mockMealPlans.map((plan) => (
-                        <div
-                          key={plan.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                          data-testid={`meal-plan-${plan.id}`}
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                              <Utensils className="h-6 w-6 text-orange-600" />
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-gray-900">{plan.recipe}</h4>
-                              <div className="flex items-center text-sm text-gray-500 mt-1 space-x-3">
-                                <span>{formatDate(plan.date)}</span>
-                                <span>•</span>
-                                <span>{plan.meal}</span>
-                                <span>•</span>
-                                <span>{plan.servings} servings</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="sm">
-                            View Recipe
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Recipes Tab */}
-              <TabsContent value="recipes">
-                <Card data-testid="card-recipes">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="h-5 w-5" />
-                        Recipe Collection
-                      </CardTitle>
-                      <div className="flex items-center space-x-2">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <Input
-                            placeholder="Search recipes..."
-                            className="pl-10 w-64"
-                            data-testid="input-search-recipes"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {mockRecipes.map((recipe) => (
-                        <div
-                          key={recipe.id}
-                          className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                          data-testid={`recipe-${recipe.id}`}
-                        >
-                          <div className="flex items-start justify-between mb-3">
-                            <h4 className="font-medium text-gray-900">{recipe.name}</h4>
-                            <Button variant="ghost" size="sm">
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{recipe.description}</p>
-                          <div className="flex items-center text-xs text-gray-500 space-x-4 mb-3">
-                            <div className="flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
-                              <span>Prep: {recipe.prepTime}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
-                              <span>Cook: {recipe.cookTime}</span>
-                            </div>
-                            <span>Serves {recipe.servings}</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {recipe.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Shopping List Tab */}
-              <TabsContent value="shopping">
-                <Card data-testid="card-shopping-list">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ShoppingCart className="h-5 w-5" />
-                      Shopping List
-                      <Badge variant="secondary" className="ml-2">
-                        {mockShoppingList.filter(item => !item.checked).length} remaining
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {mockShoppingList.map((item) => (
-                        <div
-                          key={item.id}
-                          className={cn(
-                            "flex items-center space-x-3 p-3 border rounded-lg transition-colors",
-                            item.checked ? "bg-gray-50 opacity-75" : "bg-white hover:bg-gray-50"
-                          )}
-                          data-testid={`shopping-item-${item.id}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={item.checked}
-                            readOnly
-                            className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                          />
-                          <div className="flex-1">
-                            <span className={cn(
-                              "font-medium",
-                              item.checked ? "line-through text-gray-500" : "text-gray-900"
-                            )}>
-                              {item.item}
-                            </span>
-                            <span className="text-sm text-gray-500 ml-2">
-                              {item.quantity}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
                     </div>
                     
-                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-start">
-                        <AlertCircle className="h-5 w-5 text-blue-600 mr-3 mt-0.5" />
-                        <div>
-                          <h4 className="text-sm font-medium text-blue-900 mb-1">Live Integration</h4>
-                          <p className="text-sm text-blue-700">
-                            This shopping list syncs automatically with your Mealie instance. 
-                            Changes made here or in Mealie will be reflected across both platforms.
-                          </p>
+                    {recipe.description && (
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{recipe.description}</p>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      {recipe.prepTime && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{recipe.prepTime}m prep</span>
                         </div>
-                      </div>
+                      )}
+                      {recipe.servings && (
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>{recipe.servings} servings</span>
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-      </main>
+                    
+                    {recipe.difficulty && (
+                      <div className="mt-2">
+                        <Badge 
+                          variant={
+                            recipe.difficulty === 'easy' ? 'default' : 
+                            recipe.difficulty === 'medium' ? 'secondary' : 'destructive'
+                          }
+                          className="text-xs"
+                        >
+                          {recipe.difficulty}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {recipes.length === 0 && (
+                  <div className="col-span-3 text-center py-12">
+                    <ChefHat className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No recipes yet</h3>
+                    <p className="text-gray-600 mb-4">Create your first recipe or import from Mealie</p>
+                    <Button onClick={() => setIsRecipeDialogOpen(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Recipe
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Settings Modal */}
-      <Dialog open={showSettingsForm} onOpenChange={setShowSettingsForm}>
-        <DialogContent className="sm:max-w-lg" data-testid="modal-mealie-settings">
+        <TabsContent value="meal-plans" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Saved Meal Plans</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {mealPlans.map(plan => (
+                  <div key={plan.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">{plan.name}</h3>
+                      <Badge variant="outline">
+                        {format(new Date(plan.weekStartDate), 'MMM dd')}
+                      </Badge>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600 mb-3">
+                      Week of {format(new Date(plan.weekStartDate), 'MMM dd, yyyy')}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          setCurrentWeek(new Date(plan.weekStartDate));
+                          setCurrentMealPlan(plan);
+                        }}
+                        data-testid={`button-load-plan-${plan.id}`}
+                      >
+                        <Copy className="w-3 h-3 mr-1" />
+                        Load
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                
+                {mealPlans.length === 0 && (
+                  <div className="col-span-3 text-center py-12">
+                    <BookOpen className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No saved meal plans</h3>
+                    <p className="text-gray-600">Create your first meal plan in the weekly planner</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Meal Selection Dialog */}
+      <Dialog open={isMealSelectionOpen} onOpenChange={setIsMealSelectionOpen}>
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Mealie Settings</DialogTitle>
+            <DialogTitle>
+              Select Meal for {selectedMealSlot?.day} {selectedMealSlot?.mealType}
+            </DialogTitle>
           </DialogHeader>
           
-          <form onSubmit={handleUpdateSettings} className="space-y-4">
-            <div>
-              <Label htmlFor="instanceUrl">Mealie Instance URL</Label>
-              <Input
-                id="instanceUrl"
-                type="url"
-                value={settingsForm.instanceUrl}
-                onChange={(e) => setSettingsForm(prev => ({ ...prev, instanceUrl: e.target.value }))}
-                placeholder="https://your-mealie-instance.com"
-                data-testid="input-instance-url"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                The full URL to your self-hosted Mealie instance
-              </p>
-            </div>
+          <Tabs defaultValue="recipes" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="recipes">Choose Recipe</TabsTrigger>
+              <TabsTrigger value="custom">Custom Meal</TabsTrigger>
+            </TabsList>
             
-            <div>
-              <Label htmlFor="apiKey">API Key</Label>
-              <Input
-                id="apiKey"
-                type="password"
-                value={settingsForm.apiKey}
-                onChange={(e) => setSettingsForm(prev => ({ ...prev, apiKey: e.target.value }))}
-                placeholder="Your Mealie API key"
-                data-testid="input-api-key"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Generate a long-lived API key from your Mealie user settings
-              </p>
-            </div>
-            
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start">
-                <AlertCircle className="h-5 w-5 text-yellow-600 mr-3 mt-0.5" />
-                <div>
-                  <h4 className="text-sm font-medium text-yellow-900 mb-1">Security Note</h4>
-                  <p className="text-sm text-yellow-700">
-                    Your API key is stored securely and only used to communicate with your Mealie instance. 
-                    Never share your API key with others.
-                  </p>
-                </div>
+            <TabsContent value="recipes" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                {recipes.map(recipe => (
+                  <div 
+                    key={recipe.id}
+                    className="border rounded p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => handleMealSelection(recipe)}
+                    data-testid={`select-recipe-${recipe.id}`}
+                  >
+                    <div className="font-medium text-sm">{recipe.name}</div>
+                    {recipe.cuisine && (
+                      <div className="text-xs text-gray-500">{recipe.cuisine}</div>
+                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      {recipe.prepTime && (
+                        <span className="text-xs text-gray-500">{recipe.prepTime}m</span>
+                      )}
+                      {recipe.difficulty && (
+                        <Badge variant="outline" className="text-xs">
+                          {recipe.difficulty}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            </TabsContent>
             
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowSettingsForm(false)}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={updateSettingsMutation.isPending}
-                data-testid="button-save-settings"
-              >
-                {updateSettingsMutation.isPending ? "Saving..." : "Save Settings"}
-              </Button>
-            </div>
-          </form>
+            <TabsContent value="custom" className="space-y-4">
+              <div className="space-y-4">
+                <Input 
+                  placeholder="Enter custom meal name"
+                  value={customMealText}
+                  onChange={(e) => setCustomMealText(e.target.value)}
+                  data-testid="input-custom-meal"
+                />
+                <Button 
+                  onClick={() => handleMealSelection(null, customMealText)}
+                  disabled={!customMealText.trim()}
+                  data-testid="button-save-custom-meal"
+                >
+                  Add Custom Meal
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

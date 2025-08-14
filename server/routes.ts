@@ -9,7 +9,8 @@ import {
   insertListItemSchema, insertCalendarEventSchema, insertBudgetCategorySchema,
   insertBudgetTransactionSchema, insertChatMessageSchema, insertDevotionalPostSchema,
   insertDevotionalCommentSchema, insertEventSchema, insertEventTaskSchema,
-  insertEventBudgetSchema, insertMealieSettingsSchema
+  insertEventBudgetSchema, insertMealieSettingsSchema, insertRecipeSchema,
+  insertMealPlanSchema
 } from "@shared/schema";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -701,6 +702,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(settings);
     } catch (error) {
       res.status(400).json({ error: 'Invalid input' });
+    }
+  });
+
+  // Recipe routes
+  app.get('/api/recipes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const allRecipes = await storage.getRecipes(req.user!.id, req.user!.familyId);
+      res.json(allRecipes);
+    } catch (error) {
+      console.error('Error fetching recipes:', error);
+      res.status(500).json({ error: 'Failed to fetch recipes' });
+    }
+  });
+
+  app.post('/api/recipes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const recipeData = insertRecipeSchema.parse({
+        ...req.body,
+        userId: req.user!.id
+      });
+      const recipe = await storage.createRecipe(recipeData);
+      res.status(201).json(recipe);
+    } catch (error) {
+      console.error('Error creating recipe:', error);
+      res.status(500).json({ error: 'Failed to create recipe' });
+    }
+  });
+
+  app.put('/api/recipes/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const recipe = await storage.updateRecipe(req.params.id, req.body, req.user!.id);
+      if (!recipe) {
+        return res.status(404).json({ error: 'Recipe not found' });
+      }
+      res.json(recipe);
+    } catch (error) {
+      console.error('Error updating recipe:', error);
+      res.status(500).json({ error: 'Failed to update recipe' });
+    }
+  });
+
+  app.delete('/api/recipes/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const success = await storage.deleteRecipe(req.params.id, req.user!.id);
+      if (!success) {
+        return res.status(404).json({ error: 'Recipe not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      res.status(500).json({ error: 'Failed to delete recipe' });
+    }
+  });
+
+  // Meal plan routes
+  app.get('/api/meal-plans', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const mealPlans = await storage.getMealPlans(req.user!.id, req.user!.familyId);
+      res.json(mealPlans);
+    } catch (error) {
+      console.error('Error fetching meal plans:', error);
+      res.status(500).json({ error: 'Failed to fetch meal plans' });
+    }
+  });
+
+  app.post('/api/meal-plans', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const mealPlanData = insertMealPlanSchema.parse({
+        ...req.body,
+        userId: req.user!.id
+      });
+      const mealPlan = await storage.createMealPlan(mealPlanData);
+      res.status(201).json(mealPlan);
+    } catch (error) {
+      console.error('Error creating meal plan:', error);
+      res.status(500).json({ error: 'Failed to create meal plan' });
+    }
+  });
+
+  app.put('/api/meal-plans/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const mealPlan = await storage.updateMealPlan(req.params.id, req.body, req.user!.id);
+      if (!mealPlan) {
+        return res.status(404).json({ error: 'Meal plan not found' });
+      }
+      res.json(mealPlan);
+    } catch (error) {
+      console.error('Error updating meal plan:', error);
+      res.status(500).json({ error: 'Failed to update meal plan' });
+    }
+  });
+
+  app.delete('/api/meal-plans/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const success = await storage.deleteMealPlan(req.params.id, req.user!.id);
+      if (!success) {
+        return res.status(404).json({ error: 'Meal plan not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting meal plan:', error);
+      res.status(500).json({ error: 'Failed to delete meal plan' });
     }
   });
 
