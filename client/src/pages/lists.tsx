@@ -59,10 +59,7 @@ export default function ListsPage() {
 
   const createListMutation = useMutation({
     mutationFn: async (data: ListFormData) => {
-      return await apiRequest("/api/lists", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("POST", "/api/lists", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
@@ -76,9 +73,7 @@ export default function ListsPage() {
 
   const deleteListMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/lists/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/lists/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
@@ -91,10 +86,7 @@ export default function ListsPage() {
 
   const createItemMutation = useMutation({
     mutationFn: async (data: ItemFormData) => {
-      return await apiRequest("/api/list-items", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("POST", "/api/list-items", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists", selectedList?.id, "items"] });
@@ -105,10 +97,7 @@ export default function ListsPage() {
 
   const updateItemMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<ListItem> }) => {
-      return await apiRequest(`/api/list-items/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("PATCH", `/api/list-items/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists", selectedList?.id, "items"] });
@@ -117,9 +106,7 @@ export default function ListsPage() {
 
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/list-items/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/list-items/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists", selectedList?.id, "items"] });

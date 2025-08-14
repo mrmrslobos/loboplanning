@@ -52,10 +52,7 @@ export default function TasksPage() {
         ...data,
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
       };
-      return await apiRequest("/api/tasks", {
-        method: "POST",
-        body: JSON.stringify(taskData),
-      });
+      return await apiRequest("POST", "/api/tasks", taskData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -69,10 +66,7 @@ export default function TasksPage() {
 
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Task> }) => {
-      return await apiRequest(`/api/tasks/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("PATCH", `/api/tasks/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -82,9 +76,7 @@ export default function TasksPage() {
 
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/tasks/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/tasks/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -207,6 +199,7 @@ export default function TasksPage() {
                         <Textarea 
                           placeholder="Enter task description" 
                           {...field} 
+                          value={field.value || ""} 
                           data-testid="input-task-description"
                         />
                       </FormControl>

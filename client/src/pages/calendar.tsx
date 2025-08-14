@@ -113,22 +113,12 @@ export default function Calendar() {
   // Create event mutation
   const createEventMutation = useMutation({
     mutationFn: async (data: NewEventForm) => {
-      const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          ...data,
-          userId: user?.id,
-          familyId: data.familyId || null,
-        }),
+      return await apiRequest("POST", "/api/events", {
+        ...data,
+        userId: user?.id,
+        familyId: data.familyId || null,
+        date: new Date(`${data.date}T${data.time || '12:00'}`).toISOString(),
       });
-      if (!response.ok) {
-        throw new Error('Failed to create event');
-      }
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/events'] });

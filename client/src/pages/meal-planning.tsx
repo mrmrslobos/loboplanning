@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import MealieImportDialog from "@/components/MealieImportDialog";
 
 interface Recipe {
@@ -138,21 +139,12 @@ export default function MealPlanning() {
   // Create recipe mutation
   const createRecipeMutation = useMutation({
     mutationFn: async (data: RecipeForm) => {
-      const response = await fetch('/api/recipes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          ...data,
-          source: 'custom',
-          userId: user?.id,
-          familyId: data.familyId || null,
-        }),
+      return await apiRequest("POST", "/api/recipes", {
+        ...data,
+        source: 'custom',
+        userId: user?.id,
+        familyId: data.familyId || null,
       });
-      if (!response.ok) throw new Error('Failed to create recipe');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/recipes'] });
@@ -169,22 +161,14 @@ export default function MealPlanning() {
   const saveMealPlanMutation = useMutation({
     mutationFn: async (data: { name: string; meals: any }) => {
       const weekStartDate = format(currentWeek, 'yyyy-MM-dd');
-      const response = await fetch('/api/meal-plans', {
-        method: currentMealPlan ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          ...data,
-          weekStartDate,
-          userId: user?.id,
-          familyId: user?.familyId || null,
-          id: currentMealPlan?.id,
-        }),
+      const method = currentMealPlan ? 'PUT' : 'POST';
+      return await apiRequest(method, '/api/meal-plans', {
+        ...data,
+        weekStartDate,
+        userId: user?.id,
+        familyId: user?.familyId || null,
+        id: currentMealPlan?.id,
       });
-      if (!response.ok) throw new Error('Failed to save meal plan');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/meal-plans'] });

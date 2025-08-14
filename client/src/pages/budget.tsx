@@ -140,20 +140,11 @@ export default function Budget() {
   // Create category mutation
   const createCategoryMutation = useMutation({
     mutationFn: async (data: CategoryForm) => {
-      const response = await fetch('/api/budget/categories', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          ...data,
-          userId: user?.id,
-          familyId: data.familyId || null,
-        }),
+      return await apiRequest("POST", "/api/budget/categories", {
+        ...data,
+        userId: user?.id,
+        familyId: data.familyId || null,
       });
-      if (!response.ok) throw new Error('Failed to create category');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/budget/categories'] });
@@ -169,20 +160,11 @@ export default function Budget() {
   // Create transaction mutation
   const createTransactionMutation = useMutation({
     mutationFn: async (data: TransactionForm) => {
-      const response = await fetch('/api/budget/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          ...data,
-          userId: user?.id,
-          familyId: data.familyId || null,
-        }),
+      return await apiRequest("POST", "/api/budget/transactions", {
+        ...data,
+        userId: user?.id,
+        familyId: data.familyId || null,
       });
-      if (!response.ok) throw new Error('Failed to create transaction');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/budget/transactions'] });
@@ -198,13 +180,7 @@ export default function Budget() {
   // Delete category mutation
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/budget/categories/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to delete category');
+      return await apiRequest("DELETE", `/api/budget/categories/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/budget/categories'] });
@@ -215,13 +191,7 @@ export default function Budget() {
   // Delete transaction mutation
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/budget/transactions/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to delete transaction');
+      return await apiRequest("DELETE", `/api/budget/transactions/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/budget/transactions'] });
