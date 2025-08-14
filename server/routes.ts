@@ -659,6 +659,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/devotional/comments/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const comment = await storage.updateDevotionalComment(req.params.id, req.body, req.user!.id);
+      if (!comment) {
+        return res.status(404).json({ error: 'Comment not found or unauthorized' });
+      }
+      res.json(comment);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid input' });
+    }
+  });
+
+  app.delete('/api/devotional/comments/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const success = await storage.deleteDevotionalComment(req.params.id, req.user!.id);
+      if (!success) {
+        return res.status(404).json({ error: 'Comment not found or unauthorized' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
   // Event routes
   app.get('/api/events', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {

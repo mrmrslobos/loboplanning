@@ -91,6 +91,8 @@ export interface IStorage {
   
   getDevotionalComments(postId: string): Promise<DevotionalComment[]>;
   createDevotionalComment(comment: InsertDevotionalComment): Promise<DevotionalComment>;
+  updateDevotionalComment(id: string, comment: Partial<DevotionalComment>, userId: string): Promise<DevotionalComment | undefined>;
+  deleteDevotionalComment(id: string, userId: string): Promise<boolean>;
   
   // Event methods
   getEvents(userId: string, familyId?: string): Promise<Event[]>;
@@ -911,6 +913,22 @@ export class DatabaseStorage implements IStorage {
       .values(insertComment)
       .returning();
     return comment;
+  }
+
+  async updateDevotionalComment(id: string, commentData: Partial<DevotionalComment>, userId: string): Promise<DevotionalComment | undefined> {
+    const [comment] = await db
+      .update(devotionalComments)
+      .set({ ...commentData, isEdited: true, editedAt: new Date() })
+      .where(and(eq(devotionalComments.id, id), eq(devotionalComments.userId, userId)))
+      .returning();
+    return comment || undefined;
+  }
+
+  async deleteDevotionalComment(id: string, userId: string): Promise<boolean> {
+    const result = await db.delete(devotionalComments).where(
+      and(eq(devotionalComments.id, id), eq(devotionalComments.userId, userId))
+    );
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Event methods

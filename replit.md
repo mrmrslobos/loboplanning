@@ -4,7 +4,7 @@ LoboHub is a comprehensive family hub web application built with a modern full-s
 
 ## Recent Changes (August 2025)
 
-### Enhanced Devotional Module
+### Enhanced Devotional Module with Discussion Threads
 - **Complete redesign** of the devotional page with modern tabbed interface
 - **Daily inspirational verses** - Rotating pool of 15 carefully selected Bible verses that change daily
 - **"Reflect on This" feature** - One-click button to create personal reflections based on daily verses
@@ -16,6 +16,11 @@ LoboHub is a comprehensive family hub web application built with a modern full-s
 - **Smart filtering**: Each tab shows only relevant content with accurate counts
 - **Private/Shared toggle**: All content types support individual privacy settings
 - **Pre-filled reflection forms**: Daily verse automatically populates reflection content for easy spiritual journaling
+- **Threaded Discussion System**: Full comment threading with nested replies, edit/delete functionality
+- **Interactive Discussion View**: Dedicated dialog for viewing posts with comprehensive comment management
+- **Comment Threading**: Parent-child comment relationships with expandable/collapsible threads
+- **Comment Management**: Edit comments with edit indicators, delete comments, and reply to specific comments
+- **Real-time Updates**: Comment changes update immediately across the family discussion
 
 ### Comprehensive Calendar Module
 - **Monthly calendar view** displaying events and tasks with due dates

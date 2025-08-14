@@ -16,10 +16,11 @@ import { useAuth } from "@/hooks/use-auth";
 import { 
   Plus, BookOpen, Calendar, MessageSquare, 
   Users, User, Heart, Share2, Edit, Trash2, 
-  RefreshCw, Sparkles, Pray, Quote
+  RefreshCw, Sparkles, Pray, Quote, X
 } from "lucide-react";
 import { cn, formatDate, formatDateTime, generateInitials } from "@/lib/utils";
 import type { DevotionalPost, DevotionalComment } from "@shared/schema";
+import ThreadedComments from "@/components/ThreadedComments";
 
 // Daily inspirational verses pool
 const DAILY_VERSES = [
@@ -48,7 +49,10 @@ export default function Devotional() {
   const [showReflectionForm, setShowReflectionForm] = useState(false);
   const [showPrayerForm, setShowPrayerForm] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [editingComment, setEditingComment] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<DevotionalPost | null>(null);
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [dailyVerse, setDailyVerse] = useState<{verse: string, reference: string} | null>(null);
 
   // Get daily verse based on current date
@@ -127,13 +131,38 @@ export default function Devotional() {
   });
 
   const createCommentMutation = useMutation({
-    mutationFn: async (data: { postId: string; comment: string }) => {
-      return apiRequest('POST', `/api/devotional/posts/${data.postId}/comments`, { comment: data.comment });
+    mutationFn: async (data: { postId: string; comment: string; parentId?: string }) => {
+      return apiRequest('POST', `/api/devotional/posts/${data.postId}/comments`, { 
+        comment: data.comment,
+        parentId: data.parentId || null
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/devotional/posts', selectedPost?.id, 'comments'] });
       setShowCommentForm(null);
+      setReplyingTo(null);
       toast({ title: "Success", description: "Comment added successfully" });
+    },
+  });
+
+  const updateCommentMutation = useMutation({
+    mutationFn: async (data: { id: string; comment: string }) => {
+      return apiRequest('PATCH', `/api/devotional/comments/${data.id}`, { comment: data.comment });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/devotional/posts', selectedPost?.id, 'comments'] });
+      setEditingComment(null);
+      toast({ title: "Success", description: "Comment updated successfully" });
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (commentId: string) => {
+      return apiRequest('DELETE', `/api/devotional/comments/${commentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/devotional/posts', selectedPost?.id, 'comments'] });
+      toast({ title: "Success", description: "Comment deleted successfully" });
     },
   });
 
@@ -162,6 +191,41 @@ export default function Devotional() {
   const [commentForm, setCommentForm] = useState({
     comment: "",
   });
+
+  const [editCommentForm, setEditCommentForm] = useState({
+    comment: "",
+  });
+
+  // Helper function to organize comments into threads
+  const organizeComments = (comments: DevotionalComment[]) => {
+    const topLevelComments = comments.filter(comment => !comment.parentId);
+    const commentReplies = comments.filter(comment => comment.parentId);
+    
+    const buildThread = (parentComment: DevotionalComment): DevotionalComment & { replies: DevotionalComment[] } => {
+      const replies = commentReplies
+        .filter(reply => reply.parentId === parentComment.id)
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      
+      return {
+        ...parentComment,
+        replies
+      };
+    };
+
+    return topLevelComments
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .map(buildThread);
+  };
+
+  const toggleCommentExpansion = (commentId: string) => {
+    const newExpanded = new Set(expandedComments);
+    if (newExpanded.has(commentId)) {
+      newExpanded.delete(commentId);
+    } else {
+      newExpanded.add(commentId);
+    }
+    setExpandedComments(newExpanded);
+  };
 
   const handleReflectOnVerse = () => {
     if (dailyVerse) {
@@ -257,9 +321,45 @@ export default function Devotional() {
     createCommentMutation.mutate({
       postId: selectedPost.id,
       comment: commentForm.comment.trim(),
+      parentId: replyingTo || undefined,
     });
 
     setCommentForm({ comment: "" });
+  };
+
+  const handleUpdateComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editCommentForm.comment.trim() || !editingComment) return;
+
+    updateCommentMutation.mutate({
+      id: editingComment,
+      comment: editCommentForm.comment.trim(),
+    });
+
+    setEditCommentForm({ comment: "" });
+  };
+
+  const startReply = (commentId: string) => {
+    setReplyingTo(commentId);
+    setShowCommentForm(selectedPost?.id || null);
+    setCommentForm({ comment: "" });
+  };
+
+  const startEdit = (comment: DevotionalComment) => {
+    setEditingComment(comment.id);
+    setEditCommentForm({ comment: comment.comment });
+  };
+
+  const cancelEdit = () => {
+    setEditingComment(null);
+    setEditCommentForm({ comment: "" });
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
+    if (!showCommentForm) {
+      setShowCommentForm(null);
+    }
   };
 
   const sortedPosts = posts?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) || [];
@@ -774,47 +874,140 @@ export default function Devotional() {
         </DialogContent>
       </Dialog>
 
-      {/* Comment Form Dialog */}
-      {showCommentForm && selectedPost && (
-        <Dialog open={!!showCommentForm} onOpenChange={() => setShowCommentForm(null)}>
-          <DialogContent className="max-w-md" data-testid="dialog-comment-form" aria-describedby="comment-description">
-            <DialogHeader>
-              <DialogTitle>Add Comment</DialogTitle>
-              <p id="comment-description" className="text-sm text-gray-600">
-                Share your thoughts on "{selectedPost.title}"
-              </p>
+      {/* Discussion Dialog with Threaded Comments */}
+      {selectedPost && (
+        <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col" data-testid="dialog-discussion">
+            <DialogHeader className="flex-shrink-0">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <DialogTitle className="text-lg">{selectedPost.title}</DialogTitle>
+                  <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                    <span>by {generateInitials("User")}</span>
+                    <span>•</span>
+                    <span>{formatDateTime(selectedPost.createdAt)}</span>
+                    {selectedPost.familyId && (
+                      <>
+                        <span>•</span>
+                        <Badge variant="secondary" className="text-xs">
+                          <Users className="w-3 h-3 mr-1" />
+                          Family
+                        </Badge>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedPost(null)}
+                  data-testid="button-close-discussion"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </DialogHeader>
-            <form onSubmit={handleCreateComment} className="space-y-4">
-              <div>
-                <Label htmlFor="comment">Your Comment</Label>
-                <Textarea
-                  id="comment"
-                  value={commentForm.comment}
-                  onChange={(e) => setCommentForm(prev => ({ ...prev, comment: e.target.value }))}
-                  placeholder="Share your thoughts..."
-                  className="min-h-20"
-                  data-testid="textarea-comment"
-                />
+            
+            <div className="flex-1 overflow-y-auto space-y-6">
+              {/* Post Content */}
+              <div className="prose prose-sm max-w-none bg-gray-50 p-4 rounded-lg">
+                {selectedPost.reading && (
+                  <div className="mb-4">
+                    <h4 className="font-medium text-gray-900">Scripture Reading:</h4>
+                    <p className="whitespace-pre-wrap text-gray-700">{selectedPost.reading}</p>
+                  </div>
+                )}
+                {selectedPost.questions && (
+                  <div className="mb-4">
+                    <h4 className="font-medium text-gray-900">Discussion Questions:</h4>
+                    <p className="whitespace-pre-wrap text-gray-700">{selectedPost.questions}</p>
+                  </div>
+                )}
+                {selectedPost.prayer && (
+                  <div className="mb-4">
+                    <h4 className="font-medium text-gray-900">Prayer:</h4>
+                    <p className="whitespace-pre-wrap text-gray-700">{selectedPost.prayer}</p>
+                  </div>
+                )}
               </div>
-              
-              <div className="flex justify-end space-x-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setShowCommentForm(null)}
-                  data-testid="button-cancel-comment"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={createCommentMutation.isPending}
-                  data-testid="button-save-comment"
-                >
-                  {createCommentMutation.isPending ? "Adding..." : "Add Comment"}
-                </Button>
-              </div>
-            </form>
+
+              {/* Add Comment Section */}
+              {!showCommentForm && !replyingTo && (
+                <div className="border-t pt-4">
+                  <Button
+                    onClick={() => setShowCommentForm(selectedPost.id)}
+                    className="w-full"
+                    data-testid="button-add-comment"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Add Comment
+                  </Button>
+                </div>
+              )}
+
+              {/* New Comment Form */}
+              {showCommentForm && !replyingTo && (
+                <div className="border-t pt-4">
+                  <form onSubmit={handleCreateComment} className="space-y-3">
+                    <Textarea
+                      value={commentForm.comment}
+                      onChange={(e) => setCommentForm({ comment: e.target.value })}
+                      placeholder="Share your thoughts..."
+                      className="min-h-[100px]"
+                      data-testid="textarea-new-comment"
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        type="submit" 
+                        disabled={createCommentMutation.isPending}
+                        data-testid="button-submit-comment"
+                      >
+                        {createCommentMutation.isPending ? "Adding..." : "Add Comment"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => {
+                          setShowCommentForm(null);
+                          setCommentForm({ comment: "" });
+                        }}
+                        data-testid="button-cancel-new-comment"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Threaded Comments */}
+              {comments && comments.length > 0 && (
+                <div className="border-t pt-6">
+                  <h3 className="font-medium mb-4">
+                    Discussion ({comments.length} {comments.length === 1 ? 'comment' : 'comments'})
+                  </h3>
+                  <ThreadedComments
+                    comments={comments}
+                    currentUserId={user?.id || ""}
+                    onReply={startReply}
+                    onEdit={startEdit}
+                    onDelete={(commentId) => deleteCommentMutation.mutate(commentId)}
+                    replyingTo={replyingTo}
+                    editingComment={editingComment}
+                    commentForm={commentForm}
+                    setCommentForm={setCommentForm}
+                    editCommentForm={editCommentForm}
+                    setEditCommentForm={setEditCommentForm}
+                    onSubmitComment={handleCreateComment}
+                    onSubmitEdit={handleUpdateComment}
+                    onCancelReply={cancelReply}
+                    onCancelEdit={cancelEdit}
+                    expandedComments={expandedComments}
+                    onToggleExpansion={toggleCommentExpansion}
+                  />
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       )}

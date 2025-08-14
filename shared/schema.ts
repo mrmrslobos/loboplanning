@@ -127,8 +127,11 @@ export const devotionalPosts = pgTable("devotional_posts", {
 export const devotionalComments = pgTable("devotional_comments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   postId: varchar("post_id").notNull().references(() => devotionalPosts.id, { onDelete: "cascade" }),
+  parentId: varchar("parent_id"), // Self-reference for threaded replies - will be added as foreign key constraint later
   comment: text("comment").notNull(),
   userId: varchar("user_id").notNull().references(() => users.id),
+  isEdited: boolean("is_edited").default(false),
+  editedAt: timestamp("edited_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
