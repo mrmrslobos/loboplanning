@@ -207,7 +207,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Family routes
   app.post('/api/families', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const familyData = insertFamilySchema.parse(req.body);
+      const { name } = req.body;
+      
+      if (!name || typeof name !== 'string' || !name.trim()) {
+        return res.status(400).json({ error: 'Family name is required' });
+      }
+      
+      // Generate a unique invite code
+      const generateInviteCode = () => {
+        const adjectives = ['BLUE', 'RED', 'GREEN', 'GOLD', 'SILVER', 'PURPLE', 'ORANGE', 'PINK'];
+        const nouns = ['OCEAN', 'MOUNTAIN', 'FOREST', 'RIVER', 'GARDEN', 'SUNSET', 'MEADOW', 'CASTLE'];
+        const randomNum = Math.floor(Math.random() * 100);
+        const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        return `${adjective}-${noun}-${randomNum}`;
+      };
+      
+      const familyData = {
+        name: name.trim(),
+        inviteCode: generateInviteCode()
+      };
+      
       const family = await storage.createFamily(familyData);
       
       // Update user's familyId
@@ -215,7 +235,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(family);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid input' });
+      console.error('Family creation error:', error);
+      res.status(500).json({ error: 'Failed to create family' });
     }
   });
 
