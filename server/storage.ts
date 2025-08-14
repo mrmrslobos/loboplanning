@@ -929,6 +929,33 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount !== null && result.rowCount > 0;
   }
 
+  // Event task methods
+  async getEventTasks(eventId: string): Promise<EventTask[]> {
+    return await db.select().from(eventTasks).where(eq(eventTasks.eventId, eventId));
+  }
+
+  async createEventTask(insertTask: InsertEventTask): Promise<EventTask> {
+    const [task] = await db
+      .insert(eventTasks)
+      .values(insertTask)
+      .returning();
+    return task;
+  }
+
+  async updateEventTask(id: string, taskData: Partial<EventTask>): Promise<EventTask | undefined> {
+    const [task] = await db
+      .update(eventTasks)
+      .set(taskData)
+      .where(eq(eventTasks.id, id))
+      .returning();
+    return task || undefined;
+  }
+
+  async deleteEventTask(id: string): Promise<boolean> {
+    const result = await db.delete(eventTasks).where(eq(eventTasks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
   // Event guest methods
   async getEventGuests(eventId: string): Promise<EventGuest[]> {
     return await db.select().from(eventGuests).where(eq(eventGuests.eventId, eventId));

@@ -1,746 +1,818 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { apiRequest } from "@/lib/queryClient";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertEventSchema, insertEventTaskSchema, type Event, type EventTask } from "@shared/schema";
+import { z } from "zod";
+import { Plus, Calendar, MapPin, Clock, Users, CheckSquare, Trash2, Edit, MoreVertical, CalendarDays } from "lucide-react";
+import { formatDistanceToNow, format, differenceInDays } from "date-fns";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { 
-  Plus, Calendar, MapPin, Users, User, CheckCircle2, 
-  DollarSign, UserCheck, UserX, UserRound, 
-  Clock, Edit, Trash2, PartyPopper
-} from "lucide-react";
-import { cn, formatDate, formatDateTime } from "@/lib/utils";
-import type { Event, EventGuest, EventChecklist, EventBudget } from "@shared/schema";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function Events() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [showEventForm, setShowEventForm] = useState(false);
+const eventFormSchema = insertEventSchema.extend({
+  eventDate: z.string(),
+  eventTime: z.string().optional(),
+}).omit({ date: true });
+
+const taskFormSchema = insertEventTaskSchema.extend({});
+
+type EventFormData = z.infer<typeof eventFormSchema>;
+type TaskFormData = z.infer<typeof taskFormSchema>;
+
+const eventTemplates = [
+  { value: "custom", label: "Custom Event", icon: CalendarDays },
+  { value: "birthday", label: "Birthday Party", icon: CalendarDays },
+  { value: "wedding", label: "Wedding", icon: CalendarDays },
+  { value: "vacation", label: "Vacation Trip", icon: CalendarDays },
+  { value: "graduation", label: "Graduation", icon: CalendarDays },
+  { value: "holiday", label: "Holiday Celebration", icon: CalendarDays },
+  { value: "anniversary", label: "Anniversary", icon: CalendarDays },
+];
+
+const taskCategories = [
+  "Planning",
+  "Preparation", 
+  "Shopping",
+  "Decorations",
+  "Food & Catering",
+  "Entertainment",
+  "Travel",
+  "Communication",
+  "Cleanup",
+  "Other",
+];
+
+const assigneeOptions = [
+  { value: "Me", label: "Me" },
+  { value: "Ana", label: "Ana" },
+];
+
+export default function EventsPage() {
+  const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false);
+  const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [showGuestForm, setShowGuestForm] = useState(false);
-  const [showChecklistForm, setShowChecklistForm] = useState(false);
-  const [showBudgetForm, setShowBudgetForm] = useState(false);
+  const { toast } = useToast();
 
-  const { data: events, isLoading } = useQuery({
-    queryKey: ['/api/events'],
-    enabled: !!user?.familyId,
+  const { data: events = [], isLoading } = useQuery<Event[]>({
+    queryKey: ["/api/events"],
   });
 
-  const { data: guests } = useQuery({
-    queryKey: ['/api/events', selectedEvent?.id, 'guests'],
-    enabled: !!selectedEvent?.id,
-  });
-
-  const { data: checklists } = useQuery({
-    queryKey: ['/api/events', selectedEvent?.id, 'checklists'],
-    enabled: !!selectedEvent?.id,
-  });
-
-  const { data: budgetItems } = useQuery({
-    queryKey: ['/api/events', selectedEvent?.id, 'budget'],
-    enabled: !!selectedEvent?.id,
+  const { data: eventTasks = [], isLoading: isLoadingTasks } = useQuery<EventTask[]>({
+    queryKey: ["/api/events", selectedEvent?.id, "tasks"],
+    enabled: !!selectedEvent,
   });
 
   const createEventMutation = useMutation({
-    mutationFn: async (data: {
-      title: string;
-      description?: string;
-      date: string;
-      location?: string;
-      familyId?: string;
-    }) => {
-      return apiRequest('POST', '/api/events', data);
+    mutationFn: async (data: EventFormData) => {
+      const eventData = {
+        ...data,
+        date: new Date(`${data.eventDate}T${data.eventTime || '12:00'}`),
+      };
+      delete eventData.eventDate;
+      delete eventData.eventTime;
+      return await apiRequest("/api/events", {
+        method: "POST",
+        body: JSON.stringify(eventData),
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
-      setShowEventForm(false);
-      toast({ title: "Success", description: "Event created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      setIsCreateEventDialogOpen(false);
+      toast({ title: "Event created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create event", variant: "destructive" });
     },
   });
 
-  const [eventForm, setEventForm] = useState({
-    title: "",
-    description: "",
-    date: "",
-    location: "",
-    isShared: false,
-  });
-
-  const [guestForm, setGuestForm] = useState({
-    name: "",
-    email: "",
-  });
-
-  const [checklistForm, setChecklistForm] = useState({
-    title: "",
-  });
-
-  const [budgetForm, setBudgetForm] = useState({
-    item: "",
-    budgetedAmount: "",
-    actualAmount: "",
-  });
-
-  const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!eventForm.title.trim() || !eventForm.date) {
-      toast({
-        title: "Error",
-        description: "Please fill in required fields",
-        variant: "destructive",
+  const deleteEventMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/events/${id}`, {
+        method: "DELETE",
       });
-      return;
-    }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      setSelectedEvent(null);
+      toast({ title: "Event deleted successfully" });
+    },
+  });
 
-    createEventMutation.mutate({
-      title: eventForm.title.trim(),
-      description: eventForm.description.trim() || undefined,
-      date: new Date(eventForm.date).toISOString(),
-      location: eventForm.location.trim() || undefined,
-      familyId: eventForm.isShared && user?.familyId ? user.familyId : undefined,
-    });
+  const createTaskMutation = useMutation({
+    mutationFn: async (data: TaskFormData) => {
+      return await apiRequest("/api/event-tasks", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events", selectedEvent?.id, "tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] }); // Also update main tasks
+      setIsAddTaskDialogOpen(false);
+      toast({ title: "Task added successfully" });
+    },
+  });
 
-    setEventForm({
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<EventTask> }) => {
+      return await apiRequest(`/api/event-tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events", selectedEvent?.id, "tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] }); // Also update main tasks
+    },
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/event-tasks/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events", selectedEvent?.id, "tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] }); // Also update main tasks
+      toast({ title: "Task deleted successfully" });
+    },
+  });
+
+  const eventForm = useForm<EventFormData>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: {
       title: "",
       description: "",
-      date: "",
       location: "",
-      isShared: false,
+      template: "custom",
+      eventDate: "",
+      eventTime: "",
+    },
+  });
+
+  const taskForm = useForm<TaskFormData>({
+    resolver: zodResolver(taskFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "",
+      assignedTo: "Me",
+      completed: false,
+    },
+  });
+
+  const onCreateEvent = (data: EventFormData) => {
+    createEventMutation.mutate(data);
+  };
+
+  const onAddTask = (data: TaskFormData) => {
+    if (!selectedEvent) return;
+    createTaskMutation.mutate({
+      ...data,
+      eventId: selectedEvent.id,
     });
   };
 
-  const addGuest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!guestForm.name.trim() || !selectedEvent) return;
-
-    try {
-      await apiRequest('POST', `/api/events/${selectedEvent.id}/guests`, {
-        name: guestForm.name.trim(),
-        email: guestForm.email.trim() || undefined,
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent.id, 'guests'] });
-      setGuestForm({ name: "", email: "" });
-      setShowGuestForm(false);
-      toast({ title: "Success", description: "Guest added successfully" });
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to add guest", variant: "destructive" });
-    }
+  const handleTaskToggle = (taskId: string, completedStatus: boolean) => {
+    updateTaskMutation.mutate({ id: taskId, data: { completed: completedStatus } });
   };
 
-  const addChecklistItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checklistForm.title.trim() || !selectedEvent) return;
-
-    try {
-      await apiRequest('POST', `/api/events/${selectedEvent.id}/checklists`, {
-        title: checklistForm.title.trim(),
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent.id, 'checklists'] });
-      setChecklistForm({ title: "" });
-      setShowChecklistForm(false);
-      toast({ title: "Success", description: "Checklist item added successfully" });
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to add checklist item", variant: "destructive" });
-    }
+  const getEventProgress = (tasks: EventTask[]) => {
+    if (tasks.length === 0) return 0;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    return (completedTasks / tasks.length) * 100;
   };
 
-  const addBudgetItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!budgetForm.item.trim() || !selectedEvent) return;
-
-    try {
-      await apiRequest('POST', `/api/events/${selectedEvent.id}/budget`, {
-        item: budgetForm.item.trim(),
-        budgetedAmount: budgetForm.budgetedAmount ? parseFloat(budgetForm.budgetedAmount) : undefined,
-        actualAmount: budgetForm.actualAmount ? parseFloat(budgetForm.actualAmount) : undefined,
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent.id, 'budget'] });
-      setBudgetForm({ item: "", budgetedAmount: "", actualAmount: "" });
-      setShowBudgetForm(false);
-      toast({ title: "Success", description: "Budget item added successfully" });
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to add budget item", variant: "destructive" });
-    }
+  const getDaysUntilEvent = (eventDate: Date) => {
+    const now = new Date();
+    const event = new Date(eventDate);
+    return differenceInDays(event, now);
   };
 
-  const updateGuestRSVP = async (guestId: string, status: string) => {
-    try {
-      await apiRequest('PATCH', `/api/events/guests/${guestId}`, { rsvpStatus: status });
-      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent?.id, 'guests'] });
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to update RSVP", variant: "destructive" });
-    }
+  const getTemplateIcon = (template: string) => {
+    const templateConfig = eventTemplates.find(t => t.value === template);
+    return templateConfig?.icon || CalendarDays;
   };
-
-  const toggleChecklistItem = async (itemId: string, completed: boolean) => {
-    try {
-      await apiRequest('PATCH', `/api/events/checklists/${itemId}`, { completed: !completed });
-      queryClient.invalidateQueries({ queryKey: ['/api/events', selectedEvent?.id, 'checklists'] });
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to update checklist", variant: "destructive" });
-    }
-  };
-
-  const sortedEvents = events?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) || [];
-  const upcomingEvents = sortedEvents.filter(event => new Date(event.date) > new Date());
-  const pastEvents = sortedEvents.filter(event => new Date(event.date) <= new Date());
-
-  const getRSVPIcon = (status: string) => {
-    switch (status) {
-      case 'attending': return <UserCheck className="h-4 w-4 text-green-600" />;
-      case 'declined': return <UserX className="h-4 w-4 text-red-600" />;
-      case 'maybe': return <UserRound className="h-4 w-4 text-yellow-600" />;
-      default: return <Clock className="h-4 w-4 text-gray-400" />;
-    }
-  };
-
-  const totalBudgeted = budgetItems?.reduce((sum, item) => sum + parseFloat(item.budgetedAmount || '0'), 0) || 0;
-  const totalSpent = budgetItems?.reduce((sum, item) => sum + parseFloat(item.actualAmount || '0'), 0) || 0;
-  const budgetProgress = totalBudgeted > 0 ? Math.round((totalSpent / totalBudgeted) * 100) : 0;
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="container mx-auto p-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Event Planning</h1>
-            <p className="mt-1 text-sm text-gray-600">Plan and organize special family events</p>
+    <div className="container mx-auto p-6">
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Events Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Events</h1>
+              <p className="text-muted-foreground text-sm">
+                Plan and manage your special occasions
+              </p>
+            </div>
+            <Dialog open={isCreateEventDialogOpen} onOpenChange={setIsCreateEventDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" data-testid="button-create-event">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Event
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Create New Event</DialogTitle>
+                  <DialogDescription>
+                    Plan a special occasion with tasks and timeline.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...eventForm}>
+                  <form onSubmit={eventForm.handleSubmit(onCreateEvent)} className="space-y-4">
+                    <FormField
+                      control={eventForm.control}
+                      name="template"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Template</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-event-template">
+                                <SelectValue placeholder="Choose a template" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {eventTemplates.map((template) => {
+                                const Icon = template.icon;
+                                return (
+                                  <SelectItem key={template.value} value={template.value}>
+                                    <div className="flex items-center space-x-2">
+                                      <Icon className="h-4 w-4" />
+                                      <span>{template.label}</span>
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={eventForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Event Title</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter event title" 
+                              {...field} 
+                              data-testid="input-event-title"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={eventForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Enter event description" 
+                              {...field}
+                              value={field.value || ""}
+                              data-testid="input-event-description"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={eventForm.control}
+                      name="eventDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Event Date</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="date" 
+                              {...field} 
+                              data-testid="input-event-date"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={eventForm.control}
+                      name="eventTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Event Time (Optional)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="time" 
+                              {...field} 
+                              data-testid="input-event-time"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={eventForm.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location (Optional)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter event location" 
+                              {...field}
+                              value={field.value || ""} 
+                              data-testid="input-event-location"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsCreateEventDialogOpen(false)}
+                        data-testid="button-cancel-event"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        disabled={createEventMutation.isPending}
+                        data-testid="button-submit-event"
+                      >
+                        {createEventMutation.isPending ? "Creating..." : "Create Event"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
-          <Button onClick={() => setShowEventForm(true)} data-testid="button-create-event">
-            <Plus className="h-4 w-4 mr-2" />
-            Plan Event
-          </Button>
-        </div>
-      </header>
 
-      <main className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Events List */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Upcoming Events */}
-            <Card data-testid="card-upcoming-events">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PartyPopper className="h-5 w-5" />
-                  Upcoming Events ({upcomingEvents.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {upcomingEvents.length === 0 ? (
-                  <div className="text-center py-8">
-                    <PartyPopper className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No upcoming events</h3>
-                    <p className="text-gray-500 mb-4">Start planning your next family gathering</p>
-                    <Button onClick={() => setShowEventForm(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Plan First Event
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {upcomingEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => setSelectedEvent(event)}
-                        data-testid={`event-${event.id}`}
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <Calendar className="h-6 w-6 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">{event.title}</h4>
-                            <div className="flex items-center text-sm text-gray-500 mt-1 space-x-3">
-                              <div className="flex items-center">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                <span>{formatDate(event.date)}</span>
-                              </div>
-                              {event.location && (
-                                <div className="flex items-center">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  <span>{event.location}</span>
-                                </div>
-                              )}
-                              <Badge variant="outline">
-                                {event.familyId ? (
-                                  <><Users className="h-3 w-3 mr-1" />Shared</>
-                                ) : (
-                                  <><User className="h-3 w-3 mr-1" />Private</>
-                                )}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          View Details
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Past Events */}
-            {pastEvents.length > 0 && (
-              <Card data-testid="card-past-events">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5" />
-                    Past Events ({pastEvents.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {pastEvents.slice(0, 3).map((event) => (
-                      <div
-                        key={event.id}
-                        className="flex items-center justify-between p-3 border rounded-lg opacity-75 hover:opacity-100 cursor-pointer transition-opacity"
-                        onClick={() => setSelectedEvent(event)}
-                        data-testid={`past-event-${event.id}`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <Calendar className="h-4 w-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-700">{event.title}</h4>
-                            <p className="text-sm text-gray-500">{formatDate(event.date)}</p>
-                          </div>
+          <div className="space-y-3">
+            {events.map((event) => {
+              const Icon = getTemplateIcon(event.template || "custom");
+              const daysUntil = getDaysUntilEvent(event.date);
+              const isUpcoming = daysUntil >= 0;
+              
+              return (
+                <Card 
+                  key={event.id} 
+                  className={`cursor-pointer transition-colors hover:bg-accent ${
+                    selectedEvent?.id === event.id ? "ring-2 ring-primary" : ""
+                  }`}
+                  onClick={() => setSelectedEvent(event)}
+                  data-testid={`event-card-${event.id}`}
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-2 flex-1">
+                        <Icon className="h-4 w-4 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="text-sm truncate">{event.title}</CardTitle>
+                          {event.description && (
+                            <CardDescription className="text-xs truncate">
+                              {event.description}
+                            </CardDescription>
+                          )}
                         </div>
                       </div>
-                    ))}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteEventMutation.mutate(event.id);
+                            }}
+                            className="text-destructive"
+                            data-testid={`delete-event-${event.id}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Event
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{format(new Date(event.date), 'MMM d, yyyy')}</span>
+                        </div>
+                        {event.location && (
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="h-3 w-3" />
+                            <span className="truncate">{event.location}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Countdown */}
+                      <div className="flex items-center justify-between">
+                        <Badge 
+                          variant={isUpcoming ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {isUpcoming ? (
+                            daysUntil === 0 ? "Today!" : 
+                            daysUntil === 1 ? "Tomorrow" : 
+                            `${daysUntil} days left`
+                          ) : (
+                            `${Math.abs(daysUntil)} days ago`
+                          )}
+                        </Badge>
+                        {event.template && (
+                          <Badge variant="outline" className="text-xs">
+                            {eventTemplates.find(t => t.value === event.template)?.label}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              );
+            })}
+            
+            {events.length === 0 && (
+              <Card className="p-4 text-center border-dashed">
+                <CardContent className="pt-0">
+                  <div className="space-y-2">
+                    <h3 className="font-medium">No events yet</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Create your first event to start planning.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
+        </div>
 
-          {/* Event Details */}
-          <div>
-            {selectedEvent ? (
-              <Card data-testid="card-event-details">
-                <CardHeader className="border-b border-gray-200">
-                  <CardTitle>{selectedEvent.title}</CardTitle>
-                  <div className="flex items-center text-sm text-gray-500 space-x-3">
-                    <div className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span>{formatDate(selectedEvent.date)}</span>
-                    </div>
-                    {selectedEvent.location && (
-                      <div className="flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>{selectedEvent.location}</span>
+        {/* Event Details and Tasks */}
+        <div className="lg:col-span-8">
+          {selectedEvent ? (
+            <div className="space-y-6">
+              {/* Event Header */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <CardTitle className="text-xl">{selectedEvent.title}</CardTitle>
+                        <Badge variant="outline">
+                          {eventTemplates.find(t => t.value === selectedEvent.template)?.label || "Custom"}
+                        </Badge>
                       </div>
-                    )}
+                      {selectedEvent.description && (
+                        <CardDescription>{selectedEvent.description}</CardDescription>
+                      )}
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>{format(new Date(selectedEvent.date), 'EEEE, MMMM d, yyyy')}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{format(new Date(selectedEvent.date), 'h:mm a')}</span>
+                        </div>
+                        {selectedEvent.location && (
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>{selectedEvent.location}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">
+                        {(() => {
+                          const daysUntil = getDaysUntilEvent(selectedEvent.date);
+                          return daysUntil >= 0 ? (
+                            daysUntil === 0 ? "Today!" : 
+                            daysUntil === 1 ? "Tomorrow" : 
+                            `${daysUntil} days`
+                          ) : (
+                            "Past event"
+                          );
+                        })()}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {getDaysUntilEvent(selectedEvent.date) >= 0 ? "until event" : ""}
+                      </div>
+                    </div>
                   </div>
-                  {selectedEvent.description && (
-                    <p className="text-sm text-gray-600 mt-2">{selectedEvent.description}</p>
+                </CardHeader>
+              </Card>
+
+              {/* Tasks Section */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Event Tasks</CardTitle>
+                      <CardDescription>
+                        Manage tasks and track progress for this event
+                      </CardDescription>
+                    </div>
+                    <Dialog open={isAddTaskDialogOpen} onOpenChange={setIsAddTaskDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button data-testid="button-add-event-task">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Task
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Add Event Task</DialogTitle>
+                          <DialogDescription>
+                            Add a new task for {selectedEvent.title}.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Form {...taskForm}>
+                          <form onSubmit={taskForm.handleSubmit(onAddTask)} className="space-y-4">
+                            <FormField
+                              control={taskForm.control}
+                              name="title"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Task Title</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Enter task title" 
+                                      {...field} 
+                                      data-testid="input-event-task-title"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={taskForm.control}
+                              name="description"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Description (Optional)</FormLabel>
+                                  <FormControl>
+                                    <Textarea 
+                                      placeholder="Enter task description" 
+                                      {...field}
+                                      value={field.value || ""} 
+                                      data-testid="input-event-task-description"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={taskForm.control}
+                              name="category"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Category</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                                    <FormControl>
+                                      <SelectTrigger data-testid="select-task-category">
+                                        <SelectValue placeholder="Select category" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {taskCategories.map((category) => (
+                                        <SelectItem key={category} value={category}>
+                                          {category}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={taskForm.control}
+                              name="assignedTo"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Assign To</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger data-testid="select-task-assignee">
+                                        <SelectValue placeholder="Select assignee" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {assigneeOptions.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                          {option.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsAddTaskDialogOpen(false)}
+                                data-testid="button-cancel-task"
+                              >
+                                Cancel
+                              </Button>
+                              <Button 
+                                type="submit" 
+                                disabled={createTaskMutation.isPending}
+                                data-testid="button-submit-task"
+                              >
+                                {createTaskMutation.isPending ? "Adding..." : "Add Task"}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  {eventTasks.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Progress</span>
+                        <span>
+                          {eventTasks.filter(task => task.completed).length} of {eventTasks.length} tasks completed
+                        </span>
+                      </div>
+                      <Progress 
+                        value={getEventProgress(eventTasks)} 
+                        className="h-2"
+                        data-testid="event-progress"
+                      />
+                    </div>
                   )}
                 </CardHeader>
-                <CardContent className="p-0">
-                  <Tabs defaultValue="guests" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="guests" data-testid="tab-guests">Guests</TabsTrigger>
-                      <TabsTrigger value="checklist" data-testid="tab-checklist">Checklist</TabsTrigger>
-                      <TabsTrigger value="budget" data-testid="tab-budget">Budget</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="guests" className="p-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">Guest List</h4>
-                        <Button
-                          size="sm"
-                          onClick={() => setShowGuestForm(true)}
-                          data-testid="button-add-guest"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Guest
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        {guests?.map((guest) => (
-                          <div
-                            key={guest.id}
-                            className="flex items-center justify-between p-2 border rounded"
-                            data-testid={`guest-${guest.id}`}
-                          >
-                            <div>
-                              <p className="font-medium text-sm">{guest.name}</p>
-                              {guest.email && (
-                                <p className="text-xs text-gray-500">{guest.email}</p>
-                              )}
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              {getRSVPIcon(guest.rsvpStatus || 'pending')}
-                              <Select
-                                value={guest.rsvpStatus || 'pending'}
-                                onValueChange={(value) => updateGuestRSVP(guest.id, value)}
-                              >
-                                <SelectTrigger className="w-20 h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="attending">Attending</SelectItem>
-                                  <SelectItem value="maybe">Maybe</SelectItem>
-                                  <SelectItem value="declined">Declined</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        )) || (
-                          <p className="text-center text-gray-500 py-4">No guests added yet</p>
-                        )}
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="checklist" className="p-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">Event Checklist</h4>
-                        <Button
-                          size="sm"
-                          onClick={() => setShowChecklistForm(true)}
-                          data-testid="button-add-checklist"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Item
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        {checklists?.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center space-x-3 p-2 border rounded"
-                            data-testid={`checklist-${item.id}`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={item.completed || false}
-                              onChange={() => toggleChecklistItem(item.id, item.completed || false)}
-                              className="w-4 h-4 text-primary border-gray-300 rounded"
-                            />
-                            <span className={cn(
-                              "text-sm",
-                              item.completed ? "line-through text-gray-500" : "text-gray-900"
-                            )}>
-                              {item.title}
-                            </span>
-                          </div>
-                        )) || (
-                          <p className="text-center text-gray-500 py-4">No checklist items yet</p>
-                        )}
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="budget" className="p-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">Budget Tracking</h4>
-                        <Button
-                          size="sm"
-                          onClick={() => setShowBudgetForm(true)}
-                          data-testid="button-add-budget-item"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Item
-                        </Button>
-                      </div>
-                      
-                      {totalBudgeted > 0 && (
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="flex justify-between text-sm mb-2">
-                            <span>Total Spent</span>
-                            <span className="font-medium">
-                              ${totalSpent.toFixed(2)} / ${totalBudgeted.toFixed(2)}
-                            </span>
-                          </div>
-                          <Progress value={budgetProgress} className="h-2" />
-                          <p className="text-xs text-gray-500 mt-1 text-center">
-                            {budgetProgress}% of budget used
-                          </p>
+                <CardContent>
+                  {/* Tasks by Category */}
+                  {isLoadingTasks ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center space-x-3 p-3 border rounded animate-pulse">
+                          <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                          <div className="flex-1 h-4 bg-gray-200 rounded"></div>
+                          <div className="w-8 h-4 bg-gray-200 rounded"></div>
                         </div>
-                      )}
-                      
-                      <div className="space-y-2">
-                        {budgetItems?.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center justify-between p-2 border rounded"
-                            data-testid={`budget-item-${item.id}`}
-                          >
-                            <span className="text-sm font-medium">{item.item}</span>
-                            <div className="text-right">
-                              <div className="text-sm">
-                                {item.actualAmount && (
-                                  <span className="text-gray-900">${parseFloat(item.actualAmount).toFixed(2)}</span>
-                                )}
-                                {item.budgetedAmount && (
-                                  <span className="text-gray-500 ml-2">
-                                    / ${parseFloat(item.budgetedAmount).toFixed(2)}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )) || (
-                          <p className="text-center text-gray-500 py-4">No budget items yet</p>
-                        )}
-                      </div>
-                    </TabsContent>
-                  </Tabs>
+                      ))}
+                    </div>
+                  ) : eventTasks.length > 0 ? (
+                    (() => {
+                      const tasksByCategory = eventTasks.reduce((acc, task) => {
+                        const category = task.category || "Other";
+                        if (!acc[category]) acc[category] = [];
+                        acc[category].push(task);
+                        return acc;
+                      }, {} as Record<string, EventTask[]>);
+
+                      return (
+                        <Tabs defaultValue={Object.keys(tasksByCategory)[0]} className="w-full">
+                          <TabsList className="grid w-full grid-cols-auto">
+                            {Object.keys(tasksByCategory).map((category) => (
+                              <TabsTrigger key={category} value={category}>
+                                {category} ({tasksByCategory[category].length})
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                          {Object.entries(tasksByCategory).map(([category, tasks]) => (
+                            <TabsContent key={category} value={category} className="space-y-2 mt-4">
+                              {tasks.map((task) => (
+                                <div 
+                                  key={task.id} 
+                                  className={`flex items-center space-x-3 p-3 border rounded hover:bg-accent transition-colors ${
+                                    task.completed ? "bg-muted/50" : ""
+                                  }`}
+                                  data-testid={`event-task-${task.id}`}
+                                >
+                                  <Checkbox
+                                    checked={task.completed || false}
+                                    onCheckedChange={(checked) => 
+                                      handleTaskToggle(task.id, checked as boolean)
+                                    }
+                                    data-testid={`checkbox-event-task-${task.id}`}
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`font-medium ${task.completed ? "line-through text-muted-foreground" : ""}`}>
+                                      {task.title}
+                                    </div>
+                                    {task.description && (
+                                      <div className="text-sm text-muted-foreground truncate">{task.description}</div>
+                                    )}
+                                    <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
+                                      <div className="flex items-center space-x-1">
+                                        <Users className="h-3 w-3" />
+                                        <span>{task.assignedTo}</span>
+                                      </div>
+                                      <Badge variant="outline" className="text-xs">
+                                        {task.completed ? "complete" : "pending"}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteTaskMutation.mutate(task.id)}
+                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                    data-testid={`delete-event-task-${task.id}`}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </TabsContent>
+                          ))}
+                        </Tabs>
+                      );
+                    })()
+                  ) : (
+                    <div className="text-center py-8 border-dashed border rounded">
+                      <CheckSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <h3 className="font-medium">No tasks yet</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Add tasks to start planning this event.
+                      </p>
+                      <Button onClick={() => setIsAddTaskDialogOpen(true)} data-testid="button-add-first-event-task">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Task
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            ) : (
-              <Card data-testid="card-select-event">
-                <CardContent className="p-8">
-                  <div className="text-center">
-                    <PartyPopper className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Select an event</h3>
-                    <p className="text-gray-500">Choose an event to view guests, checklists, and budget details</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+            </div>
+          ) : (
+            <Card className="p-8 text-center border-dashed">
+              <CardContent>
+                <div className="space-y-2">
+                  <CalendarDays className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <h3 className="font-medium">Select an event</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Choose an event from the sidebar to view details and manage tasks.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      </main>
-
-      {/* Create Event Modal */}
-      <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
-        <DialogContent className="sm:max-w-lg" data-testid="modal-create-event">
-          <DialogHeader>
-            <DialogTitle>Plan New Event</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={handleCreateEvent} className="space-y-4">
-            <div>
-              <Label htmlFor="eventTitle">Event Title</Label>
-              <Input
-                id="eventTitle"
-                value={eventForm.title}
-                onChange={(e) => setEventForm(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="e.g., Dad's 50th Birthday, Summer BBQ"
-                data-testid="input-event-title"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="eventDate">Event Date</Label>
-              <Input
-                id="eventDate"
-                type="date"
-                value={eventForm.date}
-                onChange={(e) => setEventForm(prev => ({ ...prev, date: e.target.value }))}
-                data-testid="input-event-date"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="eventLocation">Location (optional)</Label>
-              <Input
-                id="eventLocation"
-                value={eventForm.location}
-                onChange={(e) => setEventForm(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="Enter event location"
-                data-testid="input-event-location"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="eventDescription">Description (optional)</Label>
-              <Textarea
-                id="eventDescription"
-                value={eventForm.description}
-                onChange={(e) => setEventForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Add event details..."
-                rows={3}
-                data-testid="textarea-event-description"
-              />
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <span className="text-sm font-medium text-gray-900">Share with family</span>
-                <p className="text-xs text-gray-500">Make this event visible to all family members</p>
-              </div>
-              <Switch
-                checked={eventForm.isShared}
-                onCheckedChange={(checked) => setEventForm(prev => ({ ...prev, isShared: checked }))}
-                data-testid="switch-event-shared"
-              />
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowEventForm(false)}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createEventMutation.isPending}
-                data-testid="button-create-event-submit"
-              >
-                {createEventMutation.isPending ? "Creating..." : "Create Event"}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Guest Modal */}
-      <Dialog open={showGuestForm} onOpenChange={setShowGuestForm}>
-        <DialogContent data-testid="modal-add-guest">
-          <DialogHeader>
-            <DialogTitle>Add Guest</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={addGuest} className="space-y-4">
-            <div>
-              <Label htmlFor="guestName">Guest Name</Label>
-              <Input
-                id="guestName"
-                value={guestForm.name}
-                onChange={(e) => setGuestForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter guest name"
-                data-testid="input-guest-name"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="guestEmail">Email (optional)</Label>
-              <Input
-                id="guestEmail"
-                type="email"
-                value={guestForm.email}
-                onChange={(e) => setGuestForm(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="Enter guest email"
-                data-testid="input-guest-email"
-              />
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowGuestForm(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" data-testid="button-add-guest-submit">
-                Add Guest
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Checklist Item Modal */}
-      <Dialog open={showChecklistForm} onOpenChange={setShowChecklistForm}>
-        <DialogContent data-testid="modal-add-checklist">
-          <DialogHeader>
-            <DialogTitle>Add Checklist Item</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={addChecklistItem} className="space-y-4">
-            <div>
-              <Label htmlFor="checklistTitle">Task</Label>
-              <Input
-                id="checklistTitle"
-                value={checklistForm.title}
-                onChange={(e) => setChecklistForm({ title: e.target.value })}
-                placeholder="e.g., Order cake, Send invitations"
-                data-testid="input-checklist-title"
-              />
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowChecklistForm(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" data-testid="button-add-checklist-submit">
-                Add Item
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Budget Item Modal */}
-      <Dialog open={showBudgetForm} onOpenChange={setShowBudgetForm}>
-        <DialogContent data-testid="modal-add-budget-item">
-          <DialogHeader>
-            <DialogTitle>Add Budget Item</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={addBudgetItem} className="space-y-4">
-            <div>
-              <Label htmlFor="budgetItem">Item</Label>
-              <Input
-                id="budgetItem"
-                value={budgetForm.item}
-                onChange={(e) => setBudgetForm(prev => ({ ...prev, item: e.target.value }))}
-                placeholder="e.g., Decorations, Food, Venue"
-                data-testid="input-budget-item"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="budgetedAmount">Budgeted Amount</Label>
-                <Input
-                  id="budgetedAmount"
-                  type="number"
-                  step="0.01"
-                  value={budgetForm.budgetedAmount}
-                  onChange={(e) => setBudgetForm(prev => ({ ...prev, budgetedAmount: e.target.value }))}
-                  placeholder="0.00"
-                  data-testid="input-budgeted-amount"
-                />
-              </div>
-              <div>
-                <Label htmlFor="actualAmount">Actual Amount</Label>
-                <Input
-                  id="actualAmount"
-                  type="number"
-                  step="0.01"
-                  value={budgetForm.actualAmount}
-                  onChange={(e) => setBudgetForm(prev => ({ ...prev, actualAmount: e.target.value }))}
-                  placeholder="0.00"
-                  data-testid="input-actual-amount"
-                />
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowBudgetForm(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" data-testid="button-add-budget-item-submit">
-                Add Item
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      </div>
     </div>
   );
 }

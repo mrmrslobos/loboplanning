@@ -8,8 +8,8 @@ import {
   insertUserSchema, insertFamilySchema, insertTaskSchema, insertListSchema,
   insertListItemSchema, insertCalendarEventSchema, insertBudgetCategorySchema,
   insertBudgetTransactionSchema, insertChatMessageSchema, insertDevotionalPostSchema,
-  insertDevotionalCommentSchema, insertEventSchema, insertEventGuestSchema,
-  insertEventTaskSchema, insertEventBudgetSchema, insertMealieSettingsSchema
+  insertDevotionalCommentSchema, insertEventSchema, insertEventTaskSchema,
+  insertEventBudgetSchema, insertMealieSettingsSchema
 } from "@shared/schema";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -406,6 +406,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deleted = await storage.deleteList(id);
       if (!deleted) {
         return res.status(404).json({ error: 'List not found' });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  // Events routes
+  app.get('/api/events', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const events = await storage.getEvents(req.user!.id, req.user!.familyId);
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  app.post('/api/events', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const eventData = insertEventSchema.parse({
+        ...req.body,
+        userId: req.user!.id
+      });
+      const event = await storage.createEvent(eventData);
+      res.json(event);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid input' });
+    }
+  });
+
+  app.delete('/api/events/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteEvent(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  // Event tasks routes
+  app.get('/api/events/:id/tasks', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const tasks = await storage.getEventTasks(id);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  app.post('/api/event-tasks', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const taskData = insertEventTaskSchema.parse(req.body);
+      const task = await storage.createEventTask(taskData);
+      
+      // Also create in main tasks system for integration
+      const mainTaskData = {
+        title: task.title,
+        description: task.description,
+        assignedTo: task.assignedTo,
+        status: task.status,
+        category: `Event: ${task.category}`,
+        userId: req.user!.id,
+        familyId: req.user!.familyId,
+      };
+      await storage.createTask(mainTaskData);
+      
+      res.json(task);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid input' });
+    }
+  });
+
+  app.patch('/api/event-tasks/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const task = await storage.updateEventTask(id, req.body);
+      if (!task) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+      res.json(task);
+    } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  app.delete('/api/event-tasks/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteEventTask(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Task not found' });
       }
       res.json({ success: true });
     } catch (error) {

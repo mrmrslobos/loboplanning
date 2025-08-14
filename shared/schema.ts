@@ -249,12 +249,12 @@ export const insertEventSchema = createInsertSchema(events).omit({
   createdAt: true,
 });
 
-export const insertEventGuestSchema = createInsertSchema(eventGuests).omit({
+export const insertEventTaskSchema = createInsertSchema(eventTasks).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertEventTaskSchema = createInsertSchema(eventTasks).omit({
+export const insertEventGuestSchema = createInsertSchema(eventGuests).omit({
   id: true,
   createdAt: true,
 });
