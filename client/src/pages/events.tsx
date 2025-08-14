@@ -222,13 +222,16 @@ export default function EventsPage() {
                 Plan and manage your special occasions
               </p>
             </div>
+            <Button 
+              size="sm" 
+              data-testid="button-create-event"
+              onClick={() => setIsCreateEventDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Event
+            </Button>
+            
             <Dialog open={isCreateEventDialogOpen} onOpenChange={setIsCreateEventDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" data-testid="button-create-event">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Event
-                </Button>
-              </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Create New Event</DialogTitle>
