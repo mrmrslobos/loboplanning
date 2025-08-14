@@ -44,6 +44,10 @@ LoboHub is a comprehensive family hub web application built with a modern full-s
 - **Recipe collection** with difficulty levels, prep times, servings, and cuisine types
 - **Week navigation** with ability to save and load different weekly plans
 - **Smart meal selection** with both recipe and custom meal options
+- **Mealie API integration** for importing recipes from self-hosted Mealie instances
+- **Connection testing** and settings management for Mealie instances
+- **Bulk recipe sync** with duplicate prevention and progress tracking
+- **Recipe format conversion** from Mealie's schema to internal format
 
 # User Preferences
 

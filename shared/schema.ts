@@ -223,6 +223,8 @@ export const mealieSettings = pgTable("mealie_settings", {
   userId: varchar("user_id").notNull().references(() => users.id),
   instanceUrl: text("instance_url").notNull(),
   apiKey: text("api_key").notNull(),
+  isActive: boolean("is_active").default(true),
+  lastSync: timestamp("last_sync"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

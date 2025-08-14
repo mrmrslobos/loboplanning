@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import MealieImportDialog from "@/components/MealieImportDialog";
 
 interface Recipe {
   id: string;
@@ -628,10 +629,13 @@ export default function MealPlanning() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Recipe Collection</CardTitle>
-                <Button onClick={() => setIsRecipeDialogOpen(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Recipe
-                </Button>
+                <div className="flex gap-2">
+                  <MealieImportDialog />
+                  <Button onClick={() => setIsRecipeDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Recipe
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>

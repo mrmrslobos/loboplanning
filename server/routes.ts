@@ -705,6 +705,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/mealie/settings/:userId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (req.params.userId !== req.user!.id) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+      
+      const settings = await storage.updateMealieSettings(req.user!.id, req.body);
+      if (!settings) {
+        return res.status(404).json({ error: 'Settings not found' });
+      }
+      res.json(settings);
+    } catch (error) {
+      res.status(400).json({ error: 'Invalid input' });
+    }
+  });
+
+  // Mealie integration routes
+  app.post('/api/mealie/test-connection', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { instanceUrl, apiKey } = req.body;
+      
+      if (!instanceUrl || !apiKey) {
+        return res.status(400).json({ error: 'Instance URL and API key are required' });
+      }
+
+      const { MealieService } = await import('./mealie');
+      const mealieService = new MealieService(instanceUrl, apiKey);
+      const isConnected = await mealieService.testConnection();
+      
+      res.json({ connected: isConnected });
+    } catch (error) {
+      console.error('Mealie connection test error:', error);
+      res.status(500).json({ error: 'Failed to test connection' });
+    }
+  });
+
+  app.get('/api/mealie/recipes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const settings = await storage.getMealieSettings(req.user!.id);
+      if (!settings) {
+        return res.status(404).json({ error: 'Mealie settings not found' });
+      }
+
+      const { MealieService } = await import('./mealie');
+      const mealieService = new MealieService(settings.instanceUrl, settings.apiKey);
+      
+      const page = parseInt(req.query.page as string) || 1;
+      const search = req.query.search as string;
+      
+      let recipes;
+      if (search) {
+        recipes = await mealieService.searchRecipes(search);
+      } else {
+        recipes = await mealieService.getRecipes(page);
+      }
+      
+      res.json(recipes);
+    } catch (error) {
+      console.error('Error fetching Mealie recipes:', error);
+      res.status(500).json({ error: 'Failed to fetch recipes from Mealie' });
+    }
+  });
+
+  app.get('/api/mealie/recipes/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const settings = await storage.getMealieSettings(req.user!.id);
+      if (!settings) {
+        return res.status(404).json({ error: 'Mealie settings not found' });
+      }
+
+      const { MealieService } = await import('./mealie');
+      const mealieService = new MealieService(settings.instanceUrl, settings.apiKey);
+      const recipe = await mealieService.getRecipe(req.params.id);
+      
+      res.json(recipe);
+    } catch (error) {
+      console.error('Error fetching Mealie recipe:', error);
+      res.status(500).json({ error: 'Failed to fetch recipe from Mealie' });
+    }
+  });
+
+  app.post('/api/mealie/import-recipe/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const settings = await storage.getMealieSettings(req.user!.id);
+      if (!settings) {
+        return res.status(404).json({ error: 'Mealie settings not found' });
+      }
+
+      const { MealieService } = await import('./mealie');
+      const mealieService = new MealieService(settings.instanceUrl, settings.apiKey);
+      
+      // Fetch the recipe from Mealie
+      const mealieRecipe = await mealieService.getRecipe(req.params.id);
+      
+      // Convert to our format
+      const recipeData = mealieService.convertMealieRecipe(
+        mealieRecipe, 
+        req.user!.id, 
+        req.user!.familyId
+      );
+      
+      // Save to our database
+      const savedRecipe = await storage.createRecipe(recipeData);
+      
+      res.status(201).json(savedRecipe);
+    } catch (error) {
+      console.error('Error importing Mealie recipe:', error);
+      res.status(500).json({ error: 'Failed to import recipe from Mealie' });
+    }
+  });
+
+  app.post('/api/mealie/sync-recipes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const settings = await storage.getMealieSettings(req.user!.id);
+      if (!settings) {
+        return res.status(404).json({ error: 'Mealie settings not found' });
+      }
+
+      const { MealieService } = await import('./mealie');
+      const mealieService = new MealieService(settings.instanceUrl, settings.apiKey);
+      
+      // Get all recipes from Mealie (with pagination)
+      let page = 1;
+      const importedRecipes = [];
+      let hasMore = true;
+      
+      while (hasMore) {
+        const recipesPage = await mealieService.getRecipes(page, 50);
+        
+        for (const mealieRecipe of recipesPage.items) {
+          try {
+            // Check if recipe already exists
+            const existingRecipes = await storage.getRecipes(req.user!.id, req.user!.familyId);
+            const exists = existingRecipes.some(r => r.mealieId === mealieRecipe.id);
+            
+            if (!exists) {
+              const recipeData = mealieService.convertMealieRecipe(
+                mealieRecipe, 
+                req.user!.id, 
+                req.user!.familyId
+              );
+              
+              const savedRecipe = await storage.createRecipe(recipeData);
+              importedRecipes.push(savedRecipe);
+            }
+          } catch (recipeError) {
+            console.error(`Error importing recipe ${mealieRecipe.id}:`, recipeError);
+            // Continue with other recipes
+          }
+        }
+        
+        hasMore = recipesPage.items.length === 50;
+        page++;
+      }
+      
+      // Update last sync time
+      await storage.updateMealieSettings(req.user!.id, { 
+        lastSync: new Date() 
+      });
+      
+      res.json({ 
+        imported: importedRecipes.length,
+        recipes: importedRecipes 
+      });
+    } catch (error) {
+      console.error('Error syncing Mealie recipes:', error);
+      res.status(500).json({ error: 'Failed to sync recipes from Mealie' });
+    }
+  });
+
   // Recipe routes
   app.get('/api/recipes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
