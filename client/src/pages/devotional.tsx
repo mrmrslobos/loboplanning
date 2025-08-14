@@ -644,9 +644,12 @@ export default function Devotional() {
 
       {/* Reflection Form Dialog */}
       <Dialog open={showReflectionForm} onOpenChange={setShowReflectionForm}>
-        <DialogContent className="max-w-md" data-testid="dialog-reflection-form">
+        <DialogContent className="max-w-md" data-testid="dialog-reflection-form" aria-describedby="reflection-description">
           <DialogHeader>
             <DialogTitle>Share Your Reflection</DialogTitle>
+            <p id="reflection-description" className="text-sm text-gray-600">
+              Write your personal thoughts and spiritual insights to share with yourself or your family.
+            </p>
           </DialogHeader>
           <form onSubmit={handleCreateReflection} className="space-y-4">
             <div>
@@ -707,9 +710,12 @@ export default function Devotional() {
 
       {/* Prayer Request Form Dialog */}
       <Dialog open={showPrayerForm} onOpenChange={setShowPrayerForm}>
-        <DialogContent className="max-w-md" data-testid="dialog-prayer-form">
+        <DialogContent className="max-w-md" data-testid="dialog-prayer-form" aria-describedby="prayer-description">
           <DialogHeader>
             <DialogTitle>Share a Prayer Request</DialogTitle>
+            <p id="prayer-description" className="text-sm text-gray-600">
+              Share prayer requests and spiritual needs with yourself or your family.
+            </p>
           </DialogHeader>
           <form onSubmit={handleCreatePrayerRequest} className="space-y-4">
             <div>
@@ -771,10 +777,12 @@ export default function Devotional() {
       {/* Comment Form Dialog */}
       {showCommentForm && selectedPost && (
         <Dialog open={!!showCommentForm} onOpenChange={() => setShowCommentForm(null)}>
-          <DialogContent className="max-w-md" data-testid="dialog-comment-form">
+          <DialogContent className="max-w-md" data-testid="dialog-comment-form" aria-describedby="comment-description">
             <DialogHeader>
               <DialogTitle>Add Comment</DialogTitle>
-              <p className="text-sm text-gray-600">{selectedPost.title}</p>
+              <p id="comment-description" className="text-sm text-gray-600">
+                Share your thoughts on "{selectedPost.title}"
+              </p>
             </DialogHeader>
             <form onSubmit={handleCreateComment} className="space-y-4">
               <div>
@@ -813,9 +821,12 @@ export default function Devotional() {
 
       {/* Regular Devotional Form Dialog */}
       <Dialog open={showPostForm} onOpenChange={setShowPostForm}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" data-testid="dialog-devotional-form">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" data-testid="dialog-devotional-form" aria-describedby="devotional-description">
           <DialogHeader>
             <DialogTitle>Create New Devotional</DialogTitle>
+            <p id="devotional-description" className="text-sm text-gray-600">
+              Create a structured devotional with readings, questions, and prayers for your family.
+            </p>
           </DialogHeader>
           <form onSubmit={handleCreatePost} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

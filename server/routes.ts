@@ -483,14 +483,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/devotional/posts', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      console.log('Received devotional post data:', req.body);
+      
       const postData = insertDevotionalPostSchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        date: new Date(req.body.date) // Convert string to Date object
       });
+      
+      console.log('Parsed devotional post data:', postData);
+      
       const post = await storage.createDevotionalPost(postData);
       res.json(post);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid input' });
+      console.error('Devotional post creation error:', error);
+      res.status(400).json({ error: 'Invalid input', details: error.message });
     }
   });
 
