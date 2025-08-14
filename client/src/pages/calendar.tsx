@@ -1,553 +1,477 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, parseISO, isToday } from "date-fns";
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, MapPin } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { 
-  Calendar as CalendarIcon, Plus, ChevronLeft, ChevronRight, 
-  MapPin, Clock, Users, User, Edit, Trash2
-} from "lucide-react";
-import { cn, formatDate, formatTime } from "@/lib/utils";
-import type { CalendarEvent } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
+interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: string;
+  time?: string;
+  location?: string;
+  userId: string;
+  familyId?: string;
+  createdAt: Date;
+  type: 'event';
+}
 
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in-progress' | 'on-hold' | 'complete';
+  assignedTo?: 'me' | 'ana';
+  category?: string;
+  userId: string;
+  familyId?: string;
+  eventId?: string;
+  createdAt: Date;
+  type: 'task';
+  date?: string; // For calendar display compatibility
+}
+
+type CalendarItem = CalendarEvent | Task;
+
+const newEventSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  familyId: z.string().optional(),
+});
+
+type NewEventForm = z.infer<typeof newEventSchema>;
 
 export default function Calendar() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isNewEventOpen, setIsNewEventOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<"month" | "week" | "day">("month");
-  const [showEventForm, setShowEventForm] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const { data: events, isLoading } = useQuery({
-    queryKey: ['/api/calendar/events'],
-    enabled: !!user?.familyId,
-  });
-
-  const createEventMutation = useMutation({
-    mutationFn: async (data: {
-      title: string;
-      description?: string;
-      startTime: string;
-      endTime: string;
-      location?: string;
-      color?: string;
-      familyId?: string;
-    }) => {
-      return apiRequest('POST', '/api/calendar/events', data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/calendar/events'] });
-      setShowEventForm(false);
-      toast({ title: "Success", description: "Event created successfully" });
-    },
-  });
-
-  const [eventForm, setEventForm] = useState({
-    title: "",
-    description: "",
-    startDate: "",
-    startTime: "",
-    endDate: "",
-    endTime: "",
-    location: "",
-    color: "#3b82f6",
-    isShared: false,
-  });
-
-  const resetEventForm = () => {
-    setEventForm({
+  const form = useForm<NewEventForm>({
+    resolver: zodResolver(newEventSchema),
+    defaultValues: {
       title: "",
       description: "",
-      startDate: "",
-      startTime: "",
-      endDate: "",
-      endTime: "",
+      date: "",
+      time: "",
       location: "",
-      color: "#3b82f6",
-      isShared: false,
-    });
-  };
+      familyId: user?.familyId || undefined,
+    },
+  });
 
-  const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!eventForm.title.trim() || !eventForm.startDate || !eventForm.startTime) {
+  // Fetch events
+  const { data: events = [] } = useQuery<CalendarEvent[]>({
+    queryKey: ['/api/events'],
+    enabled: !!user,
+  });
+
+  // Fetch tasks
+  const { data: tasks = [] } = useQuery<Task[]>({
+    queryKey: ['/api/tasks'],
+    enabled: !!user,
+  });
+
+  // Combine events and tasks with dates
+  const calendarItems = useMemo(() => {
+    const items: CalendarItem[] = [];
+    
+    // Add events
+    events.forEach(event => {
+      items.push({ ...event, type: 'event' as const });
+    });
+    
+    // Add tasks with due dates
+    tasks.forEach(task => {
+      if (task.dueDate) {
+        items.push({ ...task, date: task.dueDate, type: 'task' as const });
+      }
+    });
+    
+    return items;
+  }, [events, tasks]);
+
+  // Create event mutation
+  const createEventMutation = useMutation({
+    mutationFn: async (data: NewEventForm) => {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          ...data,
+          userId: user?.id,
+          familyId: data.familyId || null,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create event');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      setIsNewEventOpen(false);
+      form.reset();
+      toast({
+        title: "Success",
+        description: "Event created successfully",
+      });
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Please fill in required fields",
+        description: error.message || "Failed to create event",
         variant: "destructive",
       });
-      return;
-    }
+    },
+  });
 
-    const startDateTime = new Date(`${eventForm.startDate}T${eventForm.startTime}`);
-    const endDateTime = eventForm.endDate && eventForm.endTime 
-      ? new Date(`${eventForm.endDate}T${eventForm.endTime}`)
-      : new Date(startDateTime.getTime() + 60 * 60 * 1000); // Default 1 hour duration
-
-    createEventMutation.mutate({
-      title: eventForm.title.trim(),
-      description: eventForm.description.trim() || undefined,
-      startTime: startDateTime.toISOString(),
-      endTime: endDateTime.toISOString(),
-      location: eventForm.location.trim() || undefined,
-      color: eventForm.color,
-      familyId: eventForm.isShared && user?.familyId ? user.familyId : undefined,
-    });
-
-    resetEventForm();
+  const onSubmit = (data: NewEventForm) => {
+    createEventMutation.mutate(data);
   };
 
-  const openEventForm = (date?: Date) => {
-    if (date) {
-      const dateStr = date.toISOString().split('T')[0];
-      setEventForm(prev => ({
-        ...prev,
-        startDate: dateStr,
-        endDate: dateStr,
-      }));
-    }
-    setShowEventForm(true);
-  };
+  // Calendar navigation
+  const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+  const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
-  const navigateMonth = (direction: number) => {
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + direction);
-      return newDate;
+  // Generate calendar days
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+  // Get items for a specific date
+  const getItemsForDate = (date: Date) => {
+    return calendarItems.filter(item => {
+      try {
+        const itemDate = parseISO(item.date || '');
+        return isSameDay(itemDate, date);
+      } catch {
+        return false;
+      }
     });
   };
 
-  const getMonthDays = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-
-    const days = [];
-    
-    // Previous month's trailing days
-    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-      const date = new Date(year, month, -i);
-      days.push({ date, isCurrentMonth: false });
+  // Color coding for different types
+  const getItemColor = (item: CalendarItem) => {
+    if (item.type === 'event') {
+      return 'bg-blue-100 text-blue-800 border-blue-200';
     }
     
-    // Current month's days
-    for (let i = 1; i <= daysInMonth; i++) {
-      const date = new Date(year, month, i);
-      days.push({ date, isCurrentMonth: true });
+    if (item.type === 'task') {
+      switch (item.status) {
+        case 'complete':
+          return 'bg-green-100 text-green-800 border-green-200';
+        case 'in-progress':
+          return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        case 'on-hold':
+          return 'bg-gray-100 text-gray-800 border-gray-200';
+        default:
+          return 'bg-red-100 text-red-800 border-red-200';
+      }
     }
     
-    // Next month's leading days
-    const totalCells = Math.ceil(days.length / 7) * 7;
-    for (let i = days.length; i < totalCells; i++) {
-      const date = new Date(year, month + 1, i - days.length + 1);
-      days.push({ date, isCurrentMonth: false });
-    }
-    
-    return days;
+    return 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
-  const getEventsForDate = (date: Date) => {
-    return events?.filter(event => {
-      const eventDate = new Date(event.startTime);
-      return eventDate.toDateString() === date.toDateString();
-    }) || [];
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date);
+    form.setValue('date', format(date, 'yyyy-MM-dd'));
+    setIsNewEventOpen(true);
   };
 
-  const today = new Date();
-  const monthDays = getMonthDays();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const formatTime = (timeStr?: string) => {
+    if (!timeStr) return '';
+    try {
+      const [hours, minutes] = timeStr.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour % 12 || 12;
+      return `${displayHour}:${minutes} ${ampm}`;
+    } catch {
+      return timeStr;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
-              <p className="mt-1 text-sm text-gray-600">Manage your family's schedule and events</p>
-            </div>
-          </div>
-          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-            <Select value={view} onValueChange={(value: "month" | "week" | "day") => setView(value)}>
-              <SelectTrigger className="w-32" data-testid="select-calendar-view">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="month">Month</SelectItem>
-                <SelectItem value="week">Week</SelectItem>
-                <SelectItem value="day">Day</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={() => openEventForm()} data-testid="button-create-event">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Event
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Calendar</h1>
+        <Dialog open={isNewEventOpen} onOpenChange={setIsNewEventOpen}>
+          <DialogTrigger asChild>
+            <Button data-testid="button-new-event">
+              <Plus className="w-4 h-4 mr-2" />
+              New Event
             </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="p-6">
-        {/* Calendar Navigation */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigateMonth(-1)}
-                  data-testid="button-prev-month"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
-                </h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigateMonth(1)}
-                  data-testid="button-next-month"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setCurrentDate(new Date())}
-                data-testid="button-today"
-              >
-                Today
-              </Button>
-            </div>
-
-            {/* Month View */}
-            {view === "month" && (
-              <div className="grid grid-cols-7 gap-1">
-                {/* Day headers */}
-                {DAYS.map(day => (
-                  <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
-                    {day}
-                  </div>
-                ))}
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Event</DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Event title" 
+                          {...field} 
+                          data-testid="input-event-title"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
-                {/* Calendar days */}
-                {monthDays.map(({ date, isCurrentMonth }, index) => {
-                  const dayEvents = getEventsForDate(date);
-                  const isToday = date.toDateString() === today.toDateString();
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Event description" 
+                          {...field} 
+                          data-testid="input-event-description"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="date" 
+                            {...field} 
+                            data-testid="input-event-date"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
-                  return (
-                    <div
-                      key={index}
-                      className={cn(
-                        "min-h-24 p-2 border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors",
-                        !isCurrentMonth && "bg-gray-50 text-gray-400",
-                        isToday && "bg-blue-50 border-blue-200"
-                      )}
-                      onClick={() => openEventForm(date)}
-                      data-testid={`calendar-day-${date.getDate()}`}
-                    >
-                      <div className={cn(
-                        "text-sm font-medium mb-1",
-                        isToday && "text-blue-600"
-                      )}>
-                        {date.getDate()}
-                      </div>
-                      <div className="space-y-1">
-                        {dayEvents.slice(0, 2).map(event => (
-                          <div
-                            key={event.id}
-                            className="text-xs p-1 rounded truncate"
-                            style={{ backgroundColor: event.color + '20', color: event.color }}
-                            data-testid={`event-${event.id}`}
-                          >
-                            {event.title}
-                          </div>
-                        ))}
-                        {dayEvents.length > 2 && (
-                          <div className="text-xs text-gray-500">
-                            +{dayEvents.length - 2} more
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                  <FormField
+                    control={form.control}
+                    name="time"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Time</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="time" 
+                            {...field} 
+                            data-testid="input-event-time"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Event location" 
+                          {...field} 
+                          data-testid="input-event-location"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    type="submit" 
+                    disabled={createEventMutation.isPending}
+                    data-testid="button-save-event"
+                  >
+                    {createEventMutation.isPending ? "Creating..." : "Create Event"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsNewEventOpen(false)}
+                    data-testid="button-cancel-event"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-            {/* Week/Day views placeholder */}
-            {(view === "week" || view === "day") && (
-              <div className="text-center py-12">
-                <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {view === "week" ? "Week" : "Day"} View
-                </h3>
-                <p className="text-gray-500">
-                  {view === "week" ? "Week" : "Day"} view coming soon. For now, use month view.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Events */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card data-testid="card-upcoming-events">
-            <CardHeader>
-              <CardTitle>Upcoming Events</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {events?.filter(event => new Date(event.startTime) > new Date())
-                  .slice(0, 5)
-                  .map(event => (
-                    <div
-                      key={event.id}
-                      className="flex items-start p-3 border rounded-lg hover:bg-gray-50"
-                      data-testid={`upcoming-event-${event.id}`}
-                    >
-                      <div 
-                        className="w-3 h-3 rounded-full mt-2 mr-3"
-                        style={{ backgroundColor: event.color }}
-                      ></div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{event.title}</h4>
-                        <div className="flex items-center text-sm text-gray-500 mt-1">
-                          <Clock className="h-3 w-3 mr-1" />
-                          <span>{formatDate(event.startTime)} at {formatTime(event.startTime)}</span>
-                        </div>
-                        {event.location && (
-                          <div className="flex items-center text-sm text-gray-500 mt-1">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            <span>{event.location}</span>
-                          </div>
-                        )}
-                        <Badge variant="outline" className="mt-2">
-                          {event.familyId ? (
-                            <><Users className="h-3 w-3 mr-1" />Shared</>
-                          ) : (
-                            <><User className="h-3 w-3 mr-1" />Private</>
-                          )}
-                        </Badge>
-                      </div>
-                    </div>
-                  )) || (
-                  <div className="text-center py-8">
-                    <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No upcoming events</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-recent-events">
-            <CardHeader>
-              <CardTitle>Recent Events</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {events?.filter(event => new Date(event.startTime) <= new Date())
-                  .slice(0, 5)
-                  .map(event => (
-                    <div
-                      key={event.id}
-                      className="flex items-start p-3 border rounded-lg opacity-75"
-                      data-testid={`recent-event-${event.id}`}
-                    >
-                      <div 
-                        className="w-3 h-3 rounded-full mt-2 mr-3"
-                        style={{ backgroundColor: event.color }}
-                      ></div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-700">{event.title}</h4>
-                        <div className="flex items-center text-sm text-gray-500 mt-1">
-                          <Clock className="h-3 w-3 mr-1" />
-                          <span>{formatDate(event.startTime)} at {formatTime(event.startTime)}</span>
-                        </div>
-                        {event.location && (
-                          <div className="flex items-center text-sm text-gray-500 mt-1">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            <span>{event.location}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )) || (
-                  <div className="text-center py-8">
-                    <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No recent events</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-
-      {/* Create Event Modal */}
-      <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
-        <DialogContent className="sm:max-w-lg" data-testid="modal-create-event">
-          <DialogHeader>
-            <DialogTitle>Create New Event</DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={handleCreateEvent} className="space-y-4">
-            <div>
-              <Label htmlFor="eventTitle">Event Title</Label>
-              <Input
-                id="eventTitle"
-                value={eventForm.title}
-                onChange={(e) => setEventForm(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Enter event title"
-                data-testid="input-event-title"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="eventDescription">Description (optional)</Label>
-              <Textarea
-                id="eventDescription"
-                value={eventForm.description}
-                onChange={(e) => setEventForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Add event description..."
-                rows={3}
-                data-testid="textarea-event-description"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={eventForm.startDate}
-                  onChange={(e) => setEventForm(prev => ({ ...prev, startDate: e.target.value }))}
-                  data-testid="input-start-date"
-                />
-              </div>
-              <div>
-                <Label htmlFor="startTime">Start Time</Label>
-                <Input
-                  id="startTime"
-                  type="time"
-                  value={eventForm.startTime}
-                  onChange={(e) => setEventForm(prev => ({ ...prev, startTime: e.target.value }))}
-                  data-testid="input-start-time"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={eventForm.endDate}
-                  onChange={(e) => setEventForm(prev => ({ ...prev, endDate: e.target.value }))}
-                  data-testid="input-end-date"
-                />
-              </div>
-              <div>
-                <Label htmlFor="endTime">End Time</Label>
-                <Input
-                  id="endTime"
-                  type="time"
-                  value={eventForm.endTime}
-                  onChange={(e) => setEventForm(prev => ({ ...prev, endTime: e.target.value }))}
-                  data-testid="input-end-time"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="location">Location (optional)</Label>
-              <Input
-                id="location"
-                value={eventForm.location}
-                onChange={(e) => setEventForm(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="Enter event location"
-                data-testid="input-event-location"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="color">Color</Label>
-              <div className="flex items-center space-x-2 mt-2">
-                <Input
-                  id="color"
-                  type="color"
-                  value={eventForm.color}
-                  onChange={(e) => setEventForm(prev => ({ ...prev, color: e.target.value }))}
-                  className="w-16 h-10"
-                  data-testid="input-event-color"
-                />
-                <span className="text-sm text-gray-500">Choose event color</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <span className="text-sm font-medium text-gray-900">Share with family</span>
-                <p className="text-xs text-gray-500">Make this event visible to all family members</p>
-              </div>
-              <Switch
-                checked={eventForm.isShared}
-                onCheckedChange={(checked) => setEventForm(prev => ({ ...prev, isShared: checked }))}
-                data-testid="switch-event-shared"
-              />
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 pt-4">
+      {/* Calendar Header */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl">
+              {format(currentDate, 'MMMM yyyy')}
+            </CardTitle>
+            <div className="flex gap-2">
               <Button 
-                type="button" 
                 variant="outline" 
-                onClick={() => setShowEventForm(false)}
+                size="sm" 
+                onClick={prevMonth}
+                data-testid="button-prev-month"
               >
-                Cancel
+                <ChevronLeft className="w-4 h-4" />
               </Button>
               <Button 
-                type="submit" 
-                disabled={createEventMutation.isPending}
-                data-testid="button-create-event-submit"
+                variant="outline" 
+                size="sm" 
+                onClick={nextMonth}
+                data-testid="button-next-month"
               >
-                {createEventMutation.isPending ? "Creating..." : "Create Event"}
+                <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-2 mb-4">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="p-2 text-center font-medium text-gray-500">
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-7 gap-2">
+            {calendarDays.map(day => {
+              const dayItems = getItemsForDate(day);
+              const isCurrentMonth = isSameMonth(day, currentDate);
+              
+              return (
+                <div 
+                  key={day.toISOString()}
+                  className={`
+                    min-h-[120px] p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors
+                    ${isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-400'}
+                    ${isToday(day) ? 'ring-2 ring-blue-500' : ''}
+                  `}
+                  onClick={() => handleDateClick(day)}
+                  data-testid={`calendar-day-${format(day, 'yyyy-MM-dd')}`}
+                >
+                  <div className="font-medium mb-1">
+                    {format(day, 'd')}
+                  </div>
+                  
+                  <div className="space-y-1">
+                    {dayItems.slice(0, 3).map(item => (
+                      <div 
+                        key={item.id}
+                        className={`
+                          text-xs p-1 rounded border truncate
+                          ${getItemColor(item)}
+                        `}
+                        data-testid={`calendar-item-${item.id}`}
+                      >
+                        <div className="flex items-center gap-1">
+                          {item.type === 'event' ? (
+                            <CalendarIcon className="w-3 h-3" />
+                          ) : (
+                            <Clock className="w-3 h-3" />
+                          )}
+                          <span className="truncate">{item.title}</span>
+                        </div>
+                        {'time' in item && item.time && (
+                          <div className="text-xs opacity-75">
+                            {formatTime(item.time)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {dayItems.length > 3 && (
+                      <div className="text-xs text-gray-500 p-1">
+                        +{dayItems.length - 3} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Legend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Legend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-100 border border-blue-200 rounded"></div>
+              <span className="text-sm">Events</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-100 border border-red-200 rounded"></div>
+              <span className="text-sm">Pending Tasks</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded"></div>
+              <span className="text-sm">In Progress Tasks</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-100 border border-green-200 rounded"></div>
+              <span className="text-sm">Completed Tasks</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-gray-100 border border-gray-200 rounded"></div>
+              <span className="text-sm">On Hold Tasks</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
