@@ -231,6 +231,17 @@ export const mealieSettings = pgTable("mealie_settings", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Emoji reactions table - for family interactions
+export const emojiReactions = pgTable("emoji_reactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  emoji: text("emoji").notNull(), // The actual emoji (❤️, 👍, 😊, etc.)
+  targetType: text("target_type").notNull(), // devotional_post, devotional_comment, task, list, event, calendar_event, etc.
+  targetId: varchar("target_id").notNull(), // ID of the target content
+  userId: varchar("user_id").notNull().references(() => users.id),
+  familyId: varchar("family_id").references(() => families.id), // To ensure only family members can see reactions
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -322,6 +333,11 @@ export const insertMealieSettingsSchema = createInsertSchema(mealieSettings).omi
   createdAt: true,
 });
 
+export const insertEmojiReactionSchema = createInsertSchema(emojiReactions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -359,3 +375,6 @@ export type MealPlan = typeof mealPlans.$inferSelect;
 export type InsertMealPlan = z.infer<typeof insertMealPlanSchema>;
 export type MealieSettings = typeof mealieSettings.$inferSelect;
 export type InsertMealieSettings = z.infer<typeof insertMealieSettingsSchema>;
+
+export type EmojiReaction = typeof emojiReactions.$inferSelect;
+export type InsertEmojiReaction = z.infer<typeof insertEmojiReactionSchema>;

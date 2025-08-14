@@ -10,7 +10,7 @@ import {
   insertBudgetTransactionSchema, insertChatMessageSchema, insertDevotionalPostSchema,
   insertDevotionalCommentSchema, insertEventSchema, insertEventTaskSchema,
   insertEventBudgetSchema, insertMealieSettingsSchema, insertRecipeSchema,
-  insertMealPlanSchema
+  insertMealPlanSchema, insertEmojiReactionSchema
 } from "@shared/schema";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -998,6 +998,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting meal plan:', error);
       res.status(500).json({ error: 'Failed to delete meal plan' });
+    }
+  });
+
+  // Emoji reaction routes
+  app.get('/api/reactions/:targetType/:targetId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { targetType, targetId } = req.params;
+      const reactions = await storage.getEmojiReactions(targetType, targetId);
+      
+      // Group reactions by emoji and include user info
+      const groupedReactions: { [emoji: string]: { count: number; users: string[]; userReacted: boolean } } = {};
+      
+      for (const reaction of reactions) {
+        if (!groupedReactions[reaction.emoji]) {
+          groupedReactions[reaction.emoji] = {
+            count: 0,
+            users: [],
+            userReacted: false
+          };
+        }
+        groupedReactions[reaction.emoji].count++;
+        groupedReactions[reaction.emoji].users.push(reaction.userId);
+        if (reaction.userId === req.user!.id) {
+          groupedReactions[reaction.emoji].userReacted = true;
+        }
+      }
+      
+      res.json(groupedReactions);
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+      res.status(500).json({ error: 'Failed to fetch reactions' });
+    }
+  });
+
+  app.post('/api/reactions', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const validatedData = insertEmojiReactionSchema.parse({
+        ...req.body,
+        userId: req.user!.id,
+        familyId: req.user!.familyId
+      });
+
+      const reaction = await storage.createEmojiReaction(validatedData);
+      res.status(201).json(reaction);
+    } catch (error) {
+      console.error('Error creating reaction:', error);
+      res.status(500).json({ error: 'Failed to create reaction' });
+    }
+  });
+
+  app.delete('/api/reactions/:targetType/:targetId/:emoji', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { targetType, targetId, emoji } = req.params;
+      const success = await storage.deleteEmojiReaction(req.user!.id, targetType, targetId, decodeURIComponent(emoji));
+      
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ error: 'Reaction not found' });
+      }
+    } catch (error) {
+      console.error('Error deleting reaction:', error);
+      res.status(500).json({ error: 'Failed to delete reaction' });
     }
   });
 

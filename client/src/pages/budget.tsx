@@ -15,7 +15,7 @@ import { z } from "zod";
 import { format, startOfMonth, endOfMonth, parseISO, subMonths, eachMonthOfInterval } from "date-fns";
 import { 
   Plus, Edit, Trash2, DollarSign, TrendingUp, TrendingDown, 
-  PieChart, BarChart3, Calendar, Target, Activity, TrendingRightIcon
+  PieChart, BarChart3, Calendar, Target, Activity
 } from "lucide-react";
 import { 
   PieChart as RechartsPieChart, 

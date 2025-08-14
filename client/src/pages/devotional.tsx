@@ -21,6 +21,7 @@ import {
 import { cn, formatDate, formatDateTime, generateInitials } from "@/lib/utils";
 import type { DevotionalPost, DevotionalComment } from "@shared/schema";
 import ThreadedComments from "@/components/ThreadedComments";
+import { EmojiReactions } from "@/components/EmojiReactions";
 
 // Daily inspirational verses pool
 const DAILY_VERSES = [
@@ -512,8 +513,15 @@ export default function Devotional() {
                           )}
                         </div>
                         
-                        {post.familyId && (
-                          <div className="mt-4 pt-4 border-t border-gray-200">
+                        {/* Emoji Reactions for Reflections */}
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <EmojiReactions 
+                            targetType="devotional_post" 
+                            targetId={post.id} 
+                            className="mb-3"
+                          />
+                          
+                          {post.familyId && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -526,8 +534,8 @@ export default function Devotional() {
                               <MessageSquare className="h-4 w-4 mr-2" />
                               Add Comment
                             </Button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -603,8 +611,15 @@ export default function Devotional() {
                           )}
                         </div>
                         
-                        {post.familyId && (
-                          <div className="mt-4 pt-4 border-t border-gray-200">
+                        {/* Emoji Reactions for Prayer Requests */}
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <EmojiReactions 
+                            targetType="devotional_post" 
+                            targetId={post.id} 
+                            className="mb-3"
+                          />
+                          
+                          {post.familyId && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -617,8 +632,8 @@ export default function Devotional() {
                               <MessageSquare className="h-4 w-4 mr-2" />
                               Add Comment
                             </Button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -716,8 +731,15 @@ export default function Devotional() {
                           )}
                         </div>
                         
-                        {post.familyId && (
-                          <div className="mt-4 pt-4 border-t border-gray-200">
+                        {/* Emoji Reactions for Devotionals */}
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <EmojiReactions 
+                            targetType="devotional_post" 
+                            targetId={post.id} 
+                            className="mb-3"
+                          />
+                          
+                          {post.familyId && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -730,8 +752,8 @@ export default function Devotional() {
                               <MessageSquare className="h-4 w-4 mr-2" />
                               Add Comment
                             </Button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

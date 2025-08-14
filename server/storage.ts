@@ -8,10 +8,11 @@ import {
   type EventGuest, type InsertEventGuest, type EventTask, type InsertEventTask,
   type EventBudget, type InsertEventBudget, type MealieSettings, type InsertMealieSettings,
   type Recipe, type InsertRecipe, type MealPlan, type InsertMealPlan,
+  type EmojiReaction, type InsertEmojiReaction,
   users, families, tasks, lists, listItems, calendarEvents, 
   budgetCategories, budgetTransactions, chatMessages, devotionalPosts, 
   devotionalComments, events, eventGuests, eventTasks, eventBudget, mealieSettings,
-  recipes, mealPlans
+  recipes, mealPlans, emojiReactions
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
@@ -132,6 +133,11 @@ export interface IStorage {
   getMealieSettings(userId: string): Promise<MealieSettings | undefined>;
   createMealieSettings(settings: InsertMealieSettings): Promise<MealieSettings>;
   updateMealieSettings(userId: string, settings: Partial<MealieSettings>): Promise<MealieSettings | undefined>;
+  
+  // Emoji reaction methods
+  getEmojiReactions(targetType: string, targetId: string): Promise<EmojiReaction[]>;
+  createEmojiReaction(reaction: InsertEmojiReaction): Promise<EmojiReaction>;
+  deleteEmojiReaction(userId: string, targetType: string, targetId: string, emoji: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -153,6 +159,7 @@ export class MemStorage implements IStorage {
   private recipes: Map<string, Recipe> = new Map();
   private mealPlans: Map<string, MealPlan> = new Map();
   private mealieSettings: Map<string, MealieSettings> = new Map();
+  private emojiReactions: Map<string, EmojiReaction> = new Map();
 
   // User methods
   async getUser(id: string): Promise<User | undefined> {
@@ -1146,6 +1153,50 @@ export class DatabaseStorage implements IStorage {
       .where(eq(mealieSettings.userId, userId))
       .returning();
     return settings || undefined;
+  }
+
+  // Emoji reaction methods
+  async getEmojiReactions(targetType: string, targetId: string): Promise<EmojiReaction[]> {
+    return await db.select().from(emojiReactions).where(
+      and(
+        eq(emojiReactions.targetType, targetType),
+        eq(emojiReactions.targetId, targetId)
+      )
+    );
+  }
+
+  async createEmojiReaction(insertReaction: InsertEmojiReaction): Promise<EmojiReaction> {
+    // First check if user already reacted with this emoji to prevent duplicates
+    const existing = await db.select().from(emojiReactions).where(
+      and(
+        eq(emojiReactions.userId, insertReaction.userId),
+        eq(emojiReactions.targetType, insertReaction.targetType),
+        eq(emojiReactions.targetId, insertReaction.targetId),
+        eq(emojiReactions.emoji, insertReaction.emoji)
+      )
+    );
+
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    const [reaction] = await db
+      .insert(emojiReactions)
+      .values(insertReaction)
+      .returning();
+    return reaction;
+  }
+
+  async deleteEmojiReaction(userId: string, targetType: string, targetId: string, emoji: string): Promise<boolean> {
+    const result = await db.delete(emojiReactions).where(
+      and(
+        eq(emojiReactions.userId, userId),
+        eq(emojiReactions.targetType, targetType),
+        eq(emojiReactions.targetId, targetId),
+        eq(emojiReactions.emoji, emoji)
+      )
+    );
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 
