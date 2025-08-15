@@ -32,7 +32,8 @@ const eventFormSchema = insertEventSchema.extend({
 
 const taskFormSchema = insertEventTaskSchema.extend({}).omit({ 
   userId: true,
-  familyId: true 
+  familyId: true,
+  eventId: true
 });
 
 type EventFormData = z.infer<typeof eventFormSchema>;

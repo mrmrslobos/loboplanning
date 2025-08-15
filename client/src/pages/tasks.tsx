@@ -94,7 +94,6 @@ export default function TasksPage() {
       title: "",
       description: "",
       assignedTo: "Me",
-      status: "pending",
     },
   });
 

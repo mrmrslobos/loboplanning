@@ -230,7 +230,7 @@ export default function ListsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Template</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value || "custom"}>
                             <FormControl>
                               <SelectTrigger data-testid="select-template">
                                 <SelectValue placeholder="Choose a template" />
