@@ -136,6 +136,7 @@ export default function ListsPage() {
 
   const onCreateList = (data: ListFormData) => {
     console.log("onCreateList called with data:", data);
+    console.log("Form errors:", listForm.formState.errors);
     createListMutation.mutate(data);
   };
 
@@ -214,7 +215,12 @@ export default function ListsPage() {
                   <DialogTitle>Create New List</DialogTitle>
                 </DialogHeader>
                 <Form {...listForm}>
-                  <form onSubmit={listForm.handleSubmit(onCreateList)} className="space-y-4">
+                  <form onSubmit={(e) => {
+                    console.log("Form onSubmit event triggered");
+                    console.log("Form is valid:", listForm.formState.isValid);
+                    console.log("Form values:", listForm.getValues());
+                    listForm.handleSubmit(onCreateList)(e);
+                  }} className="space-y-4">
                     <FormField
                       control={listForm.control}
                       name="template"

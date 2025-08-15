@@ -161,6 +161,8 @@ export default function EventsPage() {
   });
 
   const onCreateEvent = (data: EventFormData) => {
+    console.log("onCreateEvent called with data:", data);
+    console.log("Form errors:", eventForm.formState.errors);
     createEventMutation.mutate(data);
   };
 
@@ -237,7 +239,12 @@ export default function EventsPage() {
                   <DialogTitle>Create New Event</DialogTitle>
                 </DialogHeader>
                 <Form {...eventForm}>
-                  <form onSubmit={eventForm.handleSubmit(onCreateEvent)} className="space-y-4">
+                  <form onSubmit={(e) => {
+                    console.log("Events Form onSubmit event triggered");
+                    console.log("Events Form is valid:", eventForm.formState.isValid);
+                    console.log("Events Form values:", eventForm.getValues());
+                    eventForm.handleSubmit(onCreateEvent)(e);
+                  }} className="space-y-4">
                     <FormField
                       control={eventForm.control}
                       name="template"

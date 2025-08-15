@@ -95,6 +95,8 @@ export default function TasksPage() {
   });
 
   const onSubmit = (data: TaskFormData) => {
+    console.log("onSubmit called with data:", data);
+    console.log("Form errors:", form.formState.errors);
     createTaskMutation.mutate(data);
   };
 
@@ -173,7 +175,12 @@ export default function TasksPage() {
               <DialogTitle>Create New Task</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={(e) => {
+                console.log("Tasks Form onSubmit event triggered");
+                console.log("Tasks Form is valid:", form.formState.isValid);
+                console.log("Tasks Form values:", form.getValues());
+                form.handleSubmit(onSubmit)(e);
+              }} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="title"
