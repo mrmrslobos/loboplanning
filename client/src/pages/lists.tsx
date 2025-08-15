@@ -195,8 +195,13 @@ export default function ListsPage() {
               onClick={() => {
                 console.log("Lists button clicked!");
                 console.log("Setting dialog open to true");
+                console.log("Current dialog state before:", isCreateDialogOpen);
                 setIsCreateDialogOpen(true);
                 console.log("Dialog state should be:", true);
+                // Force a small delay to see if React needs time to update
+                setTimeout(() => {
+                  console.log("Dialog state after timeout:", isCreateDialogOpen);
+                }, 100);
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -204,7 +209,7 @@ export default function ListsPage() {
             </Button>
             
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md" style={{ zIndex: 9999 }}>
                 <DialogHeader>
                   <DialogTitle>Create New List</DialogTitle>
                 </DialogHeader>
