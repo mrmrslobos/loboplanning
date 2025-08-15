@@ -1,0 +1,234 @@
+# 1) Add Playwright + TypeScript
+npm i -D @playwright/test typescript ts-node
+
+# 2) Install browsers
+npx playwright install --with-deps
+
+# 3) Create folders
+mkdir -p tests/e2e tests/artifacts
+
+# 4) Write config
+cat > playwright.config.ts << 'EOF'
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: 'tests/e2e',
+  timeout: 90_000,
+  expect: { timeout: 5000 },
+  fullyParallel: true,
+  reporter: [['list'], ['html', { outputFolder: 'tests/artifacts/html-report' }]],
+  use: {
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+  webServer: process.env.NO_WEB_SERVER ? undefined : {
+    command: process.env.START_CMD || 'npm run start',
+    url: process.env.BASE_URL || 'http://localhost:3000',
+    reuseExistingServer: true,
+    timeout: 120_000,
+  },
+  projects: [
+    { name: 'chromium', use: { browserName: 'chromium' } },
+    { name: 'firefox',  use: { browserName: 'firefox'  } },
+    { name: 'webkit',   use: { browserName: 'webkit'   } },
+  ],
+});
+EOF
+
+# 5) Add the test spec
+cat > tests/e2e/full-click.spec.ts << 'EOF'
+import { test, expect } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+const VISIT_LIMIT = parseInt(process.env.VISIT_LIMIT || '200', 10); // safety cap
+const CLICK_LIMIT_PER_PAGE = parseInt(process.env.CLICK_LIMIT_PER_PAGE || '200', 10);
+const ARTIFACT_DIR = 'tests/artifacts';
+const REPORT_JSON = path.join(ARTIFACT_DIR, 'full-click-report.json');
+
+type LogItem = {
+  type: 'console' | 'pageerror' | 'requestfailed';
+  url?: string;
+  text?: string;
+  level?: string;
+  method?: string;
+  status?: number;
+  error?: string;
+  route?: string;
+};
+
+type PageReport = {
+  url: string;
+  clicksTried: number;
+  clicksSucceeded: number;
+  dialogsOpened: number;
+  formsSubmitted: number;
+  errors: LogItem[];
+};
+
+const report: {
+  startedAt: string;
+  pages: PageReport[];
+} = { startedAt: new Date().toISOString(), pages: [] };
+
+async function collectLinks(page) {
+  const anchors = await page.$$eval('a[href]', as => as.map(a => (a as HTMLAnchorElement).href));
+  const base = new URL(page.url());
+  const sameOrigin = anchors
+    .filter(h => {
+      try {
+        const u = new URL(h);
+        return u.origin === base.origin;
+      } catch { return false; }
+    })
+    .map(h => {
+      const u = new URL(h);
+      u.hash = ''; // ignore hashes
+      return u.toString();
+    });
+  return Array.from(new Set(sameOrigin));
+}
+
+async function clickAll(page, pageReport: PageReport) {
+  // Wider net of clickable selectors
+  const selectors = [
+    'button',
+    '[role="button"]',
+    'a[href]',
+    'input[type="submit"]',
+    'input[type="button"]',
+    '[onclick]',
+    '[data-testid]',
+    'div[role="menuitem"],li[role="menuitem"]',
+    '[aria-haspopup="dialog"],[aria-controls*="dialog"]',
+    '[aria-expanded]',
+    '[class*="btn"],[class*="Button"],[class*="icon"],[class*="Icon"]',
+    '[data-dialog-open],[data-modal-open],[data-open],[data-action]'
+  ];
+  const locator = page.locator(selectors.join(','));
+  const count = await locator.count();
+  const max = Math.min(count, CLICK_LIMIT_PER_PAGE);
+
+  for (let i = 0; i < max; i++) {
+    const el = locator.nth(i);
+    try {
+      const visible = await el.isVisible();
+      if (!visible) continue;
+
+      // Try hover first to trigger lazy tooltips/menus
+      await el.hover({ trial: true }).catch(() => {});
+
+      // Edge cases
+      await el.dblclick({ delay: 50 }).catch(() => {});
+      await el.click({ timeout: 3000 }).catch(() => {});
+      pageReport.clicksTried++;
+
+      // Press Enter/Escape where applicable
+      await el.press('Enter').catch(() => {});
+      await page.keyboard.press('Escape').catch(() => {});
+
+      pageReport.clicksSucceeded++;
+      // Give UI time to animate/open modals
+      await page.waitForTimeout(100);
+    } catch (e) {
+      pageReport.errors.push({ type: 'console', text: `Click error: ${String(e)}` });
+    }
+  }
+}
+
+test('crawl & click everything, capture logs', async ({ page, baseURL }) => {
+  if (!baseURL) throw new Error('No baseURL configured');
+
+  fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
+
+  // Global log capture
+  page.on('console', msg => {
+    if (['error','warning'].includes(msg.type()))
+      current().errors.push({ type: 'console', level: msg.type(), text: msg.text() });
+  });
+  page.on('pageerror', err => current().errors.push({ type: 'pageerror', error: String(err) }));
+  page.on('requestfailed', req => current().errors.push({
+    type: 'requestfailed',
+    url: req.url(),
+    method: req.method(),
+    error: req.failure()?.errorText
+  }));
+
+  // Basic dialog handling (count & accept)
+  page.on('dialog', async dialog => {
+    current().dialogsOpened++;
+    try { await dialog.accept().catch(() => {}); } catch {}
+  });
+
+  const startUrl = baseURL!;
+  const toVisit: string[] = [startUrl];
+  const visited = new Set<string>();
+
+  function current(): PageReport {
+    return report.pages[report.pages.length - 1];
+  }
+
+  while (toVisit.length && visited.size < VISIT_LIMIT) {
+    const url = toVisit.shift()!;
+    if (visited.has(url)) continue;
+    visited.add(url);
+
+    const pageReport: PageReport = {
+      url, clicksTried: 0, clicksSucceeded: 0, dialogsOpened: 0, formsSubmitted: 0, errors: []
+    };
+    report.pages.push(pageReport);
+
+    // Go
+    await page.goto(url, { waitUntil: 'networkidle' });
+
+    // Try forms quickly with sample values
+    const forms = page.locator('form');
+    const fCount = await forms.count();
+    for (let i = 0; i < Math.min(fCount, 25); i++) {
+      const f = forms.nth(i);
+      try {
+        // Fill inputs
+        const inputs = f.locator('input:not([type=hidden]), textarea, select');
+        const iCount = await inputs.count();
+        for (let j = 0; j < iCount; j++) {
+          const inp = inputs.nth(j);
+          const type = await inp.getAttribute('type');
+          if (type === 'checkbox' || type === 'radio') {
+            await inp.check({ timeout: 1500 }).catch(() => {});
+          } else if (await inp.evaluate(e => (e as HTMLInputElement).tagName === 'SELECT')) {
+            await inp.selectOption({ index: 0 }).catch(() => {});
+          } else {
+            await inp.fill('test', { timeout: 1500 }).catch(() => {});
+          }
+        }
+        // Submit (press Enter or click submit)
+        await f.press('Enter').catch(async () => {
+          const submit = f.locator('button[type=submit], input[type=submit]');
+          if (await submit.count()) await submit.first().click().catch(() => {});
+        });
+        pageReport.formsSubmitted++;
+        await page.waitForLoadState('networkidle').catch(() => {});
+      } catch (e) {
+        pageReport.errors.push({ type: 'console', text: `Form error: ${String(e)}` });
+      }
+    }
+
+    // Click everything we can
+    await clickAll(page, pageReport);
+
+    // collect new links
+    const links = await collectLinks(page);
+    for (const l of links) if (!visited.has(l)) toVisit.push(l);
+  }
+
+  // Persist JSON report
+  fs.writeFileSync(REPORT_JSON, JSON.stringify(report, null, 2), 'utf8');
+  // Human assertion: at least visited the start page
+  expect(report.pages.length).toBeGreaterThan(0);
+});
+EOF
+
+# 6) Add handy scripts
+node -e "let p=require('./package.json'); p.scripts=p.scripts||{}; p.scripts['test:e2e']='playwright test'; p.scripts['test:e2e:ui']='playwright test --ui'; p.scripts['test:e2e:headed']='playwright test --headed'; p.scripts['test:e2e:open-report']='playwright show-report tests/artifacts/html-report'; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2));"
