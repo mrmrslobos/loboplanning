@@ -171,9 +171,6 @@ export default function TasksPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Create New Task</DialogTitle>
-              <DialogDescription>
-                Add a new task and assign it to a family member.
-              </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

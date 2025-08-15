@@ -204,9 +204,6 @@ export default function ListsPage() {
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Create New List</DialogTitle>
-                  <DialogDescription>
-                    Choose a template or create a custom list.
-                  </DialogDescription>
                 </DialogHeader>
                 <Form {...listForm}>
                   <form onSubmit={listForm.handleSubmit(onCreateList)} className="space-y-4">
@@ -427,9 +424,6 @@ export default function ListsPage() {
                   <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>Add Item</DialogTitle>
-                      <DialogDescription>
-                        Add a new item to {selectedList.title}.
-                      </DialogDescription>
                     </DialogHeader>
                     <Form {...itemForm}>
                       <form onSubmit={itemForm.handleSubmit(onAddItem)} className="space-y-4">

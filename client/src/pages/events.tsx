@@ -235,9 +235,6 @@ export default function EventsPage() {
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Create New Event</DialogTitle>
-                  <DialogDescription>
-                    Plan a special occasion with tasks and timeline.
-                  </DialogDescription>
                 </DialogHeader>
                 <Form {...eventForm}>
                   <form onSubmit={eventForm.handleSubmit(onCreateEvent)} className="space-y-4">
