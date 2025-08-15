@@ -414,13 +414,18 @@ export default function ListsPage() {
                     </div>
                   </div>
                 </div>
+                <Button 
+                  data-testid="button-add-item"
+                  onClick={() => {
+                    console.log("Add Item button clicked!");
+                    setIsAddItemDialogOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+                
                 <Dialog open={isAddItemDialogOpen} onOpenChange={setIsAddItemDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button data-testid="button-add-item">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Item
-                    </Button>
-                  </DialogTrigger>
                   <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>Add Item</DialogTitle>

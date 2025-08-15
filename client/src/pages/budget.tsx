@@ -410,13 +410,19 @@ export default function Budget() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Budget</h1>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            data-testid="button-new-category"
+            onClick={() => {
+              console.log("Budget Category button clicked!");
+              openCategoryDialog();
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Category
+          </Button>
+          
           <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" data-testid="button-new-category">
-                <Plus className="w-4 h-4 mr-2" />
-                New Category
-              </Button>
-            </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
@@ -544,13 +550,18 @@ export default function Budget() {
             </DialogContent>
           </Dialog>
           
+          <Button 
+            data-testid="button-new-transaction"
+            onClick={() => {
+              console.log("Budget Transaction button clicked!");
+              openTransactionDialog();
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Transaction
+          </Button>
+          
           <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
-            <DialogTrigger asChild>
-              <Button data-testid="button-new-transaction">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Transaction
-              </Button>
-            </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
