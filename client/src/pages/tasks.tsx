@@ -21,7 +21,6 @@ import { useToast } from "@/hooks/use-toast";
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
 }).omit({ 
-  status: true,
   userId: true,
   familyId: true 
 });
@@ -53,8 +52,12 @@ export default function TasksPage() {
   const createTaskMutation = useMutation({
     mutationFn: async (data: TaskFormData) => {
       const taskData = {
-        ...data,
-        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
+        title: data.title,
+        description: data.description || '',
+        category: data.category || '',
+        assignedTo: data.assignedTo,
+        status: 'pending', // Default status
+        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
       };
       return await apiRequest("POST", "/api/tasks", taskData);
     },

@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertEventSchema, insertEventTaskSchema, type Event, type EventTask } from "@shared/schema";
+import { insertEventSchema, insertTaskSchema, type Event, type Task } from "@shared/schema";
 import { z } from "zod";
 import { Plus, Calendar, MapPin, Clock, Users, CheckSquare, Trash2, Edit, MoreVertical, CalendarDays } from "lucide-react";
 import { formatDistanceToNow, format, differenceInDays } from "date-fns";
@@ -25,12 +25,11 @@ const eventFormSchema = insertEventSchema.extend({
   eventDate: z.string(),
   eventTime: z.string().optional(),
 }).omit({ 
-  date: true,
   userId: true,
   familyId: true 
 });
 
-const taskFormSchema = insertEventTaskSchema.extend({}).omit({ 
+const taskFormSchema = insertTaskSchema.extend({}).omit({ 
   userId: true,
   familyId: true,
   eventId: true
@@ -170,7 +169,18 @@ export default function EventsPage() {
   const onCreateEvent = (data: EventFormData) => {
     console.log("onCreateEvent called with data:", data);
     console.log("Form errors:", eventForm.formState.errors);
-    createEventMutation.mutate(data);
+    
+    // Transform the form data to match the server schema
+    const eventData = {
+      title: data.title,
+      description: data.description,
+      location: data.location,
+      template: data.template,
+      date: data.eventDate ? new Date(data.eventDate + (data.eventTime ? `T${data.eventTime}` : 'T12:00')).toISOString() : new Date().toISOString(),
+      time: data.eventTime || '12:00',
+    };
+    
+    createEventMutation.mutate(eventData);
   };
 
   const onAddTask = (data: TaskFormData) => {
@@ -185,7 +195,7 @@ export default function EventsPage() {
     updateTaskMutation.mutate({ id: taskId, data: { completed: completedStatus } });
   };
 
-  const getEventProgress = (tasks: EventTask[]) => {
+  const getEventProgress = (tasks: Task[]) => {
     if (tasks.length === 0) return 0;
     const completedTasks = tasks.filter(task => task.completed).length;
     return (completedTasks / tasks.length) * 100;

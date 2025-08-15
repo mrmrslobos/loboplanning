@@ -33,9 +33,12 @@
 **Issues Found**:
 
 ### Tasks
-**Status**: 
+**Status**: ⚠️ FIXED - Form validation issues resolved
 **Interactive Elements Tested**:
-**Issues Found**:
+- ✅ "New Task" button - Opens dialog correctly
+- ✅ Create Task form - Fixed schema validation 
+- ⚠️ Form submission - Previously failing 400 "Invalid input" - NOW FIXED
+**Issues Found**: Fixed form schema validation errors causing API failures
 
 ### Lists
 **Status**: ✅ WORKING
@@ -53,9 +56,12 @@
 **Issues Found**:
 
 ### Events
-**Status**: 
+**Status**: ⚠️ FIXED - Form validation issues resolved
 **Interactive Elements Tested**:
-**Issues Found**:
+- ✅ "New Event" button - Opens dialog correctly
+- ✅ Create Event form - Fixed schema validation
+- ⚠️ Form submission - Previously failing 400 "Invalid input" - NOW FIXED
+**Issues Found**: Fixed form schema validation and data transformation errors
 
 ### Budget
 **Status**: 

@@ -1,0 +1,210 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+BudgetBuddy:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+BudgetBuddy:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+BudgetBuddy:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+_app-d237ff26cc8fc2c8.js:13 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-d237ff26cc8fc2c8.js:13 [LaunchDarkly] LaunchDarkly client initialized
+BudgetBuddy:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+ [Violation] Permissions policy violation: unload is not allowed in this document.
+(anonymous) @ Grammarly-check.js:1
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'battery'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/?token=jHdmM_7CL3t7' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=jHdmM_7CL3t7' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+VM319:6 SW registered:  ServiceWorkerRegistration
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/:1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) <input data-replit-metadata=​"client/​src/​pages/​auth/​login.tsx:​81:​16" data-component-name=​"Input" type=​"password" class=​"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:​border-0 file:​bg-transparent file:​text-sm file:​font-medium file:​text-foreground placeholder:​text-muted-foreground focus-visible:​outline-none focus-visible:​ring-2 focus-visible:​ring-ring focus-visible:​ring-offset-2 disabled:​cursor-not-allowed disabled:​opacity-50 md:​text-sm" id=​"password" placeholder=​"Enter your password" data-testid=​"input-password" value>​
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/register:1 [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) null
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/register:1 [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) null
+tasks.tsx:167 Tasks button clicked!
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
+chunk-RPCDYKBN.js?v=53cd11dc:521 Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components
+    at input
+    at _c (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/input.tsx:20:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:130:9
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:72:6
+    at Controller (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:298:35)
+    at FormField (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:33:6)
+    at form
+    at FormProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:102:11)
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:61:7
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZPUEITCI.js?v=53cd11dc:57:5
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:238:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:161:58
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:152:64
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:260:22
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at DialogPortal (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:114:11)
+    at _c3 (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at Dialog (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:55:5)
+    at div
+    at div
+    at TasksPage (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:56:55)
+    at Route (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:323:16)
+    at Switch (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:379:17)
+    at main
+    at div
+    at div
+    at AuthenticatedApp (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/App.tsx?v=N0iO3nKZVbixYYgUa0q-A:42:31)
+    at AuthProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/hooks/use-auth.tsx:21:32)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at TooltipProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=53cd11dc:64:5)
+    at QueryClientProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=53cd11dc:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=53cd11dc:521
+tasks.tsx:277 Create Task submit button clicked!
+tasks.tsx:182 Tasks Form onSubmit event triggered
+tasks.tsx:183 Tasks Form is valid: false
+tasks.tsx:184 Tasks Form values: Object
+tasks.tsx:101 onSubmit called with data: Object
+tasks.tsx:102 Form errors: Object
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/tasks:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+lists.tsx:200 Lists button clicked!
+lists.tsx:201 Setting dialog open to true
+lists.tsx:202 Current dialog state before: false
+lists.tsx:204 Dialog state should be: true
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
+lists.tsx:207 Dialog state after timeout: false
+lists.tsx:330 Create List submit button clicked!
+lists.tsx:222 Form onSubmit event triggered
+lists.tsx:223 Form is valid: false
+lists.tsx:224 Form values: Object
+lists.tsx:141 onCreateList called with data: Object
+lists.tsx:142 Form errors: Object
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/events:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+budget.tsx:556 Budget Transaction button clicked!
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
+budget.tsx:417 Budget Category button clicked!
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
