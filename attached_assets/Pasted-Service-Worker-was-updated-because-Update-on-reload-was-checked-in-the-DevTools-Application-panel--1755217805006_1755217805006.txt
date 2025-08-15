@@ -1,0 +1,36 @@
+Service Worker was updated because "Update on reload" was checked in the DevTools Application panel.
+Service Worker was updated because "Update on reload" was checked in the DevTools Application panel.
+client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/?token=VetiqYg39Z85' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=VetiqYg39Z85' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+chunk-RPCDYKBN.js?v=2ed12216:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+(index):163 SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/', …}
+auth.ts:67  GET https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/auth/me 401 (Unauthorized)
+getCurrentUser @ auth.ts:67
+checkAuth @ use-auth.tsx:22
+(anonymous) @ use-auth.tsx:31
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=2ed12216:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=2ed12216:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=2ed12216:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=2ed12216:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=2ed12216:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=2ed12216:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=2ed12216:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=2ed12216:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=2ed12216:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=2ed12216:19432
+commitRoot @ chunk-RPCDYKBN.js?v=2ed12216:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=2ed12216:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=2ed12216:18718
+workLoop @ chunk-RPCDYKBN.js?v=2ed12216:197
+flushWork @ chunk-RPCDYKBN.js?v=2ed12216:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=2ed12216:384
+(index):1 Error while trying to use the following icon from the Manifest: https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/icons/icon-144x144.png (Download error or resource isn't a valid image)
+(index):1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) <input data-replit-metadata=​"client/​src/​pages/​auth/​login.tsx:​81:​16" data-component-name=​"Input" type=​"password" class=​"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:​border-0 file:​bg-transparent file:​text-sm file:​font-medium file:​text-foreground placeholder:​text-muted-foreground focus-visible:​outline-none focus-visible:​ring-2 focus-visible:​ring-ring focus-visible:​ring-offset-2 disabled:​cursor-not-allowed disabled:​opacity-50 md:​text-sm" id=​"password" placeholder=​"Enter your password" data-testid=​"input-password" value>​flex
