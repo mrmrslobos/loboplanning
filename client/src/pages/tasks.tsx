@@ -263,6 +263,10 @@ export default function TasksPage() {
                     type="submit" 
                     disabled={createTaskMutation.isPending}
                     data-testid="button-submit-task"
+                    onClick={(e) => {
+                      console.log("Create Task submit button clicked!");
+                      // Let the form handle the submission
+                    }}
                   >
                     {createTaskMutation.isPending ? "Creating..." : "Create Task"}
                   </Button>

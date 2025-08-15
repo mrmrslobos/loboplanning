@@ -317,6 +317,10 @@ export default function ListsPage() {
                         type="submit" 
                         disabled={createListMutation.isPending}
                         data-testid="button-submit-list"
+                        onClick={(e) => {
+                          console.log("Create List submit button clicked!");
+                          // Let the form handle the submission
+                        }}
                       >
                         {createListMutation.isPending ? "Creating..." : "Create List"}
                       </Button>

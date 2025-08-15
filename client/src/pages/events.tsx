@@ -368,6 +368,10 @@ export default function EventsPage() {
                         type="submit" 
                         disabled={createEventMutation.isPending}
                         data-testid="button-submit-event"
+                        onClick={(e) => {
+                          console.log("Create Event submit button clicked!");
+                          // Let the form handle the submission
+                        }}
                       >
                         {createEventMutation.isPending ? "Creating..." : "Create Event"}
                       </Button>
