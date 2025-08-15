@@ -20,6 +20,10 @@ import { useToast } from "@/hooks/use-toast";
 
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
+}).omit({ 
+  status: true,
+  userId: true,
+  familyId: true 
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;

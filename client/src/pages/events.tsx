@@ -24,9 +24,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const eventFormSchema = insertEventSchema.extend({
   eventDate: z.string(),
   eventTime: z.string().optional(),
-}).omit({ date: true });
+}).omit({ 
+  date: true,
+  userId: true,
+  familyId: true 
+});
 
-const taskFormSchema = insertEventTaskSchema.extend({});
+const taskFormSchema = insertEventTaskSchema.extend({}).omit({ 
+  userId: true,
+  familyId: true 
+});
 
 type EventFormData = z.infer<typeof eventFormSchema>;
 type TaskFormData = z.infer<typeof taskFormSchema>;

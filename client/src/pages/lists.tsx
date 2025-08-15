@@ -18,7 +18,10 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-const listFormSchema = insertListSchema.extend({});
+const listFormSchema = insertListSchema.omit({ 
+  userId: true, 
+  familyId: true 
+}).extend({});
 const itemFormSchema = insertListItemSchema.extend({});
 
 type ListFormData = z.infer<typeof listFormSchema>;
