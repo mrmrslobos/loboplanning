@@ -164,7 +164,6 @@ export default function EventsPage() {
       description: "",
       category: "",
       assignedTo: "Me",
-      completed: false,
     },
   });
 
