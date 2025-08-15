@@ -40,19 +40,19 @@ export default function Dashboard() {
     enabled: !!user?.familyId,
   });
 
-  const overdueTasks = tasks?.filter(task => task.dueDate && isOverdue(task.dueDate) && task.status !== 'done') || [];
-  const todaysEvents = events?.filter(event => {
+  const overdueTasks = tasks?.filter((task: any) => task.dueDate && isOverdue(task.dueDate) && task.status !== 'complete') || [];
+  const todaysEvents = events?.filter((event: any) => {
     const eventDate = new Date(event.startTime);
     const today = new Date();
     return eventDate.toDateString() === today.toDateString();
   }) || [];
 
-  const totalBudget = budgetCategories?.reduce((sum, cat) => sum + parseFloat(cat.monthlyLimit || '0'), 0) || 0;
-  const totalSpent = budgetTransactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0) || 0;
+  const totalBudget = budgetCategories?.reduce((sum: number, cat: any) => sum + parseFloat(cat.monthlyLimit || '0'), 0) || 0;
+  const totalSpent = budgetTransactions?.filter((t: any) => t.type === 'expense').reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0) || 0;
   const budgetUsedPercentage = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
 
   const recentTasks = tasks?.slice(0, 3) || [];
-  const upcomingEvents = events?.filter(event => new Date(event.startTime) > new Date()).slice(0, 2) || [];
+  const upcomingEvents = events?.filter((event: any) => new Date(event.startTime) > new Date()).slice(0, 2) || [];
 
   const quickActions = [
     { icon: Plus, label: "Add Task", action: () => setShowTaskForm(true), color: "bg-primary-100 text-primary-600" },
@@ -197,7 +197,7 @@ export default function Dashboard() {
               {recentTasks.length === 0 ? (
                 <p className="text-sm text-gray-500 text-center py-4">No tasks yet</p>
               ) : (
-                recentTasks.map((task) => (
+                recentTasks.map((task: any) => (
                   <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -229,7 +229,7 @@ export default function Dashboard() {
               {upcomingEvents.length === 0 ? (
                 <p className="text-sm text-gray-500 text-center py-4">No upcoming events</p>
               ) : (
-                upcomingEvents.map((event) => (
+                upcomingEvents.map((event: any) => (
                   <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
