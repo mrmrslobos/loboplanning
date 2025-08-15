@@ -135,6 +135,7 @@ export default function ListsPage() {
   });
 
   const onCreateList = (data: ListFormData) => {
+    console.log("onCreateList called with data:", data);
     createListMutation.mutate(data);
   };
 
@@ -193,7 +194,9 @@ export default function ListsPage() {
               data-testid="button-create-list"
               onClick={() => {
                 console.log("Lists button clicked!");
+                console.log("Setting dialog open to true");
                 setIsCreateDialogOpen(true);
+                console.log("Dialog state should be:", true);
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
