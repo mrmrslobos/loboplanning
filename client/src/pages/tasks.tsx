@@ -53,11 +53,12 @@ export default function TasksPage() {
     mutationFn: async (data: TaskFormData) => {
       const taskData = {
         title: data.title,
-        description: data.description || '',
-        category: data.category || '',
+        description: data.description || null,
+        category: data.category || null,
         assignedTo: data.assignedTo,
         status: 'pending', // Default status
-        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
+        dueDate: data.dueDate ? new Date(data.dueDate) : null,
+        eventId: null, // Not linked to an event
       };
       return await apiRequest("POST", "/api/tasks", taskData);
     },

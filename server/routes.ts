@@ -283,11 +283,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const taskData = insertTaskSchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        familyId: req.user!.familyId
       });
       const task = await storage.createTask(taskData);
       res.json(task);
     } catch (error) {
+      console.error('Task creation error:', error);
       res.status(400).json({ error: 'Invalid input' });
     }
   });
@@ -332,11 +334,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const listData = insertListSchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        familyId: req.user!.familyId
       });
       const list = await storage.createList(listData);
       res.json(list);
     } catch (error) {
+      console.error('List creation error:', error);
       res.status(400).json({ error: 'Invalid input' });
     }
   });
@@ -428,11 +432,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const eventData = insertEventSchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        familyId: req.user!.familyId
       });
       const event = await storage.createEvent(eventData);
       res.json(event);
     } catch (error) {
+      console.error('Event creation error:', error);
       res.status(400).json({ error: 'Invalid input' });
     }
   });
