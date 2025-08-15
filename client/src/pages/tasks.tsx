@@ -57,7 +57,7 @@ export default function TasksPage() {
         category: data.category || null,
         assignedTo: data.assignedTo,
         status: 'pending', // Default status
-        dueDate: data.dueDate ? new Date(data.dueDate) : null,
+        dueDate: data.dueDate || null,
         eventId: null, // Not linked to an event
       };
       return await apiRequest("POST", "/api/tasks", taskData);

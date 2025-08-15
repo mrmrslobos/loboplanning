@@ -1,0 +1,1070 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+BudgetBuddy:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+BudgetBuddy:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+BudgetBuddy:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+_app-d237ff26cc8fc2c8.js:13 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-d237ff26cc8fc2c8.js:13 [LaunchDarkly] LaunchDarkly client initialized
+BudgetBuddy:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+ [Violation] Permissions policy violation: unload is not allowed in this document.
+(anonymous) @ Grammarly-check.js:1
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'battery'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+framework-bc0e5d42934fbbd8.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-bc0e5d42934fbbd8.js:1
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar16r%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@vite/client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/?token=jHdmM_7CL3t7' failed: 
+setupWebSocket @ VM332 client:536
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@vite/client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=jHdmM_7CL3t7' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/:163 SW registered:  ServiceWorkerRegistration
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/auth/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+[DOM] Input elements should have autocomplete attributes <attribute>: (More info: <URL>) 
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:211 Tasks button clicked!
+@radix-ui_react-dialog.js:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM396 @radix-ui_react-dialog.js:342
+chunk-RPCDYKBN.js:521 Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components
+    at input
+    at _c (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/input.tsx:20:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:130:9
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:72:6
+    at Controller (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:298:35)
+    at FormField (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:33:6)
+    at form
+    at FormProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:102:11)
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:61:7
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZPUEITCI.js?v=53cd11dc:57:5
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:238:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:161:58
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:152:64
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:260:22
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at DialogPortal (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:114:11)
+    at _c3 (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at Dialog (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:55:5)
+    at div
+    at div
+    at TasksPage (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:56:55)
+    at Route (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:323:16)
+    at Switch (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:379:17)
+    at main
+    at div
+    at div
+    at AuthenticatedApp (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/App.tsx?v=N0iO3nKZVbixYYgUa0q-A:42:31)
+    at AuthProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/hooks/use-auth.tsx:21:32)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at TooltipProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=53cd11dc:64:5)
+    at QueryClientProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=53cd11dc:2805:3)
+    at App
+printWarning @ VM327 chunk-RPCDYKBN.js:521
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:507 Create Task submit button clicked!
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:243 Tasks Form onSubmit event triggered
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:244 Tasks Form is valid: false
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:245 Tasks Form values: Object
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:107 onSubmit called with data: Object
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:108 Form errors: Object
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/tasks:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:221 Lists button clicked!
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:222 Setting dialog open to true
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:223 Current dialog state before: false
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:225 Dialog state should be: true
+@radix-ui_react-dialog.js:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM396 @radix-ui_react-dialog.js:342
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:227 Dialog state after timeout: false
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:547 Create List submit button clicked!
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:259 Form onSubmit event triggered
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:260 Form is valid: false
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:261 Form values: Object
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:141 onCreateList called with data: Object
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/lists.tsx:142 Form errors: Object
+@radix-ui_react-dialog.js:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM396 @radix-ui_react-dialog.js:342
+@radix-ui_react-dialog.js:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM396 @radix-ui_react-dialog.js:342
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/events:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/budget.tsx:739 Budget Transaction button clicked!
+@radix-ui_react-dialog.js:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM396 @radix-ui_react-dialog.js:342
+f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/budget.tsx:346 Budget Category button clicked!
+@radix-ui_react-dialog.js:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM396 @radix-ui_react-dialog.js:342
+@radix-ui_react-dialog.js:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM396 @radix-ui_react-dialog.js:342
+Service Worker was updated because "Update on reload" was checked in the DevTools Application panel.
+Service Worker was updated because "Update on reload" was checked in the DevTools Application panel.
+Service Worker was updated because "Update on reload" was checked in the DevTools Application panel.
+Service Worker was updated because "Update on reload" was checked in the DevTools Application panel.
+Service Worker was updated because "Update on reload" was checked in the DevTools Application panel.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1do%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/?token=cLaoYffoaqxV' failed: 
+setupWebSocket @ VM450 client:536
+(anonymous) @ VM450 client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=cLaoYffoaqxV' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ VM450 client:536
+fallback @ VM450 client:509
+(anonymous) @ VM450 client:555
+(index):163 SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/', …}
+auth.ts:46  GET https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/auth/me 401 (Unauthorized)
+getCurrentUser @ VM508 auth.ts:46
+checkAuth @ VM461 use-auth.tsx:28
+(anonymous) @ VM461 use-auth.tsx:36
+commitHookEffectListMount @ VM449 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM449 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM449 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM449 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM449 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM449 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM449 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM449 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM449 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM449 chunk-RPCDYKBN.js:19432
+commitRoot @ VM449 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM449 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM449 chunk-RPCDYKBN.js:18718
+workLoop @ VM449 chunk-RPCDYKBN.js:197
+flushWork @ VM449 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM449 chunk-RPCDYKBN.js:384
+BudgetBuddy:1 Access to fetch at 'https://sp.replit.com/v1/t' from origin 'https://replit.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+_app-d237ff26cc8fc2c8.js:13  POST https://sp.replit.com/v1/t net::ERR_FAILED
+(anonymous) @ _app-d237ff26cc8fc2c8.js:13
+o @ sdk.min.js:1
+dispatch @ fetch-dispatcher.ts:11
+(anonymous) @ index.ts:122
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+g @ index.ts:93
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+n @ _app-d237ff26cc8fc2c8.js:13
+setTimeout
+(anonymous) @ _app-d237ff26cc8fc2c8.js:13
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+n.flushOne @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+n.deliver @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n.dispatchSingle @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+p @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n._dispatch @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n.track @ index.ts:241
+A @ _app-d237ff26cc8fc2c8.js:1
+p @ 9089-b8be5f14f79b263f.js:1
+(anonymous) @ 8030-216f39465ab50f9b.js:1
+(anonymous) @ 9089-b8be5f14f79b263f.js:1
+n.trigger @ 9089-b8be5f14f79b263f.js:1
+(anonymous) @ 9089-b8be5f14f79b263f.js:1
+(anonymous) @ main-a3d8a8aaba3cc089.js:1
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+Promise.then
+n @ main-a3d8a8aaba3cc089.js:1
+u @ main-a3d8a8aaba3cc089.js:1
+tasks.tsx:215 Tasks button clicked!
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ VM520 @radix-ui_react-dialog.js:342
+commitHookEffectListMount @ VM449 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM449 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM449 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM449 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM449 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM449 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM449 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM449 chunk-RPCDYKBN.js:19416
+commitRoot @ VM449 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM449 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM449 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM449 chunk-RPCDYKBN.js:18627
+Grammarly.js:2 grm ERROR [lib.tracking.telemetry] ░░ cs.unhandled Error: Promise timed out.
+    at S.csUnhandled (Grammarly.js:2:1549666)
+    at Object.next (Grammarly.js:2:503057)
+    at e.next (Grammarly.js:2:1926076)
+    at t._next (Grammarly.js:2:1925680)
+    at t.next (Grammarly.js:2:1925299)
+    at Grammarly.js:2:1968356
+    at a._next (Grammarly.js:2:1939623)
+    at t.next (Grammarly.js:2:1925299)
+    at Grammarly.js:2:1965817
+    at a._next (Grammarly.js:2:1939623)
+write @ VM561 Grammarly.js:2
+handleEvent @ VM561 Grammarly.js:2
+_logMessage @ VM561 Grammarly.js:2
+error @ VM561 Grammarly.js:2
+error @ VM561 Grammarly.js:2
+S.csUnhandled @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+e.next @ VM561 Grammarly.js:2
+t._next @ VM561 Grammarly.js:2
+t.next @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+a._next @ VM561 Grammarly.js:2
+t.next @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+a._next @ VM561 Grammarly.js:2
+t.next @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+a._next @ VM561 Grammarly.js:2
+t.next @ VM561 Grammarly.js:2
+t @ VM561 Grammarly.js:2
+Grammarly.js:2 Uncaught (in promise) a: Promise timed out.
+    at Grammarly.js:2:1530358
+(anonymous) @ VM561 Grammarly.js:2
+setTimeout
+(anonymous) @ VM561 Grammarly.js:2
+l @ VM561 Grammarly.js:2
+c @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+b @ VM561 Grammarly.js:2
+b @ VM561 Grammarly.js:2
+await in b
+b @ VM561 Grammarly.js:2
+await in b
+b @ VM561 Grammarly.js:2
+await in b
+C @ VM561 Grammarly.js:2
+Jn @ VM561 Grammarly.js:2
+start @ VM561 Grammarly.js:2
+di @ VM561 Grammarly.js:2
+load @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+2874 @ VM561 Grammarly.js:2
+__webpack_require__ @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+__webpack_require__.O @ VM561 Grammarly.js:2
+(anonymous) @ VM561 Grammarly.js:2
+chunk-RPCDYKBN.js?v=53cd11dc:521 Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components
+    at input
+    at _c (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/input.tsx:20:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:130:9
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:72:6
+    at Controller (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:298:35)
+    at FormField (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:33:6)
+    at form
+    at FormProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:102:11)
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:61:7
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZPUEITCI.js?v=53cd11dc:57:5
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:238:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:161:58
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:152:64
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:260:22
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at DialogPortal (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:114:11)
+    at _c3 (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at Dialog (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:55:5)
+    at div
+    at div
+    at TasksPage (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:55:55)
+    at Route (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:323:16)
+    at Switch (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:379:17)
+    at main
+    at div
+    at div
+    at AuthenticatedApp (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/App.tsx?v=99vdBtkkaZhKafq7NbwW7:42:31)
+    at AuthProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/hooks/use-auth.tsx:21:32)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at TooltipProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=53cd11dc:64:5)
+    at QueryClientProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=53cd11dc:2805:3)
+    at App
+printWarning @ VM449 chunk-RPCDYKBN.js:521
+error @ VM449 chunk-RPCDYKBN.js:505
+updateWrapper @ VM449 chunk-RPCDYKBN.js:1968
+updateProperties @ VM449 chunk-RPCDYKBN.js:7762
+commitUpdate @ VM449 chunk-RPCDYKBN.js:8419
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17763
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17813
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM449 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM449 chunk-RPCDYKBN.js:17794
+commitMutationEffects @ VM449 chunk-RPCDYKBN.js:17663
+commitRootImpl @ VM449 chunk-RPCDYKBN.js:19347
+commitRoot @ VM449 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM449 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM449 chunk-RPCDYKBN.js:9119
+flushSync @ VM449 chunk-RPCDYKBN.js:18959
+finishEventHandler @ VM449 chunk-RPCDYKBN.js:3569
+batchedUpdates @ VM449 chunk-RPCDYKBN.js:3582
+dispatchEventForPluginEventSystem @ VM449 chunk-RPCDYKBN.js:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ VM449 chunk-RPCDYKBN.js:5478
+dispatchEvent @ VM449 chunk-RPCDYKBN.js:5472
+dispatchDiscreteEvent @ VM449 chunk-RPCDYKBN.js:5449
+(anonymous) @ unknown
+setTimeout
+setSelectionAndCommit @ unknown
+selectRangeContainingDay @ unknown
+onClick @ unknown
+tasks.tsx:511 Create Task submit button clicked!
+tasks.tsx:247 Tasks Form onSubmit event triggered
+tasks.tsx:248 Tasks Form is valid: false
+tasks.tsx:249 Tasks Form values: {title: 'test', description: 'test', assignedTo: 'Me', dueDate: '2025-08-22'}
+tasks.tsx:111 onSubmit called with data: {title: 'test', description: 'test', dueDate: '2025-08-22', assignedTo: 'Me'}
+tasks.tsx:112 Form errors: {}
+queryClient.ts:21  POST https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/tasks 400 (Bad Request)
+apiRequest @ VM458 queryClient.ts:21
+mutationFn @ VM480 tasks.tsx:73
+fn @ VM455 @tanstack_react-query.js:1189
+run @ VM455 @tanstack_react-query.js:494
+start @ VM455 @tanstack_react-query.js:536
+execute @ VM455 @tanstack_react-query.js:1225
+await in execute
+mutate @ VM455 @tanstack_react-query.js:2630
+(anonymous) @ VM455 @tanstack_react-query.js:3295
+onSubmit @ VM480 tasks.tsx:113
+(anonymous) @ VM483 chunk-4BFJKWC4.js:1465
+await in (anonymous)
+onSubmit @ VM480 tasks.tsx:250
+callCallback2 @ VM449 chunk-RPCDYKBN.js:3674
+invokeGuardedCallbackDev @ VM449 chunk-RPCDYKBN.js:3699
+invokeGuardedCallback @ VM449 chunk-RPCDYKBN.js:3733
+invokeGuardedCallbackAndCatchFirstError @ VM449 chunk-RPCDYKBN.js:3736
+executeDispatch @ VM449 chunk-RPCDYKBN.js:7014
+processDispatchQueueItemsInOrder @ VM449 chunk-RPCDYKBN.js:7034
+processDispatchQueue @ VM449 chunk-RPCDYKBN.js:7043
+dispatchEventsForPlugins @ VM449 chunk-RPCDYKBN.js:7051
+(anonymous) @ VM449 chunk-RPCDYKBN.js:7174
+batchedUpdates$1 @ VM449 chunk-RPCDYKBN.js:18913
+batchedUpdates @ VM449 chunk-RPCDYKBN.js:3579
+dispatchEventForPluginEventSystem @ VM449 chunk-RPCDYKBN.js:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ VM449 chunk-RPCDYKBN.js:5478
+dispatchEvent @ VM449 chunk-RPCDYKBN.js:5472
+dispatchDiscreteEvent @ VM449 chunk-RPCDYKBN.js:5449
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar1l8%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/?token=ATMHiudfqnWE' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=ATMHiudfqnWE' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+(index):163 SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/', …}
+auth.ts:67  GET https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/auth/me 401 (Unauthorized)
+getCurrentUser @ auth.ts:67
+checkAuth @ use-auth.tsx:22
+(anonymous) @ use-auth.tsx:31
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=53cd11dc:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=53cd11dc:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=53cd11dc:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=53cd11dc:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=53cd11dc:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=53cd11dc:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=53cd11dc:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=53cd11dc:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=53cd11dc:19432
+commitRoot @ chunk-RPCDYKBN.js?v=53cd11dc:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=53cd11dc:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=53cd11dc:18718
+workLoop @ chunk-RPCDYKBN.js?v=53cd11dc:197
+flushWork @ chunk-RPCDYKBN.js?v=53cd11dc:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=53cd11dc:384
+tasks.tsx:171 Tasks button clicked!
+@radix-ui_react-dialog.js?v=53cd11dc:342 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=53cd11dc:342
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=53cd11dc:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=53cd11dc:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=53cd11dc:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=53cd11dc:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=53cd11dc:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=53cd11dc:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=53cd11dc:19416
+commitRoot @ chunk-RPCDYKBN.js?v=53cd11dc:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=53cd11dc:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=53cd11dc:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=53cd11dc:18627
+ Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components
+    at input
+    at _c (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/input.tsx:20:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:130:9
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:72:6
+    at Controller (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:298:35)
+    at FormField (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/form.tsx:33:6)
+    at form
+    at FormProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=53cd11dc:102:11)
+    at div
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:61:7
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZPUEITCI.js?v=53cd11dc:57:5
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:238:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:161:58
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:152:64
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:43:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LHPXHTGV.js?v=53cd11dc:20:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-IWFJIMEQ.js?v=53cd11dc:42:13
+    at https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HKSITMS3.js?v=53cd11dc:260:22
+    at Presence (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WKSNYNSY.js?v=53cd11dc:24:11)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at DialogPortal (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:114:11)
+    at _c3 (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at Dialog (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=53cd11dc:55:5)
+    at div
+    at div
+    at TasksPage (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/pages/tasks.tsx:55:55)
+    at Route (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:323:16)
+    at Switch (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=53cd11dc:379:17)
+    at main
+    at div
+    at div
+    at AuthenticatedApp (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/App.tsx?v=oxIQvuH5TnanlCxjMBMlt:42:31)
+    at AuthProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/src/hooks/use-auth.tsx:21:32)
+    at Provider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=53cd11dc:38:15)
+    at TooltipProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=53cd11dc:64:5)
+    at QueryClientProvider (https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=53cd11dc:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=53cd11dc:521
+error @ chunk-RPCDYKBN.js?v=53cd11dc:505
+updateWrapper @ chunk-RPCDYKBN.js?v=53cd11dc:1968
+updateProperties @ chunk-RPCDYKBN.js?v=53cd11dc:7762
+commitUpdate @ chunk-RPCDYKBN.js?v=53cd11dc:8419
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17763
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17813
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17737
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17896
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17699
+recursivelyTraverseMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17685
+commitMutationEffectsOnFiber @ chunk-RPCDYKBN.js?v=53cd11dc:17794
+commitMutationEffects @ chunk-RPCDYKBN.js?v=53cd11dc:17663
+commitRootImpl @ chunk-RPCDYKBN.js?v=53cd11dc:19347
+commitRoot @ chunk-RPCDYKBN.js?v=53cd11dc:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=53cd11dc:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=53cd11dc:9119
+flushSync @ chunk-RPCDYKBN.js?v=53cd11dc:18959
+finishEventHandler @ chunk-RPCDYKBN.js?v=53cd11dc:3569
+batchedUpdates @ chunk-RPCDYKBN.js?v=53cd11dc:3582
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=53cd11dc:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=53cd11dc:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=53cd11dc:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=53cd11dc:5449
+(anonymous) @ unknown
+setTimeout
+setSelectionAndCommit @ unknown
+selectRangeContainingDay @ unknown
+onClick @ unknown
+tasks.tsx:281 Create Task submit button clicked!
+tasks.tsx:186 Tasks Form onSubmit event triggered
+tasks.tsx:187 Tasks Form is valid: false
+tasks.tsx:188 Tasks Form values: {title: 'test', description: 'test', assignedTo: 'Me', dueDate: '2025-08-15'}
+tasks.tsx:105 onSubmit called with data: {title: 'test', description: 'test', dueDate: '2025-08-15', assignedTo: 'Me'}
+tasks.tsx:106 Form errors: {}
+Grammarly.js:2 grm ERROR [lib.tracking.telemetry] ░░ cs.unhandled Error: Promise timed out.
+    at S.csUnhandled (Grammarly.js:2:1549666)
+    at Object.next (Grammarly.js:2:503057)
+    at e.next (Grammarly.js:2:1926076)
+    at t._next (Grammarly.js:2:1925680)
+    at t.next (Grammarly.js:2:1925299)
+    at Grammarly.js:2:1968356
+    at a._next (Grammarly.js:2:1939623)
+    at t.next (Grammarly.js:2:1925299)
+    at Grammarly.js:2:1965817
+    at a._next (Grammarly.js:2:1939623)
+write @ Grammarly.js:2
+handleEvent @ Grammarly.js:2
+_logMessage @ Grammarly.js:2
+error @ Grammarly.js:2
+error @ Grammarly.js:2
+S.csUnhandled @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+e.next @ Grammarly.js:2
+t._next @ Grammarly.js:2
+t.next @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+a._next @ Grammarly.js:2
+t.next @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+a._next @ Grammarly.js:2
+t.next @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+a._next @ Grammarly.js:2
+t.next @ Grammarly.js:2
+t @ Grammarly.js:2
+Grammarly.js:2 Uncaught (in promise) a: Promise timed out.
+    at Grammarly.js:2:1530358
+(anonymous) @ Grammarly.js:2
+setTimeout
+(anonymous) @ Grammarly.js:2
+l @ Grammarly.js:2
+c @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+b @ Grammarly.js:2
+b @ Grammarly.js:2
+await in b
+b @ Grammarly.js:2
+await in b
+b @ Grammarly.js:2
+await in b
+C @ Grammarly.js:2
+Jn @ Grammarly.js:2
+start @ Grammarly.js:2
+di @ Grammarly.js:2
+load @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+2874 @ Grammarly.js:2
+__webpack_require__ @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+__webpack_require__.O @ Grammarly.js:2
+(anonymous) @ Grammarly.js:2
+queryClient.ts:31  POST https://f18ff4e0-839f-4ba6-8850-1a423979e8ff-00-133ns704iu0dk.worf.replit.dev/api/tasks 400 (Bad Request)
+apiRequest @ queryClient.ts:31
+mutationFn @ tasks.tsx:63
+fn @ @tanstack_react-query.js?v=53cd11dc:1189
+run @ @tanstack_react-query.js?v=53cd11dc:494
+start @ @tanstack_react-query.js?v=53cd11dc:536
+execute @ @tanstack_react-query.js?v=53cd11dc:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=53cd11dc:2630
+(anonymous) @ @tanstack_react-query.js?v=53cd11dc:3295
+onSubmit @ tasks.tsx:107
+(anonymous) @ chunk-4BFJKWC4.js?v=53cd11dc:1465
+await in (anonymous)
+onSubmit @ tasks.tsx:189
+callCallback2 @ chunk-RPCDYKBN.js?v=53cd11dc:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=53cd11dc:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=53cd11dc:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=53cd11dc:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=53cd11dc:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=53cd11dc:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=53cd11dc:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=53cd11dc:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=53cd11dc:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=53cd11dc:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=53cd11dc:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=53cd11dc:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=53cd11dc:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=53cd11dc:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=53cd11dc:5449

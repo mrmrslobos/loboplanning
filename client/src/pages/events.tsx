@@ -176,7 +176,7 @@ export default function EventsPage() {
       description: data.description,
       location: data.location,
       template: data.template,
-      date: data.eventDate ? new Date(data.eventDate + (data.eventTime ? `T${data.eventTime}` : 'T12:00')).toISOString() : new Date().toISOString(),
+      date: data.eventDate ? data.eventDate + (data.eventTime ? `T${data.eventTime}` : 'T12:00') : new Date().toISOString(),
       time: data.eventTime || '12:00',
     };
     
