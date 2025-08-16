@@ -708,14 +708,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/events', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      console.log('Received event data:', req.body);
+      console.log('User info:', { id: req.user!.id, familyId: req.user!.familyId });
+      
       const eventData = insertEventSchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        familyId: req.user!.familyId
       });
+      
+      console.log('Parsed event data:', eventData);
       const event = await storage.createEvent(eventData);
+      console.log('Created event:', event);
       res.json(event);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid input' });
+      console.error('Event creation error:', error);
+      res.status(400).json({ error: 'Invalid input', details: error.message });
     }
   });
 

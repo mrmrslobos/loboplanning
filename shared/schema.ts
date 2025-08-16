@@ -304,7 +304,7 @@ export const insertEventSchema = createInsertSchema(events).omit({
   id: true,
   createdAt: true,
 }).extend({
-  date: z.string().optional().nullable().transform((val) => val ? new Date(val) : null),
+  date: z.string().transform((val) => new Date(val)),
 });
 
 export const insertEventTaskSchema = createInsertSchema(eventTasks).omit({
