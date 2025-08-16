@@ -82,20 +82,23 @@ export default function EventsPage() {
   });
 
   const createEventMutation = useMutation({
-    mutationFn: async (data: EventFormData) => {
-      const { eventDate, eventTime, ...eventData } = data;
-      const processedData = {
-        ...eventData,
-        date: new Date(`${eventDate}T${eventTime || '12:00'}`),
-      };
-      return await apiRequest("POST", "/api/events", processedData);
+    mutationFn: async (data: any) => {
+      console.log("Mutation receiving data:", data);
+      return await apiRequest("POST", "/api/events", {
+        ...data,
+        userId: user?.id,
+        familyId: user?.familyId || null,
+      });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log("Event created successfully:", result);
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setIsCreateEventDialogOpen(false);
+      eventForm.reset();
       toast({ title: "Event created successfully" });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Event creation failed:", error);
       toast({ title: "Failed to create event", variant: "destructive" });
     },
   });
@@ -170,16 +173,21 @@ export default function EventsPage() {
     console.log("onCreateEvent called with data:", data);
     console.log("Form errors:", eventForm.formState.errors);
     
-    // Transform the form data to match the server schema
+    // Properly format the date by combining eventDate and eventTime
+    const formattedDate = data.eventDate ? 
+      new Date(`${data.eventDate}T${data.eventTime || '12:00'}`).toISOString() : 
+      new Date().toISOString();
+    
+    // Transform to the format expected by the server
     const eventData = {
       title: data.title,
       description: data.description,
       location: data.location,
       template: data.template,
-      date: data.eventDate ? data.eventDate + (data.eventTime ? `T${data.eventTime}` : 'T12:00') : new Date().toISOString(),
-      time: data.eventTime || '12:00',
+      date: formattedDate,
     };
     
+    console.log("Transformed eventData for server:", eventData);
     createEventMutation.mutate(eventData);
   };
 
