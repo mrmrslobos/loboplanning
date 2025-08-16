@@ -233,6 +233,12 @@ export default function MealPlanning() {
     setIsMealSelectionOpen(false);
     setSelectedMealSlot(null);
     setCustomMealText("");
+
+    // Auto-save the meal plan after adding a meal
+    saveMealPlanMutation.mutate({
+      name: updatedMealPlan.name,
+      meals: updatedMeals,
+    });
   };
 
   const handleDragStart = (recipe: Recipe) => {
@@ -263,12 +269,21 @@ export default function MealPlanning() {
     const updatedMeals = { ...currentMealPlan.meals };
     if (updatedMeals[day]) {
       delete updatedMeals[day][mealType as keyof typeof updatedMeals[string]];
+      
+      // Clean up empty day objects
       if (Object.keys(updatedMeals[day]).length === 0) {
         delete updatedMeals[day];
       }
+      
+      // Update state and auto-save
+      const updatedMealPlan = { ...currentMealPlan, meals: updatedMeals };
+      setCurrentMealPlan(updatedMealPlan);
+      
+      saveMealPlanMutation.mutate({
+        name: updatedMealPlan.name,
+        meals: updatedMeals,
+      });
     }
-
-    setCurrentMealPlan({ ...currentMealPlan, meals: updatedMeals });
   };
 
   const saveMealPlan = () => {
