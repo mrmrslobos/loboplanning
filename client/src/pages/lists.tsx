@@ -22,7 +22,11 @@ const listFormSchema = insertListSchema.omit({
   userId: true, 
   familyId: true 
 }).extend({});
-const itemFormSchema = insertListItemSchema.extend({});
+const itemFormSchema = insertListItemSchema.omit({ 
+  id: true, 
+  createdAt: true,
+  listId: true
+}).extend({});
 
 type ListFormData = z.infer<typeof listFormSchema>;
 type ItemFormData = z.infer<typeof itemFormSchema>;
@@ -89,12 +93,19 @@ export default function ListsPage() {
 
   const createItemMutation = useMutation({
     mutationFn: async (data: ItemFormData) => {
-      return await apiRequest("POST", "/api/list-items", data);
+      const itemData = {
+        ...data,
+        listId: selectedList?.id,
+      };
+      return await apiRequest("POST", "/api/list-items", itemData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists", selectedList?.id, "items"] });
       setIsAddItemDialogOpen(false);
       toast({ title: "Item added successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to add item", variant: "destructive" });
     },
   });
 

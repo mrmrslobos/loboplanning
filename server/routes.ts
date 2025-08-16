@@ -69,20 +69,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!familyConnections.has(userFamilyId)) {
             familyConnections.set(userFamilyId, new Set());
           }
-          familyConnections.get(userFamilyId)!.add(ws);
+          familyConnections.get(userFamilyId)?.add(ws);
           
           // Send online count update
-          const connections = familyConnections.get(userFamilyId)!;
-          const onlineCount = Array.from(connections).filter(socket => socket.readyState === WebSocket.OPEN).length;
+          const connections = familyConnections.get(userFamilyId);
+          if (connections) {
+            const onlineCount = Array.from(connections).filter(socket => socket.readyState === WebSocket.OPEN).length;
           
-          connections.forEach(socket => {
+            connections.forEach(socket => {
             if (socket.readyState === WebSocket.OPEN) {
               socket.send(JSON.stringify({
                 type: 'online_count',
                 count: onlineCount
               }));
             }
-          });
+            });
+          }
         }
         
         if (message.type === 'chat_message' && userFamilyId) {
@@ -477,7 +479,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: task.title,
         description: task.description,
         assignedTo: task.assignedTo,
-        status: task.status,
+        status: 'pending',
+        dueDate: null,
         category: `Event: ${task.category}`,
         userId: req.user!.id,
         familyId: req.user!.familyId,
