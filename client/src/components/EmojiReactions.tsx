@@ -29,13 +29,10 @@ export function EmojiReactions({ targetType, targetId, className = "" }: EmojiRe
 
   const addReactionMutation = useMutation({
     mutationFn: async (emoji: string) => {
-      return apiRequest('/api/reactions', {
-        method: 'POST',
-        body: JSON.stringify({
-          emoji,
-          targetType,
-          targetId
-        })
+      return apiRequest('POST', '/api/reactions', {
+        emoji,
+        targetType,
+        targetId
       });
     },
     onSuccess: () => {
@@ -46,10 +43,7 @@ export function EmojiReactions({ targetType, targetId, className = "" }: EmojiRe
 
   const removeReactionMutation = useMutation({
     mutationFn: async (emoji: string) => {
-      return apiRequest(`/api/reactions/${targetType}/${targetId}/${encodeURIComponent(emoji)}`, {
-        method: 'DELETE',
-        body: JSON.stringify({})
-      });
+      return apiRequest('DELETE', `/api/reactions/${targetType}/${targetId}/${encodeURIComponent(emoji)}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reactions', targetType, targetId] });
