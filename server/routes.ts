@@ -707,6 +707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/events', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    console.log('=== EVENT CREATION REQUEST RECEIVED ===');
     try {
       console.log('Received event data:', req.body);
       console.log('User info:', { id: req.user!.id, familyId: req.user!.familyId });

@@ -85,11 +85,16 @@ export default function EventsPage() {
   const createEventMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Mutation receiving data:", data);
-      return await apiRequest("POST", "/api/events", {
-        ...data,
-        userId: user?.id,
-        familyId: user?.familyId || null,
-      });
+      console.log("Making API request to /api/events");
+      
+      try {
+        const response = await apiRequest("POST", "/api/events", data);
+        console.log("API response received:", response);
+        return response;
+      } catch (error) {
+        console.error("API request failed:", error);
+        throw error;
+      }
     },
     onSuccess: (result) => {
       console.log("Event created successfully:", result);
@@ -100,6 +105,7 @@ export default function EventsPage() {
     },
     onError: (error: any) => {
       console.error("Event creation failed:", error);
+      console.error("Full error details:", JSON.stringify(error, null, 2));
       toast({ title: "Failed to create event", variant: "destructive" });
     },
   });
