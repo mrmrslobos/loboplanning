@@ -21,12 +21,13 @@ import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const eventFormSchema = insertEventSchema.extend({
-  eventDate: z.string(),
+const eventFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  location: z.string().optional(),
+  template: z.string().optional(),
+  eventDate: z.string().min(1, "Date is required"),
   eventTime: z.string().optional(),
-}).omit({ 
-  userId: true,
-  familyId: true 
 });
 
 const taskFormSchema = insertTaskSchema.extend({}).omit({ 
@@ -172,6 +173,15 @@ export default function EventsPage() {
   const onCreateEvent = (data: EventFormData) => {
     console.log("onCreateEvent called with data:", data);
     console.log("Form errors:", eventForm.formState.errors);
+    console.log("Form validation state:", eventForm.formState.isValid);
+    
+    // Check if form has any validation errors
+    if (!eventForm.formState.isValid) {
+      console.log("Form is invalid, checking individual field errors:");
+      Object.keys(eventForm.formState.errors).forEach(field => {
+        console.log(`Error in ${field}:`, eventForm.formState.errors[field]);
+      });
+    }
     
     // Properly format the date by combining eventDate and eventTime
     const formattedDate = data.eventDate ? 
