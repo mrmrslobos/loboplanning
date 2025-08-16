@@ -547,77 +547,165 @@ export default function MealPlanning() {
               </div>
             </CardHeader>
             <CardContent>
-              {/* Meal Planning Grid */}
-              <div className="grid grid-cols-8 gap-2">
-                {/* Header Row */}
-                <div className="font-medium text-center p-2">Meal</div>
-                {getWeekDays().map(day => (
-                  <div key={day.toISOString()} className="font-medium text-center p-2">
-                    <div>{format(day, 'EEE')}</div>
-                    <div className="text-sm text-gray-500">{format(day, 'MMM dd')}</div>
-                  </div>
-                ))}
-                
-                {/* Meal Rows */}
-                {mealTypes.map(mealType => (
-                  <div key={mealType} className="contents">
-                    <div className="font-medium p-2 bg-gray-50 rounded-l-lg flex items-center">
-                      {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+              {/* Desktop Grid Layout */}
+              <div className="hidden lg:block">
+                <div className="grid grid-cols-8 gap-2">
+                  {/* Header Row */}
+                  <div className="font-medium text-center p-2">Meal</div>
+                  {daysOfWeek.map(day => {
+                    const dayDate = addDays(currentWeek, daysOfWeek.indexOf(day));
+                    return (
+                      <div key={day} className="font-medium text-center p-2">
+                        <div>{day.substring(0, 3)}</div>
+                        <div className="text-sm text-gray-500">{format(dayDate, 'MMM dd')}</div>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Meal Rows */}
+                  {mealTypes.map(mealType => (
+                    <div key={mealType} className="contents">
+                      <div className="font-medium p-2 bg-gray-50 rounded-l-lg flex items-center">
+                        {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+                      </div>
+                      {daysOfWeek.map(day => {
+                        const dayDate = addDays(currentWeek, daysOfWeek.indexOf(day));
+                        const dayKey = format(dayDate, 'EEEE').toLowerCase();
+                        const meal = getMealDisplay(dayKey, mealType);
+                        
+                        return (
+                          <div 
+                            key={`${dayKey}-${mealType}`}
+                            className="min-h-[80px] border-2 border-dashed border-gray-200 rounded-lg p-2 hover:border-gray-300 transition-colors"
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, dayKey, mealType)}
+                            data-testid={`meal-slot-${dayKey}-${mealType}`}
+                          >
+                            {meal ? (
+                              <div className="bg-white border rounded p-2 h-full flex flex-col justify-between">
+                                <div>
+                                  <div className="font-medium text-sm truncate">{meal.name}</div>
+                                  <Badge variant="outline" className="text-xs mt-1">
+                                    {meal.type === 'recipe' ? 'Recipe' : 'Custom'}
+                                  </Badge>
+                                </div>
+                                <div className="flex gap-1 mt-2">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => openMealSelection(dayKey, mealType)}
+                                    data-testid={`button-edit-meal-${dayKey}-${mealType}`}
+                                  >
+                                    <Edit3 className="w-3 h-3" />
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => removeMeal(dayKey, mealType)}
+                                    data-testid={`button-remove-meal-${dayKey}-${mealType}`}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div 
+                                className="h-full flex items-center justify-center text-gray-400 cursor-pointer hover:text-gray-600"
+                                onClick={() => openMealSelection(dayKey, mealType)}
+                              >
+                                <Plus className="w-6 h-6" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    {getWeekDays().map(day => {
-                      const dayKey = format(day, 'yyyy-MM-dd');
-                      const meal = getMealDisplay(dayKey, mealType);
-                      
-                      return (
-                        <div 
-                          key={`${dayKey}-${mealType}`}
-                          className="min-h-[80px] border-2 border-dashed border-gray-200 rounded-lg p-2 hover:border-gray-300 transition-colors"
-                          onDragOver={handleDragOver}
-                          onDrop={(e) => handleDrop(e, dayKey, mealType)}
-                          data-testid={`meal-slot-${dayKey}-${mealType}`}
-                        >
-                          {meal ? (
-                            <div className="bg-white border rounded p-2 h-full flex flex-col justify-between">
-                              <div>
-                                <div className="font-medium text-sm truncate">{meal.name}</div>
-                                <Badge variant="outline" className="text-xs mt-1">
-                                  {meal.type === 'recipe' ? 'Recipe' : 'Custom'}
-                                </Badge>
-                              </div>
-                              <div className="flex gap-1 mt-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-6 w-6 p-0"
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile Card Layout */}
+              <div className="lg:hidden space-y-4">
+                {daysOfWeek.map(day => {
+                  const dayDate = addDays(currentWeek, daysOfWeek.indexOf(day));
+                  const dayKey = format(dayDate, 'EEEE').toLowerCase();
+                  
+                  return (
+                    <Card key={day} className="border">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg font-semibold">
+                          {day}
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                          {format(dayDate, 'MMM dd, yyyy')}
+                        </p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mealTypes.map(mealType => {
+                          const meal = getMealDisplay(dayKey, mealType);
+                          
+                          return (
+                            <div key={mealType} className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-medium capitalize text-base">{mealType}</h4>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
                                   onClick={() => openMealSelection(dayKey, mealType)}
-                                  data-testid={`button-edit-meal-${dayKey}-${mealType}`}
+                                  data-testid={`button-add-meal-mobile-${dayKey}-${mealType}`}
                                 >
-                                  <Edit3 className="w-3 h-3" />
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-6 w-6 p-0"
-                                  onClick={() => removeMeal(dayKey, mealType)}
-                                  data-testid={`button-remove-meal-${dayKey}-${mealType}`}
-                                >
-                                  <Trash2 className="w-3 h-3" />
+                                  <Plus className="w-4 h-4 mr-1" />
+                                  Add
                                 </Button>
                               </div>
+                              
+                              {meal ? (
+                                <div className="border rounded-lg p-4 bg-gray-50">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className="font-medium text-base">{meal.name}</span>
+                                    <Badge variant={meal.type === 'recipe' ? 'default' : 'secondary'}>
+                                      {meal.type === 'recipe' ? 'Recipe' : 'Custom'}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => openMealSelection(dayKey, mealType)}
+                                      data-testid={`button-edit-meal-mobile-${dayKey}-${mealType}`}
+                                    >
+                                      <Edit3 className="w-4 h-4 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeMeal(dayKey, mealType)}
+                                      data-testid={`button-remove-meal-mobile-${dayKey}-${mealType}`}
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-1" />
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div 
+                                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-colors bg-gray-50"
+                                  onClick={() => openMealSelection(dayKey, mealType)}
+                                >
+                                  <Plus className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                                  <p className="text-sm text-gray-500">Tap to add {mealType}</p>
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <div 
-                              className="h-full flex items-center justify-center text-gray-400 cursor-pointer hover:text-gray-600"
-                              onClick={() => openMealSelection(dayKey, mealType)}
-                            >
-                              <Plus className="w-6 h-6" />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
+                          );
+                        })}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
