@@ -721,8 +721,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const event = await storage.createEvent(eventData);
       console.log('Created event:', event);
       res.json(event);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Event creation error:', error);
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
       res.status(400).json({ error: 'Invalid input', details: error.message });
     }
   });
