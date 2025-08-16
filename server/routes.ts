@@ -533,7 +533,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const eventData = insertCalendarEventSchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        familyId: req.user!.familyId
       });
       const event = await storage.createCalendarEvent(eventData);
       res.json(event);
@@ -556,7 +557,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const categoryData = insertBudgetCategorySchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        familyId: req.user!.familyId
       });
       const category = await storage.createBudgetCategory(categoryData);
       res.json(category);
@@ -578,7 +580,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const transactionData = insertBudgetTransactionSchema.parse({
         ...req.body,
-        userId: req.user!.id
+        userId: req.user!.id,
+        familyId: req.user!.familyId
       });
       const transaction = await storage.createBudgetTransaction(transactionData);
       res.json(transaction);
@@ -630,6 +633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postData = insertDevotionalPostSchema.parse({
         ...req.body,
         userId: req.user!.id,
+        familyId: req.user!.familyId,
         date: new Date(req.body.date) // Convert string to Date object
       });
       
@@ -670,7 +674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/devotional/comments/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const comment = await storage.updateDevotionalComment(req.params.id, req.body, req.user!.id);
+      const comment = await storage.updateDevotionalComment(req.params.id, req.body);
       if (!comment) {
         return res.status(404).json({ error: 'Comment not found or unauthorized' });
       }
@@ -682,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/devotional/comments/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const success = await storage.deleteDevotionalComment(req.params.id, req.user!.id);
+      const success = await storage.deleteDevotionalComment(req.params.id);
       if (!success) {
         return res.status(404).json({ error: 'Comment not found or unauthorized' });
       }
@@ -935,7 +939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/recipes/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const recipe = await storage.updateRecipe(req.params.id, req.body, req.user!.id);
+      const recipe = await storage.updateRecipe(req.params.id, req.body);
       if (!recipe) {
         return res.status(404).json({ error: 'Recipe not found' });
       }
@@ -948,7 +952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/recipes/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const success = await storage.deleteRecipe(req.params.id, req.user!.id);
+      const success = await storage.deleteRecipe(req.params.id);
       if (!success) {
         return res.status(404).json({ error: 'Recipe not found' });
       }
@@ -986,7 +990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/meal-plans/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const mealPlan = await storage.updateMealPlan(req.params.id, req.body, req.user!.id);
+      const mealPlan = await storage.updateMealPlan(req.params.id, req.body);
       if (!mealPlan) {
         return res.status(404).json({ error: 'Meal plan not found' });
       }
@@ -999,7 +1003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/meal-plans/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const success = await storage.deleteMealPlan(req.params.id, req.user!.id);
+      const success = await storage.deleteMealPlan(req.params.id);
       if (!success) {
         return res.status(404).json({ error: 'Meal plan not found' });
       }
@@ -1060,7 +1064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/reactions/:targetType/:targetId/:emoji', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { targetType, targetId, emoji } = req.params;
-      const success = await storage.deleteEmojiReaction(req.user!.id, targetType, targetId, decodeURIComponent(emoji));
+      const success = await storage.deleteEmojiReaction(targetType, targetId, decodeURIComponent(emoji), req.user!.id);
       
       if (success) {
         res.status(204).send();
