@@ -6,8 +6,14 @@ import {
   InsertChatMessage, DevotionalPost, InsertDevotionalPost, DevotionalComment, 
   InsertDevotionalComment, Event, InsertEvent, EventTask, InsertEventTask, 
   EventBudget, InsertEventBudget, MealieSettings, InsertMealieSettings, Recipe, 
-  InsertRecipe, MealPlan, InsertMealPlan, EmojiReaction, InsertEmojiReaction
+  InsertRecipe, MealPlan, InsertMealPlan, EmojiReaction, InsertEmojiReaction,
+  users, families, tasks, lists, listItems, calendarEvents, budgetCategories, 
+  budgetTransactions, chatMessages, devotionalPosts, devotionalComments, events, 
+  eventTasks, eventBudgets, recipes, mealPlans, mealieSettings, emojiReactions
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 function generateInviteCode(): string {
   const adjectives = ["BLUE", "RED", "GREEN", "GOLDEN", "SILVER", "PURPLE", "ORANGE", "PINK"];
@@ -653,4 +659,318 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// DatabaseStorage implementation
+
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        passwordHash: hashedPassword
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  // Family methods
+  async getFamily(id: string): Promise<Family | undefined> {
+    const [family] = await db.select().from(families).where(eq(families.id, id));
+    return family || undefined;
+  }
+
+  async getFamilyByInviteCode(inviteCode: string): Promise<Family | undefined> {
+    const [family] = await db.select().from(families).where(eq(families.inviteCode, inviteCode));
+    return family || undefined;
+  }
+
+  async createFamily(insertFamily: InsertFamily): Promise<Family> {
+    const [family] = await db
+      .insert(families)
+      .values(insertFamily)
+      .returning();
+    return family;
+  }
+
+  async getFamilyMembers(familyId: string): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.familyId, familyId));
+  }
+
+  // For now, delegate other methods to MemStorage to avoid breaking the app
+  private memStorage = new MemStorage();
+
+  async getTasks(userId: string, familyId?: string): Promise<Task[]> {
+    return this.memStorage.getTasks(userId, familyId);
+  }
+
+  async getTask(id: string): Promise<Task | undefined> {
+    return this.memStorage.getTask(id);
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    return this.memStorage.createTask(task);
+  }
+
+  async updateTask(id: string, task: Partial<Task>): Promise<Task | undefined> {
+    return this.memStorage.updateTask(id, task);
+  }
+
+  async deleteTask(id: string): Promise<boolean> {
+    return this.memStorage.deleteTask(id);
+  }
+
+  async getLists(userId: string, familyId?: string): Promise<List[]> {
+    return this.memStorage.getLists(userId, familyId);
+  }
+
+  async getList(id: string): Promise<List | undefined> {
+    return this.memStorage.getList(id);
+  }
+
+  async createList(list: InsertList): Promise<List> {
+    return this.memStorage.createList(list);
+  }
+
+  async updateList(id: string, list: Partial<List>): Promise<List | undefined> {
+    return this.memStorage.updateList(id, list);
+  }
+
+  async deleteList(id: string): Promise<boolean> {
+    return this.memStorage.deleteList(id);
+  }
+
+  async getListItems(listId: string): Promise<ListItem[]> {
+    return this.memStorage.getListItems(listId);
+  }
+
+  async createListItem(item: InsertListItem): Promise<ListItem> {
+    return this.memStorage.createListItem(item);
+  }
+
+  async updateListItem(id: string, item: Partial<ListItem>): Promise<ListItem | undefined> {
+    return this.memStorage.updateListItem(id, item);
+  }
+
+  async deleteListItem(id: string): Promise<boolean> {
+    return this.memStorage.deleteListItem(id);
+  }
+
+  async getCalendarEvents(userId: string, familyId?: string): Promise<CalendarEvent[]> {
+    return this.memStorage.getCalendarEvents(userId, familyId);
+  }
+
+  async createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent> {
+    return this.memStorage.createCalendarEvent(event);
+  }
+
+  async updateCalendarEvent(id: string, event: Partial<CalendarEvent>): Promise<CalendarEvent | undefined> {
+    return this.memStorage.updateCalendarEvent(id, event);
+  }
+
+  async deleteCalendarEvent(id: string): Promise<boolean> {
+    return this.memStorage.deleteCalendarEvent(id);
+  }
+
+  async getBudgetCategories(userId: string, familyId?: string): Promise<BudgetCategory[]> {
+    return this.memStorage.getBudgetCategories(userId, familyId);
+  }
+
+  async createBudgetCategory(category: InsertBudgetCategory): Promise<BudgetCategory> {
+    return this.memStorage.createBudgetCategory(category);
+  }
+
+  async updateBudgetCategory(id: string, category: Partial<BudgetCategory>): Promise<BudgetCategory | undefined> {
+    return this.memStorage.updateBudgetCategory(id, category);
+  }
+
+  async deleteBudgetCategory(id: string): Promise<boolean> {
+    return this.memStorage.deleteBudgetCategory(id);
+  }
+
+  async getBudgetTransactions(userId: string, familyId?: string): Promise<BudgetTransaction[]> {
+    return this.memStorage.getBudgetTransactions(userId, familyId);
+  }
+
+  async createBudgetTransaction(transaction: InsertBudgetTransaction): Promise<BudgetTransaction> {
+    return this.memStorage.createBudgetTransaction(transaction);
+  }
+
+  async updateBudgetTransaction(id: string, transaction: Partial<BudgetTransaction>): Promise<BudgetTransaction | undefined> {
+    return this.memStorage.updateBudgetTransaction(id, transaction);
+  }
+
+  async deleteBudgetTransaction(id: string): Promise<boolean> {
+    return this.memStorage.deleteBudgetTransaction(id);
+  }
+
+  async getChatMessages(familyId: string, limit?: number): Promise<ChatMessage[]> {
+    return this.memStorage.getChatMessages(familyId, limit);
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    return this.memStorage.createChatMessage(message);
+  }
+
+  async getDevotionalPosts(userId: string, familyId?: string): Promise<DevotionalPost[]> {
+    return this.memStorage.getDevotionalPosts(userId, familyId);
+  }
+
+  async createDevotionalPost(post: InsertDevotionalPost): Promise<DevotionalPost> {
+    return this.memStorage.createDevotionalPost(post);
+  }
+
+  async updateDevotionalPost(id: string, post: Partial<DevotionalPost>): Promise<DevotionalPost | undefined> {
+    return this.memStorage.updateDevotionalPost(id, post);
+  }
+
+  async deleteDevotionalPost(id: string): Promise<boolean> {
+    return this.memStorage.deleteDevotionalPost(id);
+  }
+
+  async getDevotionalComments(postId: string): Promise<DevotionalComment[]> {
+    return this.memStorage.getDevotionalComments(postId);
+  }
+
+  async createDevotionalComment(comment: InsertDevotionalComment): Promise<DevotionalComment> {
+    return this.memStorage.createDevotionalComment(comment);
+  }
+
+  async updateDevotionalComment(id: string, comment: Partial<DevotionalComment>): Promise<DevotionalComment | undefined> {
+    return this.memStorage.updateDevotionalComment(id, comment);
+  }
+
+  async deleteDevotionalComment(id: string): Promise<boolean> {
+    return this.memStorage.deleteDevotionalComment(id);
+  }
+
+  async getEvents(userId: string, familyId?: string): Promise<Event[]> {
+    return this.memStorage.getEvents(userId, familyId);
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    return this.memStorage.createEvent(event);
+  }
+
+  async updateEvent(id: string, event: Partial<Event>): Promise<Event | undefined> {
+    return this.memStorage.updateEvent(id, event);
+  }
+
+  async deleteEvent(id: string): Promise<boolean> {
+    return this.memStorage.deleteEvent(id);
+  }
+
+  async getEventTasks(eventId: string): Promise<EventTask[]> {
+    return this.memStorage.getEventTasks(eventId);
+  }
+
+  async createEventTask(task: InsertEventTask): Promise<EventTask> {
+    return this.memStorage.createEventTask(task);
+  }
+
+  async updateEventTask(id: string, task: Partial<EventTask>): Promise<EventTask | undefined> {
+    return this.memStorage.updateEventTask(id, task);
+  }
+
+  async deleteEventTask(id: string): Promise<boolean> {
+    return this.memStorage.deleteEventTask(id);
+  }
+
+  async getEventBudget(eventId: string): Promise<EventBudget[]> {
+    return this.memStorage.getEventBudget(eventId);
+  }
+
+  async createEventBudget(budget: InsertEventBudget): Promise<EventBudget> {
+    return this.memStorage.createEventBudget(budget);
+  }
+
+  async updateEventBudget(id: string, budget: Partial<EventBudget>): Promise<EventBudget | undefined> {
+    return this.memStorage.updateEventBudget(id, budget);
+  }
+
+  async deleteEventBudget(id: string): Promise<boolean> {
+    return this.memStorage.deleteEventBudget(id);
+  }
+
+  async getRecipes(userId: string, familyId?: string): Promise<Recipe[]> {
+    return this.memStorage.getRecipes(userId, familyId);
+  }
+
+  async createRecipe(recipe: InsertRecipe): Promise<Recipe> {
+    return this.memStorage.createRecipe(recipe);
+  }
+
+  async updateRecipe(id: string, recipe: Partial<Recipe>): Promise<Recipe | undefined> {
+    return this.memStorage.updateRecipe(id, recipe);
+  }
+
+  async deleteRecipe(id: string): Promise<boolean> {
+    return this.memStorage.deleteRecipe(id);
+  }
+
+  async getMealPlans(userId: string, familyId?: string): Promise<MealPlan[]> {
+    return this.memStorage.getMealPlans(userId, familyId);
+  }
+
+  async createMealPlan(mealPlan: InsertMealPlan): Promise<MealPlan> {
+    return this.memStorage.createMealPlan(mealPlan);
+  }
+
+  async updateMealPlan(id: string, mealPlan: Partial<MealPlan>): Promise<MealPlan | undefined> {
+    return this.memStorage.updateMealPlan(id, mealPlan);
+  }
+
+  async deleteMealPlan(id: string): Promise<boolean> {
+    return this.memStorage.deleteMealPlan(id);
+  }
+
+  async getMealieSettings(userId: string): Promise<MealieSettings | undefined> {
+    return this.memStorage.getMealieSettings(userId);
+  }
+
+  async createMealieSettings(settings: InsertMealieSettings): Promise<MealieSettings> {
+    return this.memStorage.createMealieSettings(settings);
+  }
+
+  async updateMealieSettings(id: string, settings: Partial<MealieSettings>): Promise<MealieSettings | undefined> {
+    return this.memStorage.updateMealieSettings(id, settings);
+  }
+
+  async deleteMealieSettings(id: string): Promise<boolean> {
+    return this.memStorage.deleteMealieSettings(id);
+  }
+
+  async getEmojiReactions(targetType: string, targetId: string): Promise<EmojiReaction[]> {
+    return this.memStorage.getEmojiReactions(targetType, targetId);
+  }
+
+  async createEmojiReaction(reaction: InsertEmojiReaction): Promise<EmojiReaction> {
+    return this.memStorage.createEmojiReaction(reaction);
+  }
+
+  async deleteEmojiReaction(id: string): Promise<boolean> {
+    return this.memStorage.deleteEmojiReaction(id);
+  }
+}
+
+export const storage = new DatabaseStorage();

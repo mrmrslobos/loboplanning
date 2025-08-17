@@ -246,6 +246,9 @@ export const emojiReactions = pgTable("emoji_reactions", {
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+  passwordHash: true,
+}).extend({
+  password: z.string().min(6)
 });
 
 export const insertFamilySchema = createInsertSchema(families).omit({
