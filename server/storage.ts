@@ -12,7 +12,7 @@ import {
   eventTasks, eventBudget, recipes, mealPlans, mealieSettings, emojiReactions
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, isNull } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 function generateInviteCode(): string {
@@ -236,7 +236,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTask(id: string): Promise<boolean> {
     const result = await db.delete(tasks).where(eq(tasks.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // List methods
@@ -645,10 +645,7 @@ export class DatabaseStorage implements IStorage {
   async createRecipe(insertRecipe: InsertRecipe): Promise<Recipe> {
     const [recipe] = await db
       .insert(recipes)
-      .values({
-        ...insertRecipe,
-        familyId: insertRecipe.familyId || null
-      })
+      .values(insertRecipe)
       .returning();
     return recipe;
   }
@@ -688,10 +685,7 @@ export class DatabaseStorage implements IStorage {
   async createMealPlan(insertMealPlan: InsertMealPlan): Promise<MealPlan> {
     const [mealPlan] = await db
       .insert(mealPlans)
-      .values({
-        ...insertMealPlan,
-        familyId: insertMealPlan.familyId || null
-      })
+      .values(insertMealPlan)
       .returning();
     return mealPlan;
   }
