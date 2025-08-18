@@ -385,3 +385,68 @@ export type InsertMealieSettings = z.infer<typeof insertMealieSettingsSchema>;
 
 export type EmojiReaction = typeof emojiReactions.$inferSelect;
 export type InsertEmojiReaction = z.infer<typeof insertEmojiReactionSchema>;
+
+// Family Achievement System
+
+export const familyAchievements = pgTable("family_achievements", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  familyId: text("family_id").notNull().references(() => families.id, { onDelete: "cascade" }),
+  badgeId: varchar("badge_id", { length: 100 }).notNull(),
+  unlockedAt: timestamp("unlocked_at").notNull().defaultNow(),
+  unlockedBy: text("unlocked_by").notNull().references(() => users.id),
+  metadata: jsonb("metadata"), // Additional data like progress, count, etc.
+  createdAt: timestamp("created_at").notNull().defaultNow()
+});
+
+export const familyLevels = pgTable("family_levels", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  familyId: text("family_id").notNull().references(() => families.id, { onDelete: "cascade" }).unique(),
+  level: integer("level").notNull().default(1),
+  totalPoints: integer("total_points").notNull().default(0),
+  currentLevelPoints: integer("current_level_points").notNull().default(0),
+  pointsToNextLevel: integer("points_to_next_level").notNull().default(100),
+  updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+export const achievementProgress = pgTable("achievement_progress", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  familyId: text("family_id").notNull().references(() => families.id, { onDelete: "cascade" }),
+  badgeId: varchar("badge_id", { length: 100 }).notNull(),
+  currentProgress: integer("current_progress").notNull().default(0),
+  targetProgress: integer("target_progress").notNull(),
+  metadata: jsonb("metadata"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
+
+// Relations (simplified for now)
+// export const familyAchievementsRelations = relations(familyAchievements, ({ one }) => ({
+//   family: one(families, {
+//     fields: [familyAchievements.familyId],
+//     references: [families.id]
+//   }),
+//   unlockedByUser: one(users, {
+//     fields: [familyAchievements.unlockedBy],
+//     references: [users.id]
+//   })
+// }));
+
+// Zod schemas for achievements
+export const insertFamilyAchievementSchema = createInsertSchema(familyAchievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFamilyLevelSchema = createInsertSchema(familyLevels).omit({
+  id: true,
+});
+
+export const insertAchievementProgressSchema = createInsertSchema(achievementProgress).omit({
+  id: true,
+});
+
+export type FamilyAchievement = typeof familyAchievements.$inferSelect;
+export type InsertFamilyAchievement = z.infer<typeof insertFamilyAchievementSchema>;
+export type FamilyLevel = typeof familyLevels.$inferSelect;
+export type InsertFamilyLevel = z.infer<typeof insertFamilyLevelSchema>;
+export type AchievementProgress = typeof achievementProgress.$inferSelect;
+export type InsertAchievementProgress = z.infer<typeof insertAchievementProgressSchema>;

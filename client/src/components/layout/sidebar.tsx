@@ -3,7 +3,7 @@ import { cn, generateInitials } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   Home, ListTodo, List, Calendar, MessageCircle, 
-  Wallet, Utensils, BookOpen, CalendarDays, 
+  Wallet, Utensils, BookOpen, CalendarDays, Trophy,
   LogOut, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ const navItems: NavItem[] = [
   { href: "/chat", label: "Chat", icon: MessageCircle },
   { href: "/budget", label: "Budget", icon: Wallet },
   { href: "/meal-planning", label: "Meal Planning", icon: Utensils },
+  { href: "/achievements", label: "Achievements", icon: Trophy },
   { href: "/devotional", label: "Devotional", icon: BookOpen },
   { href: "/events", label: "Events", icon: CalendarDays },
 ];

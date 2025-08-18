@@ -90,8 +90,39 @@ export default function TasksPage() {
     mutationFn: async ({ id, data }: { id: string; data: Partial<Task> }) => {
       return await apiRequest("PATCH", `/api/tasks/${id}`, data);
     },
-    onSuccess: () => {
+    onSuccess: async (updatedTask, { data }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      
+      // Check for achievements when task is completed
+      if (data.status === "complete") {
+        try {
+          const achievementResult = await apiRequest('POST', '/api/achievements/check', {
+            action: 'task_completed',
+            data: {
+              taskId: updatedTask.id,
+              taskTitle: updatedTask.title,
+              priority: updatedTask.priority,
+              completedAt: new Date().toISOString()
+            }
+          });
+
+          // Show achievement notifications
+          if (achievementResult.newAchievements?.length > 0) {
+            toast({
+              title: "🏆 Achievement Unlocked!",
+              description: `You earned ${achievementResult.pointsEarned} points and ${achievementResult.totalNewBadges} new badge${achievementResult.totalNewBadges > 1 ? 's' : ''}!`,
+              duration: 5000,
+            });
+            
+            // Invalidate achievement queries to refresh the data
+            queryClient.invalidateQueries({ queryKey: ['/api/achievements/family-achievements'] });
+            queryClient.invalidateQueries({ queryKey: ['/api/achievements/family-level'] });
+          }
+        } catch (error) {
+          console.error('Achievement check failed:', error);
+        }
+      }
+
       toast({ title: "Task updated successfully" });
     },
   });

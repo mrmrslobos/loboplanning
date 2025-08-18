@@ -14,6 +14,14 @@ import {
 } from "@shared/schema";
 import { categorizeItem } from "./ai-categorizer";
 import { generateTaskRecommendations, analyzeProductivityPatterns } from "./ai-task-recommender";
+import { 
+  ACHIEVEMENT_BADGES, 
+  calculateLevelFromPoints,
+  checkTaskCompletionAchievements,
+  checkCollaborationAchievements,
+  checkMilestoneAchievements,
+  calculateBadgePoints
+} from "./achievement-system";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -432,6 +440,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Productivity insights error:', error);
       res.status(500).json({ error: 'Failed to analyze productivity patterns' });
+    }
+  });
+
+  // Achievement System routes
+  app.get('/api/achievements/badges', (req: Request, res: Response) => {
+    res.json({ badges: ACHIEVEMENT_BADGES });
+  });
+
+  app.get('/api/achievements/family-level', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.user?.familyId) {
+        return res.status(400).json({ error: 'No family found for user' });
+      }
+
+      let familyLevel = await storage.getFamilyLevel(req.user.familyId);
+      if (!familyLevel) {
+        // Initialize family level if it doesn't exist
+        familyLevel = await storage.createOrUpdateFamilyLevel(req.user.familyId, {
+          level: 1,
+          totalPoints: 0,
+          currentLevelPoints: 0,
+          pointsToNextLevel: 100
+        });
+      }
+
+      res.json(familyLevel);
+    } catch (error) {
+      console.error('Family level fetch error:', error);
+      res.status(500).json({ error: 'Failed to fetch family level' });
+    }
+  });
+
+  app.get('/api/achievements/family-achievements', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.user?.familyId) {
+        return res.status(400).json({ error: 'No family found for user' });
+      }
+
+      const achievements = await storage.getFamilyAchievements(req.user.familyId);
+      const progress = await storage.getAchievementProgress(req.user.familyId);
+
+      res.json({ achievements, progress });
+    } catch (error) {
+      console.error('Family achievements fetch error:', error);
+      res.status(500).json({ error: 'Failed to fetch family achievements' });
+    }
+  });
+
+  app.post('/api/achievements/check', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.user?.familyId) {
+        return res.status(400).json({ error: 'No family found for user' });
+      }
+
+      const { action, data } = req.body;
+
+      // Get current family stats
+      const tasks = await storage.getTasks(req.user.id, req.user.familyId);
+      const familyMembers = await storage.getFamilyMembers(req.user.familyId);
+      const currentLevel = await storage.getFamilyLevel(req.user.familyId);
+
+      // Check for new achievements based on the action
+      let newBadges: string[] = [];
+      
+      if (action === 'task_completed') {
+        const completedTasks = tasks.filter(t => t.completed);
+        newBadges.push(...checkTaskCompletionAchievements(
+          {
+            familyId: req.user.familyId,
+            userId: req.user.id,
+            action: 'task_completed',
+            timestamp: new Date(),
+            data
+          },
+          completedTasks.length,
+          data.completionStreak || 0,
+          new Date()
+        ));
+
+        newBadges.push(...checkCollaborationAchievements(
+          {
+            familyId: req.user.familyId,
+            userId: req.user.id,
+            action: 'task_completed',
+            timestamp: new Date()
+          },
+          completedTasks.length,
+          familyMembers.length,
+          familyMembers.length
+        ));
+      }
+
+      // Process new achievements
+      const earnedAchievements = [];
+      const badgePoints = calculateBadgePoints(newBadges);
+
+      for (const badgeId of newBadges) {
+        // Check if already earned
+        const existingAchievements = await storage.getFamilyAchievements(req.user.familyId);
+        const alreadyEarned = existingAchievements.some(a => a.badgeId === badgeId);
+        
+        if (!alreadyEarned) {
+          const achievement = await storage.createFamilyAchievement({
+            familyId: req.user.familyId,
+            badgeId,
+            unlockedBy: req.user.id,
+            metadata: data
+          });
+          earnedAchievements.push(achievement);
+        }
+      }
+
+      // Update family level if points were earned
+      if (badgePoints > 0) {
+        const currentTotalPoints = (currentLevel?.totalPoints || 0) + badgePoints;
+        const levelInfo = calculateLevelFromPoints(currentTotalPoints);
+        
+        await storage.createOrUpdateFamilyLevel(req.user.familyId, {
+          level: levelInfo.level,
+          totalPoints: currentTotalPoints,
+          currentLevelPoints: levelInfo.currentLevelPoints,
+          pointsToNextLevel: levelInfo.pointsToNextLevel
+        });
+      }
+
+      res.json({ 
+        newAchievements: earnedAchievements,
+        pointsEarned: badgePoints,
+        totalNewBadges: newBadges.length
+      });
+    } catch (error) {
+      console.error('Achievement check error:', error);
+      res.status(500).json({ error: 'Failed to check achievements' });
     }
   });
 

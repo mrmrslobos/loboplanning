@@ -9,7 +9,10 @@ import {
   InsertRecipe, MealPlan, InsertMealPlan, EmojiReaction, InsertEmojiReaction,
   users, families, tasks, lists, listItems, calendarEvents, budgetCategories, 
   budgetTransactions, chatMessages, devotionalPosts, devotionalComments, events, 
-  eventTasks, eventBudget, recipes, mealPlans, mealieSettings, emojiReactions
+  eventTasks, eventBudget, recipes, mealPlans, mealieSettings, emojiReactions,
+  familyAchievements, familyLevels, achievementProgress, type FamilyAchievement,
+  type FamilyLevel, type AchievementProgress, type InsertFamilyAchievement,
+  type InsertFamilyLevel, type InsertAchievementProgress
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, isNull } from "drizzle-orm";
@@ -134,6 +137,14 @@ export interface IStorage {
   
   // Admin method
   clearAllData(): Promise<void>;
+
+  // Achievement system methods
+  getFamilyLevel(familyId: string): Promise<FamilyLevel | undefined>;
+  createOrUpdateFamilyLevel(familyId: string, level: Partial<FamilyLevel>): Promise<FamilyLevel>;
+  getFamilyAchievements(familyId: string): Promise<FamilyAchievement[]>;
+  createFamilyAchievement(achievement: InsertFamilyAchievement): Promise<FamilyAchievement>;
+  getAchievementProgress(familyId: string): Promise<AchievementProgress[]>;
+  updateAchievementProgress(familyId: string, badgeId: string, progress: Partial<AchievementProgress>): Promise<AchievementProgress>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -767,6 +778,89 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
+  // Achievement system methods
+  async getFamilyLevel(familyId: string): Promise<FamilyLevel | undefined> {
+    const [level] = await db.select().from(familyLevels).where(eq(familyLevels.familyId, familyId));
+    return level || undefined;
+  }
+
+  async createOrUpdateFamilyLevel(familyId: string, levelData: Partial<FamilyLevel>): Promise<FamilyLevel> {
+    const existing = await this.getFamilyLevel(familyId);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(familyLevels)
+        .set({ ...levelData, updatedAt: new Date() })
+        .where(eq(familyLevels.familyId, familyId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(familyLevels)
+        .values({
+          familyId,
+          level: 1,
+          totalPoints: 0,
+          currentLevelPoints: 0,
+          pointsToNextLevel: 100,
+          ...levelData
+        })
+        .returning();
+      return created;
+    }
+  }
+
+  async getFamilyAchievements(familyId: string): Promise<FamilyAchievement[]> {
+    return await db.select().from(familyAchievements).where(eq(familyAchievements.familyId, familyId));
+  }
+
+  async createFamilyAchievement(achievement: InsertFamilyAchievement): Promise<FamilyAchievement> {
+    const [created] = await db
+      .insert(familyAchievements)
+      .values(achievement)
+      .returning();
+    return created;
+  }
+
+  async getAchievementProgress(familyId: string): Promise<AchievementProgress[]> {
+    return await db.select().from(achievementProgress).where(eq(achievementProgress.familyId, familyId));
+  }
+
+  async updateAchievementProgress(familyId: string, badgeId: string, progressData: Partial<AchievementProgress>): Promise<AchievementProgress> {
+    const existing = await db.select().from(achievementProgress).where(
+      and(
+        eq(achievementProgress.familyId, familyId),
+        eq(achievementProgress.badgeId, badgeId)
+      )
+    );
+    
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(achievementProgress)
+        .set({ ...progressData, updatedAt: new Date() })
+        .where(
+          and(
+            eq(achievementProgress.familyId, familyId),
+            eq(achievementProgress.badgeId, badgeId)
+          )
+        )
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(achievementProgress)
+        .values({
+          familyId,
+          badgeId,
+          currentProgress: 0,
+          targetProgress: 1,
+          ...progressData
+        })
+        .returning();
+      return created;
+    }
+  }
+
   // Admin method
   async clearAllData(): Promise<void> {
     // Delete all data in correct order to handle foreign key constraints
@@ -786,6 +880,9 @@ export class DatabaseStorage implements IStorage {
     await db.delete(listItems);
     await db.delete(lists);
     await db.delete(tasks);
+    await db.delete(achievementProgress);
+    await db.delete(familyAchievements);
+    await db.delete(familyLevels);
     await db.delete(users);
     await db.delete(families);
   }
