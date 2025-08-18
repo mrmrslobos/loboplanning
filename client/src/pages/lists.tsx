@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const listFormSchema = insertListSchema.omit({ 
   userId: true, 
   familyId: true 
+}).extend({
+  isShared: z.boolean().default(false)
 });
 const itemFormSchema = insertListItemSchema.omit({ 
   id: true, 
@@ -38,7 +41,7 @@ const templateOptions = [
   { value: "task-checklist", label: "Task Checklist", icon: CheckSquare },
 ];
 
-const categoryOptions = [
+const listCategoryOptions = [
   "Household",
   "Groceries", 
   "Travel",
@@ -48,11 +51,101 @@ const categoryOptions = [
   "Events",
 ];
 
+const shoppingCategories = [
+  "Produce",
+  "Meat & Seafood", 
+  "Dairy & Eggs",
+  "Bakery",
+  "Pantry & Canned Goods",
+  "Frozen Foods",
+  "Beverages",
+  "Snacks & Candy",
+  "Health & Beauty",
+  "Household & Cleaning",
+  "Pet Supplies",
+  "Other"
+];
+
+// Shopping List Component with Categories
+function ShoppingListView({ items, onItemToggle, onEditItem }: {
+  items: ListItem[];
+  onItemToggle: (id: string, completed: boolean) => void;
+  onEditItem: (item: ListItem) => void;
+}) {
+  // Group items by category
+  const groupedItems = items.reduce((acc, item) => {
+    const category = item.category || 'Other';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(item);
+    return acc;
+  }, {} as Record<string, ListItem[]>);
+
+  const relevantCategories = shoppingCategories.filter(cat => 
+    groupedItems[cat] && groupedItems[cat].length > 0
+  );
+
+  return (
+    <div className="space-y-4">
+      {relevantCategories.map(category => (
+        <div key={category} className="space-y-2">
+          <div className="flex items-center gap-2 px-4 py-2 bg-muted/30">
+            <div className="w-4 h-4 rounded bg-primary/20" />
+            <h3 className="text-sm font-medium text-primary">{category}</h3>
+          </div>
+          {groupedItems[category].map(item => (
+            <div 
+              key={item.id}
+              className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors group ${
+                item.completed ? "opacity-60" : ""
+              }`}
+              onClick={() => onEditItem(item)}
+              data-testid={`item-${item.id}`}
+            >
+              <Checkbox
+                checked={item.completed || false}
+                onCheckedChange={(checked) => {
+                  onItemToggle(item.id, checked as boolean);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                data-testid={`checkbox-item-${item.id}`}
+              />
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm ${item.completed ? "line-through text-muted-foreground" : ""}`}>
+                  {item.title}
+                  {item.quantity && (
+                    <span className="text-xs text-muted-foreground ml-2">• {item.quantity}</span>
+                  )}
+                </div>
+                {item.notes && (
+                  <div className="text-xs text-muted-foreground mt-1">{item.notes}</div>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditItem(item);
+                }}
+                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
+                data-testid={`edit-item-${item.id}`}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ListsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [selectedList, setSelectedList] = useState<List | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState("custom");
+  const [newItemName, setNewItemName] = useState("");
+  const [editingItem, setEditingItem] = useState<ListItem | null>(null);
   const { toast } = useToast();
 
   const { data: lists = [], isLoading } = useQuery<List[]>({
@@ -135,6 +228,7 @@ export default function ListsPage() {
       description: "",
       template: "custom",
       category: "",
+      isShared: false,
     },
   });
 
@@ -151,7 +245,12 @@ export default function ListsPage() {
   const onCreateList = (data: ListFormData) => {
     console.log("onCreateList called with data:", data);
     console.log("Form errors:", listForm.formState.errors);
-    createListMutation.mutate(data);
+    const { isShared, ...listData } = data;
+    const payload = {
+      ...listData,
+      familyId: isShared ? 'current' : null // Backend will set actual family ID
+    };
+    createListMutation.mutate(payload);
   };
 
   const onAddItem = (data: ItemFormData) => {
@@ -165,6 +264,18 @@ export default function ListsPage() {
   const handleItemToggle = (itemId: string, completed: boolean) => {
     updateItemMutation.mutate({ id: itemId, data: { completed } });
   };
+
+  // Effect to populate edit form when editingItem changes
+  React.useEffect(() => {
+    if (editingItem) {
+      itemForm.reset({
+        title: editingItem.title,
+        quantity: editingItem.quantity || "",
+        notes: editingItem.notes || "",
+        category: editingItem.category || "",
+      });
+    }
+  }, [editingItem, itemForm]);
 
   const getTemplateIcon = (template: string) => {
     const templateConfig = templateOptions.find(t => t.value === template);
@@ -313,7 +424,7 @@ export default function ListsPage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="z-[10000]">
-                              {categoryOptions.map((category) => (
+                              {listCategoryOptions.map((category) => (
                                 <SelectItem key={category} value={category}>
                                   {category}
                                 </SelectItem>
@@ -321,6 +432,29 @@ export default function ListsPage() {
                             </SelectContent>
                           </Select>
                           <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={listForm.control}
+                      name="isShared"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              Share with Family
+                            </FormLabel>
+                            <div className="text-sm text-muted-foreground">
+                              Allow family members to view and edit this list
+                            </div>
+                          </div>
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              data-testid="checkbox-share-list"
+                            />
+                          </FormControl>
                         </FormItem>
                       )}
                     />
@@ -398,9 +532,20 @@ export default function ListsPage() {
                       </DropdownMenu>
                     </div>
                     {list.category && (
-                      <Badge variant="secondary" className="text-xs w-fit">
-                        {list.category}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs w-fit">
+                          {list.category}
+                        </Badge>
+                        {list.familyId ? (
+                          <Badge variant="outline" className="text-xs w-fit">
+                            Shared
+                          </Badge>
+                        ) : (
+                          <Badge variant="default" className="text-xs w-fit">
+                            Private
+                          </Badge>
+                        )}
+                      </div>
                     )}
                   </CardHeader>
                 </Card>
@@ -422,224 +567,311 @@ export default function ListsPage() {
           </div>
         </div>
 
-        {/* List Items */}
+        {/* List Detail View - AnyList Style */}
         <div className="lg:col-span-8">
           {selectedList ? (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold">{selectedList.title}</h2>
-                  {selectedList.description && (
-                    <p className="text-sm text-muted-foreground">{selectedList.description}</p>
-                  )}
-                  <div className="flex items-center space-x-4 mt-2">
-                    <div className="text-sm text-muted-foreground">
-                      {completedCount} of {totalCount} items completed
-                    </div>
-                    <div className="flex-1 max-w-32">
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full transition-all duration-300" 
-                          style={{ width: `${progressPercentage}%` }}
-                        />
-                      </div>
+            <div className="bg-card rounded-lg border overflow-hidden">
+              {/* Header */}
+              <div className="bg-muted/50 p-4 border-b">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">{selectedList.title}</h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-muted-foreground">
+                        {totalCount} items
+                      </span>
+                      {selectedList.familyId && (
+                        <span className="text-sm text-muted-foreground">• Shared with family</span>
+                      )}
                     </div>
                   </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => deleteListMutation.mutate(selectedList.id)}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete List
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <Button 
-                  data-testid="button-add-item"
-                  onClick={() => {
-                    console.log("Add Item button clicked!");
-                    setIsAddItemDialogOpen(true);
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Item
-                </Button>
-                
-                <Dialog open={isAddItemDialogOpen} onOpenChange={setIsAddItemDialogOpen}>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Add Item</DialogTitle>
-                    </DialogHeader>
-                    <Form {...itemForm}>
-                      <form onSubmit={itemForm.handleSubmit(onAddItem)} className="space-y-4">
-                        <FormField
-                          control={itemForm.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Item</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  placeholder="Enter item name" 
-                                  {...field} 
-                                  data-testid="input-item-title"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={itemForm.control}
-                          name="quantity"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Quantity (Optional)</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  placeholder="e.g., 2, 1kg, 3 boxes" 
-                                  {...field} 
-                                  value={field.value || ""}
-                                  data-testid="input-item-quantity"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={itemForm.control}
-                          name="notes"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Notes (Optional)</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Additional notes" 
-                                  {...field} 
-                                  value={field.value || ""}
-                                  data-testid="input-item-notes"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={itemForm.control}
-                          name="category"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Category (Optional)</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  placeholder="e.g., Produce, Dairy, Personal" 
-                                  {...field} 
-                                  value={field.value || ""}
-                                  data-testid="input-item-category"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setIsAddItemDialogOpen(false)}
-                            data-testid="button-cancel-item"
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            disabled={createItemMutation.isPending}
-                            data-testid="button-submit-item"
-                          >
-                            {createItemMutation.isPending ? "Adding..." : "Add Item"}
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
               </div>
 
-              {/* List Items */}
-              <div className="space-y-2">
+              {/* Add Item Input */}
+              <div className="p-4 border-b bg-background">
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Add Item"
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newItemName.trim()) {
+                        const newItem = {
+                          title: newItemName.trim(),
+                          listId: selectedList.id,
+                          completed: false,
+                          category: selectedList.template === 'shopping' ? 'Other' : undefined
+                        };
+                        createItemMutation.mutate(newItem);
+                        setNewItemName('');
+                      }
+                    }}
+                    className="flex-1"
+                    data-testid="input-add-item"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (newItemName.trim()) {
+                        const newItem = {
+                          title: newItemName.trim(),
+                          listId: selectedList.id,
+                          completed: false,
+                          category: selectedList.template === 'shopping' ? 'Other' : undefined
+                        };
+                        createItemMutation.mutate(newItem);
+                        setNewItemName('');
+                      }
+                    }}
+                    disabled={!newItemName.trim() || createItemMutation.isPending}
+                    data-testid="button-add-item"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Items organized by category */}
+              <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
                 {isLoadingItems ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2 p-4">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center space-x-3 p-3 border rounded animate-pulse">
+                      <div key={i} className="flex items-center space-x-3 p-3 animate-pulse">
                         <div className="w-4 h-4 bg-gray-200 rounded"></div>
                         <div className="flex-1 h-4 bg-gray-200 rounded"></div>
-                        <div className="w-8 h-4 bg-gray-200 rounded"></div>
                       </div>
                     ))}
                   </div>
                 ) : listItems.length > 0 ? (
-                  listItems.map((item) => (
-                    <div 
-                      key={item.id} 
-                      className={`flex items-center space-x-3 p-3 border rounded hover:bg-accent transition-colors ${
-                        item.completed ? "bg-muted/50" : ""
-                      }`}
-                      data-testid={`item-${item.id}`}
-                    >
-                      <Checkbox
-                        checked={item.completed || false}
-                        onCheckedChange={(checked) => 
-                          handleItemToggle(item.id, checked as boolean)
-                        }
-                        data-testid={`checkbox-item-${item.id}`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className={`font-medium ${item.completed ? "line-through text-muted-foreground" : ""}`}>
-                          {item.title}
-                          {item.quantity && (
-                            <span className="text-sm text-muted-foreground ml-2">({item.quantity})</span>
-                          )}
+                  selectedList.template === 'shopping' ? (
+                    // Shopping list with categories
+                    <ShoppingListView 
+                      items={listItems} 
+                      onItemToggle={handleItemToggle}
+                      onEditItem={setEditingItem}
+                    />
+                  ) : (
+                    // Regular list view
+                    <div className="space-y-1">
+                      {listItems.map(item => (
+                        <div 
+                          key={item.id}
+                          className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors ${
+                            item.completed ? "opacity-60" : ""
+                          }`}
+                          onClick={() => setEditingItem(item)}
+                          data-testid={`item-${item.id}`}
+                        >
+                          <Checkbox
+                            checked={item.completed || false}
+                            onCheckedChange={(checked) => {
+                              handleItemToggle(item.id, checked as boolean);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            data-testid={`checkbox-item-${item.id}`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-sm ${item.completed ? "line-through text-muted-foreground" : ""}`}>
+                              {item.title}
+                              {item.quantity && (
+                                <span className="text-xs text-muted-foreground ml-2">• {item.quantity}</span>
+                              )}
+                            </div>
+                            {item.notes && (
+                              <div className="text-xs text-muted-foreground mt-1">{item.notes}</div>
+                            )}
+                            {item.category && (
+                              <Badge variant="outline" className="text-xs mt-1">{item.category}</Badge>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingItem(item);
+                            }}
+                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
+                            data-testid={`edit-item-${item.id}`}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         </div>
-                        {item.notes && (
-                          <div className="text-sm text-muted-foreground truncate">{item.notes}</div>
-                        )}
-                        {item.category && (
-                          <Badge variant="outline" className="text-xs mt-1">{item.category}</Badge>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteItemMutation.mutate(item.id)}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        data-testid={`delete-item-${item.id}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      ))}
                     </div>
-                  ))
+                  )
                 ) : (
-                  <Card className="p-8 text-center border-dashed">
-                    <CardContent>
-                      <div className="space-y-2">
-                        <h3 className="font-medium">No items yet</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Add your first item to this list.
-                        </p>
-                        <Button onClick={() => setIsAddItemDialogOpen(true)} data-testid="button-add-first-item">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add First Item
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="p-8 text-center">
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-muted-foreground">No items yet</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Add your first item using the input above.
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
           ) : (
-            <Card className="p-8 text-center border-dashed">
-              <CardContent>
-                <div className="space-y-2">
-                  <h3 className="font-medium">Select a list</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Choose a list from the sidebar to view and manage its items.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="bg-card rounded-lg border p-8 text-center">
+              <div className="space-y-2">
+                <h3 className="font-medium">Select a list</h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose a list from the sidebar to view and manage its items.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Item Dialog */}
+          {editingItem && (
+            <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Edit Item</DialogTitle>
+                </DialogHeader>
+                <Form {...itemForm}>
+                  <form onSubmit={itemForm.handleSubmit((data) => {
+                    updateItemMutation.mutate({ 
+                      id: editingItem.id, 
+                      data: {
+                        ...data,
+                        category: selectedList?.template === 'shopping' ? data.category : undefined
+                      }
+                    });
+                    setEditingItem(null);
+                    itemForm.reset();
+                  })} className="space-y-4" key={editingItem.id}>
+                    <FormField
+                      control={itemForm.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Item</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter item name" 
+                              {...field} 
+                              data-testid="input-edit-item-title"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={itemForm.control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quantity</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="e.g., 2, 1kg, 3 boxes" 
+                              {...field} 
+                              value={field.value || ""}
+                              data-testid="input-edit-item-quantity"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {selectedList?.template === 'shopping' && (
+                      <FormField
+                        control={itemForm.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Category</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || ""}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="z-[10000]">
+                                {shoppingCategories.map((category) => (
+                                  <SelectItem key={category} value={category}>
+                                    {category}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    <FormField
+                      control={itemForm.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Notes</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Additional notes" 
+                              {...field} 
+                              value={field.value || ""}
+                              data-testid="input-edit-item-notes"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-between space-x-2">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => {
+                          deleteItemMutation.mutate(editingItem.id);
+                          setEditingItem(null);
+                        }}
+                        data-testid="button-delete-item"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                      <div className="flex space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setEditingItem(null)}
+                          data-testid="button-cancel-edit"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          disabled={updateItemMutation.isPending}
+                          data-testid="button-save-item"
+                        >
+                          {updateItemMutation.isPending ? "Saving..." : "Save"}
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
