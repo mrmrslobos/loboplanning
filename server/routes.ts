@@ -13,6 +13,7 @@ import {
   insertMealPlanSchema, insertEmojiReactionSchema
 } from "@shared/schema";
 import { categorizeItem } from "./ai-categorizer";
+import { generateTaskRecommendations, analyzeProductivityPatterns } from "./ai-task-recommender";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -352,6 +353,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+  // AI Task Recommendation routes
+  app.get('/api/ai/task-recommendations', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Get user's recent tasks (last 30 days)
+      const recentTasks = await storage.getTasks(req.user!.id, req.user!.familyId);
+      
+      // Get upcoming events (next 7 days)
+      const upcomingEvents = await storage.getEvents(req.user!.id, req.user!.familyId);
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+      
+      const filteredEvents = upcomingEvents.filter(event => 
+        new Date(event.date) <= oneWeekFromNow && new Date(event.date) >= new Date()
+      );
+
+      // Determine time of day and day of week
+      const now = new Date();
+      const hour = now.getHours();
+      let timeOfDay: 'morning' | 'afternoon' | 'evening';
+      if (hour < 12) timeOfDay = 'morning';
+      else if (hour < 17) timeOfDay = 'afternoon';
+      else timeOfDay = 'evening';
+
+      const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
+
+      const recommendations = await generateTaskRecommendations({
+        userId: req.user!.id,
+        recentTasks: recentTasks.map(task => ({
+          title: task.title,
+          description: task.description || undefined,
+          category: task.category || undefined,
+          priority: task.priority || undefined,
+          completed: task.completed,
+          completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
+          createdAt: new Date(task.createdAt)
+        })),
+        upcomingEvents: filteredEvents.map(event => ({
+          title: event.title,
+          date: new Date(event.date),
+          description: event.description || undefined
+        })),
+        timeOfDay,
+        dayOfWeek,
+        userPreferences: {
+          workingHours: "9 AM - 5 PM", // Could be stored in user preferences
+          categories: ["Work", "Personal", "Health"],
+          productivityStyle: "focused"
+        }
+      });
+
+      res.json({ recommendations });
+    } catch (error) {
+      console.error('Task recommendation error:', error);
+      res.status(500).json({ error: 'Failed to generate recommendations' });
+    }
+  });
+
+  app.get('/api/ai/productivity-insights', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const tasks = await storage.getTasks(req.user!.id, req.user!.familyId);
+      
+      const insights = await analyzeProductivityPatterns(
+        tasks.map(task => ({
+          title: task.title,
+          category: task.category || undefined,
+          priority: task.priority || undefined,
+          completed: task.completed,
+          completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
+          createdAt: new Date(task.createdAt)
+        }))
+      );
+
+      res.json(insights);
+    } catch (error) {
+      console.error('Productivity insights error:', error);
+      res.status(500).json({ error: 'Failed to analyze productivity patterns' });
     }
   });
 

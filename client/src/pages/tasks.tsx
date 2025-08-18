@@ -18,6 +18,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { TaskRecommendations } from "@/components/ai/TaskRecommendations";
 
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
@@ -302,6 +303,11 @@ export default function TasksPage() {
             </Form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      {/* AI Task Recommendations */}
+      <div className="mb-8">
+        <TaskRecommendations />
       </div>
 
       {/* Filters */}
