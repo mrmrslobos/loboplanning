@@ -146,6 +146,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // PRODUCTION ADMIN: Clear production database
+  app.post('/api/admin/clear-production-data', async (req: Request, res: Response) => {
+    if (req.body.adminKey !== 'CLEAR_PRODUCTION_DATA_2025') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    try {
+      // Use the storage interface to clear all data
+      await storage.clearAllData();
+      res.json({ message: 'Production database cleared successfully', timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Production clear error:', error);
+      res.status(500).json({ error: 'Failed to clear production data', details: error.message });
+    }
+  });
+
   // Auth routes
   app.post('/api/auth/register', async (req: Request, res: Response) => {
     try {
