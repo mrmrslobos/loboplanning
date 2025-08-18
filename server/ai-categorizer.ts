@@ -1,6 +1,6 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 const shoppingCategories = [
   "Produce",
@@ -19,13 +19,7 @@ const shoppingCategories = [
 
 export async function categorizeItem(itemName: string): Promise<string> {
   try {
-    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are a shopping assistant that categorizes grocery and household items. Given an item name, return the most appropriate category from this list: ${shoppingCategories.join(", ")}. 
+    const prompt = `You are a shopping assistant that categorizes grocery and household items. Given an item name, return the most appropriate category from this list: ${shoppingCategories.join(", ")}. 
 
 Examples:
 - "bananas" → "Produce"
@@ -35,18 +29,16 @@ Examples:
 - "bread" → "Bakery"
 - "frozen peas" → "Frozen Foods"
 
-Respond with only the category name, nothing else.`
-        },
-        {
-          role: "user",
-          content: itemName
-        }
-      ],
-      max_tokens: 20,
-      temperature: 0.1
+Respond with only the category name, nothing else.
+
+Item: ${itemName}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
     });
 
-    const category = response.choices[0].message.content?.trim();
+    const category = response.text?.trim();
     
     // Validate the response is a valid category
     if (category && shoppingCategories.includes(category)) {
@@ -63,26 +55,27 @@ Respond with only the category name, nothing else.`
 // Batch categorize multiple items for efficiency
 export async function categorizeItems(itemNames: string[]): Promise<Record<string, string>> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are a shopping assistant that categorizes grocery and household items. Given a list of item names, return a JSON object mapping each item to its most appropriate category from this list: ${shoppingCategories.join(", ")}.
+    const prompt = `You are a shopping assistant that categorizes grocery and household items. Given a list of item names, return a JSON object mapping each item to its most appropriate category from this list: ${shoppingCategories.join(", ")}.
 
-Respond with JSON in this exact format: {"item1": "category", "item2": "category"}`
+Respond with JSON in this exact format: {"item1": "category", "item2": "category"}
+
+Items to categorize: ${itemNames.join(", ")}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          additionalProperties: {
+            type: "string"
+          }
         },
-        {
-          role: "user",
-          content: `Categorize these items: ${itemNames.join(", ")}`
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 200,
-      temperature: 0.1
+      },
+      contents: prompt,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
+    const result = JSON.parse(response.text || "{}");
     
     // Validate and sanitize results
     const sanitized: Record<string, string> = {};
