@@ -29,6 +29,8 @@ const itemFormSchema = insertListItemSchema.omit({
   id: true, 
   createdAt: true,
   listId: true
+}).extend({
+  category: z.string().optional()
 });
 
 type ListFormData = z.infer<typeof listFormSchema>;
@@ -159,7 +161,12 @@ export default function ListsPage() {
 
   const createListMutation = useMutation({
     mutationFn: async (data: ListFormData) => {
-      return await apiRequest("POST", "/api/lists", data);
+      const { isShared, ...listData } = data;
+      const payload = {
+        ...listData,
+        familyId: isShared ? 'current' : null
+      };
+      return await apiRequest("POST", "/api/lists", payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
@@ -185,7 +192,7 @@ export default function ListsPage() {
   });
 
   const createItemMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: { title: string; listId: string; completed?: boolean; category?: string; quantity?: string; notes?: string }) => {
       return await apiRequest("POST", "/api/list-items", data);
     },
     onSuccess: () => {
@@ -241,12 +248,7 @@ export default function ListsPage() {
   const onCreateList = (data: ListFormData) => {
     console.log("onCreateList called with data:", data);
     console.log("Form errors:", listForm.formState.errors);
-    const { isShared, ...listData } = data;
-    const payload = {
-      ...listData,
-      familyId: isShared ? 'current' : null // Backend will set actual family ID
-    };
-    createListMutation.mutate(payload);
+    createListMutation.mutate(data);
   };
 
   const onAddItem = (data: ItemFormData) => {
@@ -749,8 +751,10 @@ export default function ListsPage() {
                     updateItemMutation.mutate({ 
                       id: editingItem.id, 
                       data: {
-                        ...data,
-                        category: selectedList?.template === 'shopping' ? data.category : undefined
+                        title: data.title,
+                        quantity: data.quantity || null,
+                        notes: data.notes || null,
+                        category: selectedList?.template === 'shopping' ? (data.category || null) : null
                       }
                     });
                     setEditingItem(null);
