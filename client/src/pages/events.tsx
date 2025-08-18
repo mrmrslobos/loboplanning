@@ -18,6 +18,7 @@ import { Plus, Calendar, MapPin, Clock, Users, CheckSquare, Trash2, Edit, MoreVe
 import { formatDistanceToNow, format, differenceInDays } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -62,16 +63,14 @@ const taskCategories = [
   "Other",
 ];
 
-const assigneeOptions = [
-  { value: "Me", label: "Me" },
-  { value: "Ana", label: "Ana" },
-];
+// Dynamic assignee options will be loaded from family members
 
 export default function EventsPage() {
   const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false);
   const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: events = [], isLoading } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -81,6 +80,20 @@ export default function EventsPage() {
     queryKey: ["/api/events", selectedEvent?.id, "tasks"],
     enabled: !!selectedEvent,
   });
+
+  // Fetch family members for assignee options
+  const { data: familyMembers = [] } = useQuery<{id: string, name: string, email: string}[]>({
+    queryKey: ["/api/families", user?.familyId, "members"],
+    enabled: !!user?.familyId,
+  });
+
+  // Create assignee options from family members
+  const assigneeOptions = familyMembers.length > 0 
+    ? familyMembers.map((member: any) => ({
+        value: member.name,
+        label: member.id === user?.id ? "Me" : member.name,
+      }))
+    : [];
 
   const createEventMutation = useMutation({
     mutationFn: async (data: any) => {

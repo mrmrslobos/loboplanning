@@ -36,7 +36,7 @@ interface Task {
   dueDate?: string;
   priority: 'low' | 'medium' | 'high';
   status: 'pending' | 'in-progress' | 'on-hold' | 'complete';
-  assignedTo?: 'me' | 'ana';
+  assignedTo?: string;
   category?: string;
   userId: string;
   familyId?: string;

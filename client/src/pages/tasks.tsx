@@ -17,6 +17,7 @@ import { Plus, Calendar, User, Trash2, Filter } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
@@ -34,20 +35,32 @@ const statusOptions = [
   { value: "complete", label: "Complete", color: "bg-green-500" },
 ];
 
-const assigneeOptions = [
-  { value: "Me", label: "Me" },
-  { value: "Ana", label: "Ana" },
-];
+// Dynamic assignee options will be loaded from family members
 
 export default function TasksPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterAssignee, setFilterAssignee] = useState<string>("all");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
   });
+
+  // Fetch family members for assignee options
+  const { data: familyMembers = [] } = useQuery<{id: string, name: string, email: string}[]>({
+    queryKey: ["/api/families", user?.familyId, "members"],
+    enabled: !!user?.familyId,
+  });
+
+  // Create assignee options from family members
+  const assigneeOptions = familyMembers.length > 0 
+    ? familyMembers.map((member: any) => ({
+        value: member.name,
+        label: member.id === user?.id ? "Me" : member.name,
+      }))
+    : [];
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: TaskFormData) => {
