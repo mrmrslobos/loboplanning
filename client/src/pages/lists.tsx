@@ -185,19 +185,15 @@ export default function ListsPage() {
   });
 
   const createItemMutation = useMutation({
-    mutationFn: async (data: ItemFormData) => {
-      const itemData = {
-        ...data,
-        listId: selectedList?.id,
-      };
-      return await apiRequest("POST", "/api/list-items", itemData);
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/list-items", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists", selectedList?.id, "items"] });
-      setIsAddItemDialogOpen(false);
       toast({ title: "Item added successfully" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Create item error:", error);
       toast({ title: "Failed to add item", variant: "destructive" });
     },
   });
@@ -619,6 +615,7 @@ export default function ListsPage() {
                           completed: false,
                           category: selectedList.template === 'shopping' ? 'Other' : undefined
                         };
+                        console.log('Adding item via Enter:', newItem);
                         createItemMutation.mutate(newItem);
                         setNewItemName('');
                       }
@@ -635,6 +632,7 @@ export default function ListsPage() {
                           completed: false,
                           category: selectedList.template === 'shopping' ? 'Other' : undefined
                         };
+                        console.log('Adding item:', newItem);
                         createItemMutation.mutate(newItem);
                         setNewItemName('');
                       }
