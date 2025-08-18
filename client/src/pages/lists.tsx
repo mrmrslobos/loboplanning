@@ -21,12 +21,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const listFormSchema = insertListSchema.omit({ 
   userId: true, 
   familyId: true 
-}).extend({});
+});
 const itemFormSchema = insertListItemSchema.omit({ 
   id: true, 
   createdAt: true,
   listId: true
-}).extend({});
+});
 
 type ListFormData = z.infer<typeof listFormSchema>;
 type ItemFormData = z.infer<typeof itemFormSchema>;
@@ -247,7 +247,7 @@ export default function ListsPage() {
                                 <SelectValue placeholder="Choose a template" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="z-[10000]">
                               {templateOptions.map((template) => {
                                 const Icon = template.icon;
                                 return (
@@ -312,7 +312,7 @@ export default function ListsPage() {
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="z-[10000]">
                               {categoryOptions.map((category) => (
                                 <SelectItem key={category} value={category}>
                                   {category}
