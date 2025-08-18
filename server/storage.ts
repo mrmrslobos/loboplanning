@@ -131,6 +131,9 @@ export interface IStorage {
   getEmojiReactions(targetType: string, targetId: string): Promise<EmojiReaction[]>;
   createEmojiReaction(reaction: InsertEmojiReaction): Promise<EmojiReaction>;
   deleteEmojiReaction(id: string): Promise<boolean>;
+  
+  // Admin method
+  clearAllData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -756,6 +759,29 @@ export class DatabaseStorage implements IStorage {
   async deleteEmojiReaction(id: string): Promise<boolean> {
     const result = await db.delete(emojiReactions).where(eq(emojiReactions.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  // Admin method
+  async clearAllData(): Promise<void> {
+    // Delete all data in correct order to handle foreign key constraints
+    await db.delete(emojiReactions);
+    await db.delete(mealPlans);
+    await db.delete(recipes);
+    await db.delete(mealieSettings);
+    await db.delete(eventBudget);
+    await db.delete(eventTasks);
+    await db.delete(events);
+    await db.delete(devotionalComments);
+    await db.delete(devotionalPosts);
+    await db.delete(chatMessages);
+    await db.delete(budgetTransactions);
+    await db.delete(budgetCategories);
+    await db.delete(calendarEvents);
+    await db.delete(listItems);
+    await db.delete(lists);
+    await db.delete(tasks);
+    await db.delete(users);
+    await db.delete(families);
   }
 }
 
