@@ -615,7 +615,7 @@ export default function ListsPage() {
                           title: newItemName.trim(),
                           listId: selectedList.id,
                           completed: false,
-                          category: selectedList.template === 'shopping' ? 'Other' : undefined
+                          // No category - let AI determine it automatically
                         };
                         console.log('Adding item via Enter:', newItem);
                         createItemMutation.mutate(newItem);
@@ -632,7 +632,7 @@ export default function ListsPage() {
                           title: newItemName.trim(),
                           listId: selectedList.id,
                           completed: false,
-                          category: selectedList.template === 'shopping' ? 'Other' : undefined
+                          // No category - let AI determine it automatically
                         };
                         console.log('Adding item:', newItem);
                         createItemMutation.mutate(newItem);

@@ -12,6 +12,7 @@ import {
   insertEventBudgetSchema, insertMealieSettingsSchema, insertRecipeSchema,
   insertMealPlanSchema, insertEmojiReactionSchema
 } from "@shared/schema";
+import { categorizeItem } from "./ai-categorizer";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -405,11 +406,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/list-items', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const itemData = insertListItemSchema.parse(req.body);
+      let itemData = insertListItemSchema.parse(req.body);
+      
+      // If no category provided and title exists, use AI to categorize
+      if (!itemData.category && itemData.title) {
+        try {
+          const suggestedCategory = await categorizeItem(itemData.title);
+          itemData = { ...itemData, category: suggestedCategory };
+        } catch (error) {
+          console.error('AI categorization failed:', error);
+          // Continue without category if AI fails
+        }
+      }
+      
       const item = await storage.createListItem(itemData);
       res.json(item);
     } catch (error) {
       res.status(400).json({ error: 'Invalid input' });
+    }
+  });
+
+  // AI categorization endpoint
+  app.post('/api/ai/categorize-item', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { title } = req.body;
+      if (!title) {
+        return res.status(400).json({ error: 'Title is required' });
+      }
+      
+      const category = await categorizeItem(title);
+      res.json({ category });
+    } catch (error) {
+      console.error('AI categorization error:', error);
+      res.status(500).json({ error: 'Categorization failed' });
     }
   });
 
