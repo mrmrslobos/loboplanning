@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,12 +24,12 @@ const listFormSchema = insertListSchema.omit({
 }).extend({
   isShared: z.boolean().default(false)
 });
-const itemFormSchema = insertListItemSchema.omit({ 
-  id: true, 
-  createdAt: true,
-  listId: true
-}).extend({
-  category: z.string().optional()
+const itemFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  completed: z.boolean().default(false),
+  category: z.string().optional(),
+  quantity: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 type ListFormData = z.infer<typeof listFormSchema>;
@@ -241,6 +241,7 @@ export default function ListsPage() {
       quantity: "",
       notes: "",
       category: "",
+      completed: false,
     },
   });
 
@@ -253,8 +254,12 @@ export default function ListsPage() {
   const onAddItem = (data: ItemFormData) => {
     if (!selectedList) return;
     createItemMutation.mutate({
-      ...data,
+      title: data.title,
       listId: selectedList.id,
+      completed: data.completed || false,
+      category: data.category,
+      quantity: data.quantity,
+      notes: data.notes,
     });
   };
 
@@ -263,13 +268,14 @@ export default function ListsPage() {
   };
 
   // Effect to populate edit form when editingItem changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingItem) {
       itemForm.reset({
         title: editingItem.title,
         quantity: editingItem.quantity || "",
         notes: editingItem.notes || "",
         category: editingItem.category || "",
+        completed: editingItem.completed,
       });
     }
   }, [editingItem, itemForm]);
