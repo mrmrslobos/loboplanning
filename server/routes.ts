@@ -144,39 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // ADMIN: Clear all data (remove after cleanup)  
-  app.post('/api/admin/clear-all-data', async (req: Request, res: Response) => {
-    if (req.body.adminKey !== 'CLEAR_PRODUCTION_DATA_2025') {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-    
-    try {
-      // Direct database cleanup since clearAllData method needs proper implementation
-      await db.delete(emojiReactions);
-      await db.delete(mealieSettings);
-      await db.delete(mealPlans);
-      await db.delete(recipes);
-      await db.delete(eventBudget);
-      await db.delete(eventTasks);
-      await db.delete(events);
-      await db.delete(devotionalComments);
-      await db.delete(devotionalPosts);
-      await db.delete(chatMessages);
-      await db.delete(budgetTransactions);
-      await db.delete(budgetCategories);
-      await db.delete(calendarEvents);
-      await db.delete(listItems);
-      await db.delete(lists);
-      await db.delete(tasks);
-      await db.delete(users);
-      await db.delete(families);
-      
-      res.json({ message: 'All data cleared successfully' });
-    } catch (error) {
-      console.error('Clear data error:', error);
-      res.status(500).json({ error: 'Failed to clear data' });
-    }
-  });
+
 
   // Auth routes
   app.post('/api/auth/register', async (req: Request, res: Response) => {
