@@ -78,7 +78,9 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         {/* Family Info Card */}
         <div className="p-4 m-4 bg-primary/5 rounded-lg border border-primary/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-primary">Johnson Family</span>
+            <span className="text-sm font-medium text-primary">
+              {user?.familyId ? `Family ID: ${user.familyId}` : 'No Family'}
+            </span>
             <Badge variant="secondary" className="bg-accent/10 text-accent">
               <span className="w-2 h-2 bg-accent rounded-full mr-1"></span>
               4 members
