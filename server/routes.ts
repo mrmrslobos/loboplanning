@@ -254,11 +254,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!family) {
         return res.status(404).json({ error: 'Invalid invite code' });
       }
+
+      // Check if user is already in this family
+      if (req.user!.familyId === family.id) {
+        return res.json({ 
+          ...family, 
+          message: 'You are already a member of this family' 
+        });
+      }
       
       // Update user's familyId
       await storage.updateUser(req.user!.id, { familyId: family.id });
       
-      res.json(family);
+      res.json({
+        ...family,
+        message: 'Successfully joined the family!'
+      });
     } catch (error) {
       res.status(500).json({ error: 'Server error' });
     }
