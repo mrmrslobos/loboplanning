@@ -204,7 +204,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(tasks).where(
       and(
         eq(tasks.userId, userId),
-        eq(tasks.familyId, null)
+        isNull(tasks.familyId)
       )
     );
   }
@@ -252,7 +252,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(lists).where(
       and(
         eq(lists.userId, userId),
-        eq(lists.familyId, null)
+        isNull(lists.familyId)
       )
     );
   }
@@ -284,7 +284,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteList(id: string): Promise<boolean> {
     const result = await db.delete(lists).where(eq(lists.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // List item methods
@@ -311,7 +311,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteListItem(id: string): Promise<boolean> {
     const result = await db.delete(listItems).where(eq(listItems.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Calendar event methods
@@ -327,7 +327,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(calendarEvents).where(
       and(
         eq(calendarEvents.userId, userId),
-        eq(calendarEvents.familyId, null)
+        isNull(calendarEvents.familyId)
       )
     );
   }
@@ -354,7 +354,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCalendarEvent(id: string): Promise<boolean> {
     const result = await db.delete(calendarEvents).where(eq(calendarEvents.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Budget methods
@@ -370,7 +370,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(budgetCategories).where(
       and(
         eq(budgetCategories.userId, userId),
-        eq(budgetCategories.familyId, null)
+        isNull(budgetCategories.familyId)
       )
     );
   }
@@ -397,7 +397,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBudgetCategory(id: string): Promise<boolean> {
     const result = await db.delete(budgetCategories).where(eq(budgetCategories.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getBudgetTransactions(userId: string, familyId?: string): Promise<BudgetTransaction[]> {
@@ -412,7 +412,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(budgetTransactions).where(
       and(
         eq(budgetTransactions.userId, userId),
-        eq(budgetTransactions.familyId, null)
+        isNull(budgetTransactions.familyId)
       )
     );
   }
@@ -439,7 +439,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBudgetTransaction(id: string): Promise<boolean> {
     const result = await db.delete(budgetTransactions).where(eq(budgetTransactions.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Chat methods
@@ -471,7 +471,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(devotionalPosts).where(
       and(
         eq(devotionalPosts.userId, userId),
-        eq(devotionalPosts.familyId, null)
+        isNull(devotionalPosts.familyId)
       )
     );
   }
@@ -498,7 +498,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDevotionalPost(id: string): Promise<boolean> {
     const result = await db.delete(devotionalPosts).where(eq(devotionalPosts.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getDevotionalComments(postId: string): Promise<DevotionalComment[]> {
@@ -524,7 +524,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDevotionalComment(id: string): Promise<boolean> {
     const result = await db.delete(devotionalComments).where(eq(devotionalComments.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Event methods
@@ -540,7 +540,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(events).where(
       and(
         eq(events.userId, userId),
-        eq(events.familyId, null)
+        isNull(events.familyId)
       )
     );
   }
@@ -567,7 +567,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEvent(id: string): Promise<boolean> {
     const result = await db.delete(events).where(eq(events.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Event task methods
@@ -594,7 +594,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEventTask(id: string): Promise<boolean> {
     const result = await db.delete(eventTasks).where(eq(eventTasks.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Event budget methods
@@ -621,7 +621,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEventBudget(id: string): Promise<boolean> {
     const result = await db.delete(eventBudget).where(eq(eventBudget.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Recipe methods
@@ -637,7 +637,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(recipes).where(
       and(
         eq(recipes.userId, userId),
-        eq(recipes.familyId, null)
+        isNull(recipes.familyId)
       )
     );
   }
@@ -645,7 +645,7 @@ export class DatabaseStorage implements IStorage {
   async createRecipe(insertRecipe: InsertRecipe): Promise<Recipe> {
     const [recipe] = await db
       .insert(recipes)
-      .values(insertRecipe)
+      .values([insertRecipe])
       .returning();
     return recipe;
   }
@@ -661,7 +661,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteRecipe(id: string): Promise<boolean> {
     const result = await db.delete(recipes).where(eq(recipes.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Meal plan methods
@@ -677,7 +677,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(mealPlans).where(
       and(
         eq(mealPlans.userId, userId),
-        eq(mealPlans.familyId, null)
+        isNull(mealPlans.familyId)
       )
     );
   }
@@ -685,7 +685,7 @@ export class DatabaseStorage implements IStorage {
   async createMealPlan(insertMealPlan: InsertMealPlan): Promise<MealPlan> {
     const [mealPlan] = await db
       .insert(mealPlans)
-      .values(insertMealPlan)
+      .values([insertMealPlan])
       .returning();
     return mealPlan;
   }
@@ -701,7 +701,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMealPlan(id: string): Promise<boolean> {
     const result = await db.delete(mealPlans).where(eq(mealPlans.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Mealie settings methods
@@ -729,7 +729,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMealieSettings(id: string): Promise<boolean> {
     const result = await db.delete(mealieSettings).where(eq(mealieSettings.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Emoji reaction methods
@@ -755,7 +755,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEmojiReaction(id: string): Promise<boolean> {
     const result = await db.delete(emojiReactions).where(eq(emojiReactions.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 
