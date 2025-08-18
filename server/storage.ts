@@ -648,7 +648,10 @@ export class DatabaseStorage implements IStorage {
   async createRecipe(insertRecipe: InsertRecipe): Promise<Recipe> {
     const [recipe] = await db
       .insert(recipes)
-      .values([insertRecipe])
+      .values({
+        ...insertRecipe,
+        familyId: insertRecipe.familyId || null
+      })
       .returning();
     return recipe;
   }
@@ -688,7 +691,10 @@ export class DatabaseStorage implements IStorage {
   async createMealPlan(insertMealPlan: InsertMealPlan): Promise<MealPlan> {
     const [mealPlan] = await db
       .insert(mealPlans)
-      .values([insertMealPlan])
+      .values({
+        ...insertMealPlan,
+        familyId: insertMealPlan.familyId || null
+      })
       .returning();
     return mealPlan;
   }
