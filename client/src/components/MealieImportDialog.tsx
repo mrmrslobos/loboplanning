@@ -15,6 +15,7 @@ import {
   CheckCircle, XCircle, ExternalLink, Clock, Users
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 
 interface MealieRecipe {
@@ -92,15 +93,7 @@ export default function MealieImportDialog() {
   // Test connection mutation
   const testConnectionMutation = useMutation({
     mutationFn: async (data: SettingsForm) => {
-      const response = await fetch('/api/mealie/test-connection', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to test connection');
+      const response = await apiRequest('POST', '/api/mealie/test-connection', data);
       return response.json();
     },
     onSuccess: (result) => {
@@ -136,15 +129,7 @@ export default function MealieImportDialog() {
         ? `/api/mealie/settings/${user?.id}` 
         : '/api/mealie/settings';
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to save settings');
+      const response = await apiRequest(method, url, data);
       return response.json();
     },
     onSuccess: () => {
@@ -163,13 +148,7 @@ export default function MealieImportDialog() {
   // Import recipe mutation
   const importRecipeMutation = useMutation({
     mutationFn: async (recipeId: string) => {
-      const response = await fetch(`/api/mealie/import-recipe/${recipeId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to import recipe');
+      const response = await apiRequest('POST', `/api/mealie/import-recipe/${recipeId}`);
       return response.json();
     },
     onSuccess: () => {
@@ -188,13 +167,7 @@ export default function MealieImportDialog() {
   // Sync all recipes mutation
   const syncRecipesMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/mealie/sync-recipes', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to sync recipes');
+      const response = await apiRequest('POST', '/api/mealie/sync-recipes');
       return response.json();
     },
     onSuccess: (result) => {
