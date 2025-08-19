@@ -195,7 +195,7 @@ export async function executeAssistantAction(
         // Handle nested action data structure
         const listItemInfo = actionData.add_list_item || actionData;
         const itemData = {
-          text: listItemInfo.text,
+          title: listItemInfo.text,
           completed: false,
           listId: listItemInfo.listId,
           userId: context.userId,
