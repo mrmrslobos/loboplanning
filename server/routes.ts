@@ -18,6 +18,7 @@ import { analyzeBehaviorPatterns, generateContextualInsights } from "./user-beha
 import { generateMealPlan, generateGroceryList } from "./ai-meal-planner";
 import { analyzeBudgetWithCalendar, generateBudgetAlerts } from "./ai-budget-advisor";
 import { generateCalendarInsights, generateEventPreparationTips } from "./ai-calendar-insights";
+import { generateEventSuggestions, generateEventTypeTemplates, generateQuickEventSuggestions } from "./ai-event-assistant";
 import { 
   ACHIEVEMENT_BADGES, 
   calculateLevelFromPoints,
@@ -1697,6 +1698,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Budget alerts error:', error);
       res.status(500).json({ error: 'Failed to generate budget alerts' });
+    }
+  });
+
+  // AI Event Assistant Routes
+
+  // Generate comprehensive event planning suggestions
+  app.post('/api/ai/event-suggestions', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { eventTitle, eventType, eventDate, attendeeCount, budget, location, description } = req.body;
+      
+      // Get existing context
+      const tasks = await storage.getTasks(req.user!.id, req.user!.familyId);
+      const lists = await storage.getLists(req.user!.id, req.user!.familyId);
+
+      const eventContext = {
+        eventTitle,
+        eventType,
+        eventDate: new Date(eventDate),
+        attendeeCount,
+        budget,
+        location,
+        description,
+        familySize: 4, // Could be stored in user profile
+        existingTasks: tasks.filter(t => !t.completed).map(t => t.title),
+        existingLists: lists.map(l => l.title)
+      };
+
+      const suggestions = await generateEventSuggestions(eventContext);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Event suggestions error:', error);
+      res.status(500).json({ error: 'Failed to generate event suggestions' });
+    }
+  });
+
+  // Create tasks and lists from event suggestions
+  app.post('/api/ai/create-event-items', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { tasks, shoppingLists, eventId } = req.body;
+      const createdItems = { tasks: [], lists: [] };
+
+      // Create tasks
+      if (tasks && tasks.length > 0) {
+        for (const taskData of tasks) {
+          try {
+            const task = await storage.createTask({
+              title: taskData.title,
+              description: taskData.description,
+              category: taskData.category,
+              priority: taskData.priority,
+              dueDate: taskData.dueDate ? new Date(taskData.dueDate).toISOString() : undefined,
+              userId: req.user!.id,
+              familyId: req.user!.familyId,
+              completed: false,
+              assignedTo: null,
+              relatedEventId: eventId
+            });
+            (createdItems.tasks as any[]).push(task);
+          } catch (taskError) {
+            console.error('Error creating task:', taskError);
+          }
+        }
+      }
+
+      // Create shopping lists
+      if (shoppingLists && shoppingLists.length > 0) {
+        for (const listData of shoppingLists) {
+          try {
+            const list = await storage.createList({
+              title: listData.title,
+              category: listData.category,
+              description: `Auto-generated for event planning - Budget: $${listData.estimatedBudget}`,
+              userId: req.user!.id,
+              familyId: req.user!.familyId,
+              isShared: true,
+              relatedEventId: eventId
+            });
+
+            // Add items to the list
+            if (listData.items && listData.items.length > 0) {
+              for (const itemData of listData.items) {
+                try {
+                  await storage.createListItem({
+                    title: itemData.name,
+                    description: itemData.quantity ? `Quantity: ${itemData.quantity}` : undefined,
+                    listId: list.id,
+                    userId: req.user!.id,
+                    completed: false,
+                    priority: itemData.priority,
+                    category: itemData.category
+                  });
+                } catch (itemError) {
+                  console.error('Error creating list item:', itemError);
+                }
+              }
+            }
+
+            (createdItems.lists as any[]).push(list);
+          } catch (listError) {
+            console.error('Error creating list:', listError);
+          }
+        }
+      }
+
+      res.json(createdItems);
+    } catch (error) {
+      console.error('Create event items error:', error);
+      res.status(500).json({ error: 'Failed to create event items' });
+    }
+  });
+
+  // Get event type templates
+  app.get('/api/ai/event-templates/:eventType', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { eventType } = req.params;
+      const template = await generateEventTypeTemplates(eventType);
+      res.json(template);
+    } catch (error) {
+      console.error('Event template error:', error);
+      res.status(500).json({ error: 'Failed to generate event template' });
+    }
+  });
+
+  // Get quick suggestions for last-minute events
+  app.post('/api/ai/quick-event-suggestions', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { eventType, daysUntilEvent } = req.body;
+      const suggestions = await generateQuickEventSuggestions(eventType, daysUntilEvent);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Quick suggestions error:', error);
+      res.status(500).json({ error: 'Failed to generate quick suggestions' });
     }
   });
 

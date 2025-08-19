@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EventAssistant } from "@/components/ai/EventAssistant";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,8 @@ export default function EventsPage() {
   const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false);
   const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isEventAssistantDialogOpen, setIsEventAssistantDialogOpen] = useState(false);
+  const [selectedEventForAssistant, setSelectedEventForAssistant] = useState<Event | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -481,6 +484,16 @@ export default function EventsPage() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
+                              setSelectedEventForAssistant(event);
+                              setIsEventAssistantDialogOpen(true);
+                            }}
+                            data-testid={`ai-plan-event-${event.id}`}
+                          >
+                            ✨ AI Event Planning
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
                               deleteEventMutation.mutate(event.id);
                             }}
                             className="text-destructive"
@@ -864,6 +877,24 @@ export default function EventsPage() {
           )}
         </div>
       </div>
+
+      {/* AI Event Assistant Dialog */}
+      <Dialog open={isEventAssistantDialogOpen} onOpenChange={setIsEventAssistantDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>AI Event Planning Assistant</DialogTitle>
+            <DialogDescription>
+              Get smart suggestions for planning your event
+            </DialogDescription>
+          </DialogHeader>
+          {selectedEventForAssistant && (
+            <EventAssistant 
+              event={selectedEventForAssistant}
+              onClose={() => setIsEventAssistantDialogOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -27,6 +27,14 @@ LoboHub is a comprehensive family hub web application providing a centralized di
 - **Smart Integrations**: Meal planning considers budget constraints and busy calendar days; budget analysis factors in calendar events and meal costs; calendar insights optimize timing for all family activities
 - **Real-Time Intelligence**: AI adapts recommendations based on current family context, energy levels, time constraints, and financial status
 
+### AI-Powered Event Management (August 2025)
+- **Intelligent Event Planning**: AI automatically generates comprehensive event plans for birthdays, parties, and special occasions
+- **Automated Task Creation**: Smart generation of relevant tasks, shopping lists, and preparation timelines for any event type
+- **Budget-Aware Planning**: Event suggestions consider family budget constraints and provide cost breakdowns
+- **Timeline Optimization**: AI creates detailed preparation schedules with appropriate lead times for bookings and purchases
+- **Family Collaboration**: Event planning tasks are designed for family participation and role assignment
+- **Emergency Planning**: Includes contingency plans and quick suggestions for last-minute events
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
