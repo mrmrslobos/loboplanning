@@ -192,13 +192,16 @@ export async function executeAssistantAction(
         return newList;
 
       case 'add_list_item':
+        // Handle nested action data structure
+        const listItemInfo = actionData.add_list_item || actionData;
         const itemData = {
-          text: actionData.text,
+          text: listItemInfo.text,
           completed: false,
-          listId: actionData.listId,
+          listId: listItemInfo.listId,
           userId: context.userId,
           familyId: context.familyId || null
         };
+        console.log('Creating list item with data:', itemData);
         return await storage.createListItem(itemData);
 
       default:
