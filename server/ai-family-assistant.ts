@@ -85,32 +85,7 @@ Be helpful, family-friendly, and proactive in suggestions. Always maintain a war
       model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemPrompt,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            message: { type: "string" },
-            actions: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  type: { type: "string" },
-                  data: { 
-                    type: "object",
-                    additionalProperties: true
-                  },
-                  description: { type: "string" }
-                }
-              }
-            },
-            suggestions: {
-              type: "array",
-              items: { type: "string" }
-            }
-          },
-          required: ["message"]
-        }
+        responseMimeType: "application/json"
       },
       contents: message,
     });
