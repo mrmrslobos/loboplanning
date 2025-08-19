@@ -53,10 +53,11 @@ interface BudgetCategory {
 
 interface BudgetTransaction {
   id: string;
-  amount: number;
+  amount: string; // Decimal comes from DB as string
   description: string;
   categoryId: string;
   date: string;
+  type: string;
   userId: string;
   familyId?: string;
   createdAt: Date;
@@ -228,14 +229,14 @@ export default function Budget() {
           const category = categories.find(c => c.id === t.categoryId);
           return category?.type === 'income';
         })
-        .reduce((sum, t) => sum + t.amount, 0);
+        .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
 
       const expenses = monthTransactions
         .filter(t => {
           const category = categories.find(c => c.id === t.categoryId);
           return category?.type === 'expense';
         })
-        .reduce((sum, t) => sum + t.amount, 0);
+        .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
 
       return {
         month: format(month, 'MMM yy'),
@@ -260,7 +261,7 @@ export default function Budget() {
                    transactionDate >= monthStart && 
                    transactionDate <= monthEnd;
           })
-          .reduce((sum, t) => sum + t.amount, 0);
+          .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
         
         return {
           name: category.name,
@@ -294,7 +295,7 @@ export default function Budget() {
       })
       .reduce((acc, transaction) => {
         const day = format(parseISO(transaction.date), 'dd');
-        acc[day] = (acc[day] || 0) + transaction.amount;
+        acc[day] = (acc[day] || 0) + parseFloat(transaction.amount || '0');
         return acc;
       }, {} as Record<string, number>);
 
@@ -335,21 +336,21 @@ export default function Budget() {
         const category = categories.find(c => c.id === t.categoryId);
         return category?.type === 'income';
       })
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
 
     const totalExpenses = monthlyTransactions
       .filter(t => {
         const category = categories.find(c => c.id === t.categoryId);
         return category?.type === 'expense';
       })
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
 
     const categorySpending = categories
       .filter(c => c.type === 'expense')
       .map(category => {
         const spent = monthlyTransactions
           .filter(t => t.categoryId === category.id)
-          .reduce((sum, t) => sum + t.amount, 0);
+          .reduce((sum, t) => sum + parseFloat(t.amount || '0'), 0);
         
         return {
           ...category,
@@ -399,10 +400,10 @@ export default function Budget() {
     if (transaction) {
       setEditingTransaction(transaction);
       transactionForm.reset({
-        amount: transaction.amount,
+        amount: parseFloat(transaction.amount || '0'),
         description: transaction.description,
         categoryId: transaction.categoryId,
-        date: transaction.date,
+        date: format(parseISO(transaction.date), 'yyyy-MM-dd'),
         familyId: transaction.familyId || undefined,
       });
     } else {
@@ -853,7 +854,7 @@ export default function Budget() {
                         </div>
                         <div className="flex items-center gap-2">
                           <div className={`font-bold ${category?.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                            {category?.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                            {category?.type === 'income' ? '+' : '-'}${parseFloat(transaction.amount || '0').toFixed(2)}
                           </div>
                           <Button 
                             variant="ghost" 
