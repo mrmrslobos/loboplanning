@@ -72,7 +72,10 @@ ACTIONS you can suggest:
 - create_event: {title, description, startTime, endTime, location?}
 - add_budget_transaction: {description, amount, categoryId, type: 'expense'|'income'}
 - create_list: {title, description, category, template}
+- add_list_item: {listId, text}
 - generate_devotional: {theme, familySize?, childrenAges?, specificNeeds?}
+
+EXISTING LISTS: ${lists.map(l => `${l.title} (id: ${l.id})`).join(', ')}
 
 CURRENT DATA CONTEXT:
 Recent Tasks: ${tasks.slice(0, 3).map(t => `"${t.title}" (${t.status})`).join(', ')}
@@ -82,7 +85,7 @@ Budget Categories: ${budgetCategories.map(c => c.name).join(', ')}
 Be helpful, family-friendly, and proactive in suggestions. Always maintain a warm, supportive tone.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json"
@@ -110,8 +113,8 @@ export async function executeAssistantAction(
   context: AssistantContext
 ): Promise<any> {
   try {
-    // Handle different action formats - sometimes it's action.type, sometimes the key is the type
-    let actionType = action.type;
+    // Handle different action formats
+    let actionType = action.type || action.action;
     let actionData = action.data;
     
     // If no type field, check if the action object has the type as a key
@@ -180,8 +183,18 @@ export async function executeAssistantAction(
         
         return newList;
 
+      case 'add_list_item':
+        const itemData = {
+          text: actionData.text,
+          completed: false,
+          listId: actionData.listId,
+          userId: context.userId,
+          familyId: context.familyId || null
+        };
+        return await storage.createListItem(itemData);
+
       default:
-        throw new Error(`Unknown action type: ${actionType}. Available actions: create_task, create_event, add_budget_transaction, create_list`);
+        throw new Error(`Unknown action type: ${actionType}. Available actions: create_task, create_event, add_budget_transaction, create_list, add_list_item`);
     }
   } catch (error) {
     console.error('Action execution error:', error);
