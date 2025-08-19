@@ -155,11 +155,30 @@ export async function executeAssistantAction(
 
       case 'create_list':
         const listData = {
-          ...actionData,
+          title: actionData.title,
+          category: actionData.category || 'General',
+          template: actionData.template || 'general',
           userId: context.userId,
           familyId: context.familyId || null
         };
-        return await storage.createList(listData);
+        const newList = await storage.createList(listData);
+        
+        // Parse items from description and add them to the list
+        if (actionData.description) {
+          const items = actionData.description.split('\n').filter(item => item.trim());
+          for (const itemText of items) {
+            const itemData = {
+              text: itemText.trim(),
+              completed: false,
+              listId: newList.id,
+              userId: context.userId,
+              familyId: context.familyId || null
+            };
+            await storage.createListItem(itemData);
+          }
+        }
+        
+        return newList;
 
       default:
         throw new Error(`Unknown action type: ${actionType}. Available actions: create_task, create_event, add_budget_transaction, create_list`);
