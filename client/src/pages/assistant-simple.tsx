@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Bot, Send, Lightbulb } from "lucide-react";
 
 export default function AssistantPage() {
@@ -27,6 +27,13 @@ export default function AssistantPage() {
       const response = await apiRequest('POST', '/api/ai/assistant', { message });
       const data = await response.json();
       setResponse(data.message || "I received your message and I'm ready to help!");
+      
+      // Invalidate cache if actions were performed
+      if (data.actionResults && data.actionResults.some((result: any) => result.success)) {
+        queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
+        // Also invalidate list items for all lists
+        queryClient.invalidateQueries({ queryKey: ["/api/lists", undefined, "items"] });
+      }
     } catch (error) {
       console.error('Assistant error:', error);
       setResponse("Sorry, I'm having trouble connecting right now. Please check that you're logged in and try again.");
