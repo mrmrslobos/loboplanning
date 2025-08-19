@@ -978,7 +978,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transaction = await storage.createBudgetTransaction(transactionData);
       res.json(transaction);
     } catch (error) {
-      res.status(400).json({ error: 'Invalid input' });
+      console.error('Budget transaction error:', error);
+      res.status(400).json({ error: 'Invalid input', details: error.message });
     }
   });
 
@@ -1550,17 +1551,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Budget Analysis with Calendar Integration
   app.get('/api/ai/budget-analysis', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const budgetItems = await storage.getBudgetItems(req.user!.id, req.user!.familyId);
-      const events = await storage.getEvents(req.user!.id, req.user!.familyId);
+      const budgetCategories = await storage.getBudgetCategories(req.user!.id, req.user!.familyId);
+      const budgetTransactions = await storage.getBudgetTransactions(req.user!.id, req.user!.familyId);
+      const events = await storage.getCalendarEvents(req.user!.id, req.user!.familyId);
 
       // Calculate budget categories
-      const categories = budgetItems.reduce((acc, item) => {
-        const category = item.category;
-        if (!acc[category]) {
-          acc[category] = { budgeted: 0, spent: 0 };
-        }
-        acc[category].budgeted += item.budgeted;
-        acc[category].spent += (item.budgeted - item.remaining);
+      const categories = budgetCategories.reduce((acc, category) => {
+        const transactions = budgetTransactions.filter(t => t.categoryId === category.id);
+        const spent = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+        acc[category.name] = { 
+          budgeted: category.budgetAmount || 0, 
+          spent: Math.abs(spent)
+        };
         return acc;
       }, {} as Record<string, { budgeted: number; spent: number }>);
 
@@ -1576,14 +1578,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             remaining: data.budgeted - data.spent
           }))
         },
-        upcomingBills: budgetItems
-          .filter(item => item.dueDate)
-          .map(item => ({
-            name: item.description || item.category,
-            amount: item.amount,
-            dueDate: new Date(item.dueDate!),
-            category: item.category,
-            recurring: false // Could be added to schema
+        upcomingBills: budgetTransactions
+          .filter(t => t.dueDate)
+          .map(t => ({
+            name: t.description || 'Transaction',
+            amount: Math.abs(t.amount || 0),
+            dueDate: new Date(t.dueDate!),
+            category: budgetCategories.find(c => c.id === t.categoryId)?.name || 'Other',
+            recurring: false
           })),
         calendarEvents: events.map(event => ({
           title: event.title,
@@ -1659,15 +1661,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Budget Alerts
   app.get('/api/ai/budget-alerts', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const budgetItems = await storage.getBudgetItems(req.user!.id, req.user!.familyId);
+      const budgetCategories = await storage.getBudgetCategories(req.user!.id, req.user!.familyId);
+      const budgetTransactions = await storage.getBudgetTransactions(req.user!.id, req.user!.familyId);
 
-      const categories = budgetItems.reduce((acc, item) => {
-        const category = item.category;
-        if (!acc[category]) {
-          acc[category] = { budgeted: 0, spent: 0 };
-        }
-        acc[category].budgeted += item.budgeted;
-        acc[category].spent += (item.budgeted - item.remaining);
+      const categories = budgetCategories.reduce((acc, category) => {
+        const transactions = budgetTransactions.filter(t => t.categoryId === category.id);
+        const spent = transactions.reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
+        acc[category.name] = { 
+          budgeted: category.budgetAmount || 0, 
+          spent: spent
+        };
         return acc;
       }, {} as Record<string, { budgeted: number; spent: number }>);
 
@@ -1683,13 +1686,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             remaining: data.budgeted - data.spent
           }))
         },
-        upcomingBills: budgetItems
-          .filter(item => item.dueDate)
-          .map(item => ({
-            name: item.description || item.category,
-            amount: item.amount,
-            dueDate: new Date(item.dueDate!),
-            category: item.category,
+        upcomingBills: budgetTransactions
+          .filter(t => t.dueDate)
+          .map(t => ({
+            name: t.description || 'Bill',
+            amount: Math.abs(t.amount || 0),
+            dueDate: new Date(t.dueDate!),
+            category: budgetCategories.find(c => c.id === t.categoryId)?.name || 'Other',
             recurring: false
           }))
       };
