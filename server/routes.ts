@@ -2006,5 +2006,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Family Assistant routes
+  app.post('/api/ai/assistant', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      const user = req.user!;
+      const family = user.familyId ? await storage.getFamily(user.familyId) : null;
+      
+      const context = {
+        userId: user.id,
+        familyId: user.familyId,
+        userName: user.name,
+        familyName: family?.name
+      };
+
+      const { processAssistantRequest } = await import('./ai-family-assistant');
+      const response = await processAssistantRequest(message, context);
+      
+      res.json(response);
+    } catch (error) {
+      console.error('AI Assistant error:', error);
+      res.status(500).json({ error: 'Failed to process assistant request' });
+    }
+  });
+
+  app.post('/api/ai/assistant/execute', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { action } = req.body;
+      
+      if (!action) {
+        return res.status(400).json({ error: 'Action is required' });
+      }
+
+      const user = req.user!;
+      const family = user.familyId ? await storage.getFamily(user.familyId) : null;
+      
+      const context = {
+        userId: user.id,
+        familyId: user.familyId,
+        userName: user.name,
+        familyName: family?.name
+      };
+
+      const { executeAssistantAction } = await import('./ai-family-assistant');
+      const result = await executeAssistantAction(action, context);
+      
+      res.json({ success: true, result });
+    } catch (error) {
+      console.error('Action execution error:', error);
+      res.status(500).json({ error: 'Failed to execute action' });
+    }
+  });
+
   return httpServer;
 }

@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { 
   Home, ListTodo, List, Calendar, MessageCircle, 
   Wallet, Utensils, BookOpen, CalendarDays, Trophy,
-  LogOut, X
+  Bot, LogOut, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ const navItems: NavItem[] = [
   { href: "/achievements", label: "Achievements", icon: Trophy },
   { href: "/devotional", label: "Devotional", icon: BookOpen },
   { href: "/events", label: "Events", icon: CalendarDays },
+  { href: "/assistant", label: "AI Assistant", icon: Bot, badge: "NEW", color: "bg-blue-500" },
 ];
 
 interface SidebarProps {

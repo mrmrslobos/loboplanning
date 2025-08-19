@@ -16,6 +16,7 @@ import Devotional from "@/pages/devotional";
 import Events from "@/pages/events";
 import MealPlanning from "@/pages/meal-planning";
 import Achievements from "@/pages/achievements";
+import Assistant from "@/pages/assistant";
 import FamilySetup from "@/components/family/family-setup";
 import NotFound from "@/pages/not-found";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -65,6 +66,7 @@ function AuthenticatedApp() {
             <Route path="/events" component={Events} />
             <Route path="/meal-planning" component={MealPlanning} />
             <Route path="/achievements" component={Achievements} />
+            <Route path="/assistant" component={Assistant} />
             <Route component={NotFound} />
           </Switch>
         </main>
