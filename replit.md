@@ -2,6 +2,24 @@
 
 LoboHub is a comprehensive family hub web application providing a centralized digital platform for families to manage tasks, lists, calendars, budgets, meal planning, devotionals, events, and real-time chat. It implements a sophisticated family-based sharing model where content can be private or shared among family members, aiming to streamline family organization and communication.
 
+## Recent Major Features Added
+
+### Advanced AI-Powered Task Recommendation Engine (August 2025)
+- **Personalized AI Recommendations**: Comprehensive task recommendation system using Gemini 2.5 Pro with deep personalization based on user behavior patterns, completion history, and contextual factors
+- **User Behavior Analysis**: Advanced AI analyzer that learns user productivity patterns, energy levels, focus patterns, motivational factors, and optimal task sequencing
+- **Contextual Intelligence**: Real-time recommendations based on time of day, day of week, family collaboration opportunities, and current energy/focus levels
+- **Family Collaboration Integration**: AI considers family task patterns and suggests collaborative opportunities
+- **Enhanced Frontend Components**: 
+  - PersonalizedInsights component showing productivity patterns, peak hours, and motivational factors
+  - ContextualRecommendations component providing real-time productivity tips and energy/focus level indicators
+  - Enhanced TaskRecommendations with personalization scores, motivation triggers, suggested subtasks, and collaboration opportunities
+
+### Comprehensive Achievement System (August 2025)
+- **PostgreSQL-Based Achievement Tracking**: Complete gamification system with 22 achievement badges across 5 categories
+- **Family Leveling System**: Points-based progression system where families level up together through task completion
+- **Real-Time Achievement Notifications**: Instant feedback when achievements are unlocked during task completion
+- **Achievement Categories**: Task completion, collaboration, milestones, consistency, and special achievements
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

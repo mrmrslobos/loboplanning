@@ -19,6 +19,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { TaskRecommendations } from "@/components/ai/TaskRecommendations";
+import { ContextualRecommendations } from "@/components/ai/ContextualRecommendations";
 
 const taskFormSchema = insertTaskSchema.extend({
   dueDate: z.string().optional(),
@@ -96,12 +97,12 @@ export default function TasksPage() {
       // Check for achievements when task is completed
       if (data.status === "complete") {
         try {
-          const achievementResult = await apiRequest('POST', '/api/achievements/check', {
+          const achievementResult: any = await apiRequest('POST', '/api/achievements/check', {
             action: 'task_completed',
             data: {
-              taskId: updatedTask.id,
-              taskTitle: updatedTask.title,
-              priority: updatedTask.priority,
+              taskId: (updatedTask as any).id,
+              taskTitle: (updatedTask as any).title,
+              priority: (updatedTask as any).priority,
               completedAt: new Date().toISOString()
             }
           });
@@ -337,7 +338,8 @@ export default function TasksPage() {
       </div>
 
       {/* AI Task Recommendations */}
-      <div className="mb-8">
+      <div className="mb-8 space-y-6">
+        <ContextualRecommendations />
         <TaskRecommendations />
       </div>
 

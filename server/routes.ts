@@ -14,6 +14,7 @@ import {
 } from "@shared/schema";
 import { categorizeItem } from "./ai-categorizer";
 import { generateTaskRecommendations, analyzeProductivityPatterns } from "./ai-task-recommender";
+import { analyzeBehaviorPatterns, generateContextualInsights } from "./user-behavior-analyzer";
 import { 
   ACHIEVEMENT_BADGES, 
   calculateLevelFromPoints,
@@ -367,8 +368,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Task Recommendation routes
   app.get('/api/ai/task-recommendations', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      // Get user's recent tasks (last 30 days)
+      // Get user's recent tasks
       const recentTasks = await storage.getTasks(req.user!.id, req.user!.familyId);
+      
+      // Get family tasks for collaboration analysis
+      let familyTasks: any[] = [];
+      if (req.user!.familyId) {
+        try {
+          const familyMembers = await storage.getFamilyMembers(req.user!.familyId);
+          for (const member of familyMembers) {
+            if (member.id !== req.user!.id) {
+              const memberTasks = await storage.getTasks(member.id, req.user!.familyId);
+              familyTasks.push(...memberTasks.map(task => ({
+                title: task.title,
+                category: task.category,
+                priority: task.priority,
+                completed: task.completed,
+                assignedTo: member.name,
+                createdAt: new Date(task.createdAt)
+              })));
+            }
+          }
+        } catch (error) {
+          console.log('Could not fetch family tasks:', error);
+        }
+      }
       
       // Get upcoming events (next 7 days)
       const upcomingEvents = await storage.getEvents(req.user!.id, req.user!.familyId);
@@ -379,7 +403,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         new Date(event.date) <= oneWeekFromNow && new Date(event.date) >= new Date()
       );
 
-      // Determine time of day and day of week
+      // Generate behavior analysis
+      const behaviorProfile = await analyzeBehaviorPatterns(req.user!.id, recentTasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        category: task.category,
+        priority: task.priority,
+        completed: task.completed,
+        completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
+        createdAt: new Date(task.createdAt),
+        assignedTo: task.assignedTo
+      })));
+
+      // Determine time context
       const now = new Date();
       const hour = now.getHours();
       let timeOfDay: 'morning' | 'afternoon' | 'evening';
@@ -389,8 +426,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
 
+      // Calculate recent completion streak
+      const recentCompletions = recentTasks
+        .filter(t => t.completed && t.completedAt)
+        .sort((a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime())
+        .slice(0, 7);
+
+      const completionStreak = recentCompletions.length;
+      const avgTasksPerDay = recentTasks.length > 0 ? Math.round(recentTasks.length / 30) : 3;
+
       const recommendations = await generateTaskRecommendations({
         userId: req.user!.id,
+        familyId: req.user!.familyId,
         recentTasks: recentTasks.map(task => ({
           title: task.title,
           description: task.description || undefined,
@@ -398,8 +445,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           priority: task.priority || undefined,
           completed: task.completed,
           completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
-          createdAt: new Date(task.createdAt)
+          createdAt: new Date(task.createdAt),
+          assignedTo: task.assignedTo
         })),
+        familyTasks,
         upcomingEvents: filteredEvents.map(event => ({
           title: event.title,
           date: new Date(event.date),
@@ -408,13 +457,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timeOfDay,
         dayOfWeek,
         userPreferences: {
-          workingHours: "9 AM - 5 PM", // Could be stored in user preferences
-          categories: ["Work", "Personal", "Health"],
-          productivityStyle: "focused"
+          workingHours: "9 AM - 5 PM",
+          categories: behaviorProfile.taskPreferences.favoriteCategories,
+          productivityStyle: behaviorProfile.taskPreferences.completionStyle,
+          energyLevels: behaviorProfile.productivityPatterns.energyLevels,
+          focusDuration: behaviorProfile.productivityPatterns.preferredTaskDuration
+        },
+        personalContext: {
+          recentCompletionStreak: completionStreak,
+          averageTasksPerDay: avgTasksPerDay,
+          preferredTaskTypes: behaviorProfile.taskPreferences.favoriteCategories,
+          avoidancePatterns: behaviorProfile.taskPreferences.avoidedCategories,
+          motivationalFactors: Object.entries(behaviorProfile.motivationalFactors)
+            .filter(([_, value]) => value)
+            .map(([key, _]) => key)
         }
       });
 
-      res.json({ recommendations });
+      res.json({ 
+        recommendations,
+        behaviorProfile: {
+          productivityPatterns: behaviorProfile.productivityPatterns,
+          motivationalFactors: behaviorProfile.motivationalFactors,
+          currentStreak: completionStreak,
+          insights: behaviorProfile.behaviorInsights
+        }
+      });
     } catch (error) {
       console.error('Task recommendation error:', error);
       res.status(500).json({ error: 'Failed to generate recommendations' });
@@ -425,18 +493,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tasks = await storage.getTasks(req.user!.id, req.user!.familyId);
       
-      const insights = await analyzeProductivityPatterns(
-        tasks.map(task => ({
-          title: task.title,
-          category: task.category || undefined,
-          priority: task.priority || undefined,
-          completed: task.completed,
-          completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
-          createdAt: new Date(task.createdAt)
-        }))
-      );
+      // Enhanced productivity analysis
+      const behaviorProfile = await analyzeBehaviorPatterns(req.user!.id, tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        category: task.category,
+        priority: task.priority,
+        completed: task.completed,
+        completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
+        createdAt: new Date(task.createdAt),
+        assignedTo: task.assignedTo
+      })));
 
-      res.json(insights);
+      // Generate contextual insights for current time
+      const now = new Date();
+      const timeOfDay = now.getHours() < 12 ? 'morning' : now.getHours() < 17 ? 'afternoon' : 'evening';
+      const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
+      
+      const recentCompletions = tasks.filter(t => t.completed && t.completedAt).length;
+      const pendingTaskCount = tasks.filter(t => !t.completed).length;
+
+      const contextualInsights = await generateContextualInsights(behaviorProfile, {
+        timeOfDay,
+        dayOfWeek,
+        recentCompletions,
+        pendingTaskCount
+      });
+
+      // Legacy format for existing components
+      const legacyInsights = await analyzeProductivityPatterns(tasks.map(task => ({
+        title: task.title,
+        category: task.category || undefined,
+        priority: task.priority || undefined,
+        completed: task.completed,
+        completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
+        createdAt: new Date(task.createdAt)
+      })));
+
+      res.json({
+        ...legacyInsights,
+        enhanced: {
+          behaviorProfile,
+          contextualInsights,
+          personalizedTips: contextualInsights.productivityTips,
+          motivationalMessage: contextualInsights.motivationalMessage,
+          currentEnergyLevel: contextualInsights.currentEnergyLevel,
+          currentFocusLevel: contextualInsights.currentFocusLevel
+        }
+      });
     } catch (error) {
       console.error('Productivity insights error:', error);
       res.status(500).json({ error: 'Failed to analyze productivity patterns' });

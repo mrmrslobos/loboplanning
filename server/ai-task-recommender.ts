@@ -4,6 +4,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 interface TaskRecommendationInput {
   userId: string;
+  familyId?: string;
   recentTasks: Array<{
     title: string;
     description?: string;
@@ -11,6 +12,15 @@ interface TaskRecommendationInput {
     priority?: string;
     completed: boolean;
     completedAt?: Date;
+    createdAt: Date;
+    assignedTo?: string;
+  }>;
+  familyTasks?: Array<{
+    title: string;
+    category?: string;
+    priority?: string;
+    completed: boolean;
+    assignedTo?: string;
     createdAt: Date;
   }>;
   upcomingEvents?: Array<{
@@ -20,10 +30,20 @@ interface TaskRecommendationInput {
   }>;
   timeOfDay: 'morning' | 'afternoon' | 'evening';
   dayOfWeek: string;
+  currentWeather?: string;
   userPreferences?: {
     workingHours?: string;
     categories?: string[];
     productivityStyle?: string;
+    energyLevels?: Record<string, string>; // time -> energy level
+    focusDuration?: string;
+  };
+  personalContext?: {
+    recentCompletionStreak?: number;
+    averageTasksPerDay?: number;
+    preferredTaskTypes?: string[];
+    avoidancePatterns?: string[];
+    motivationalFactors?: string[];
   };
 }
 
@@ -35,6 +55,12 @@ interface TaskRecommendation {
   estimatedDuration: string;
   reasoning: string;
   bestTimeToComplete: string;
+  personalizedScore: number; // 0-100, how well this matches the user
+  motivationTrigger?: string;
+  suggestedSubtasks?: string[];
+  collaborationOpportunity?: boolean;
+  energyLevelRequired: 'low' | 'medium' | 'high';
+  focusLevelRequired: 'low' | 'medium' | 'high';
 }
 
 export async function generateTaskRecommendations(
@@ -43,52 +69,87 @@ export async function generateTaskRecommendations(
   try {
     const recentCompletedTasks = input.recentTasks
       .filter(task => task.completed)
-      .slice(0, 10)
-      .map(task => `"${task.title}" (${task.category}) - completed on ${task.completedAt?.toLocaleDateString()}`);
+      .slice(0, 15)
+      .map(task => `"${task.title}" (${task.category}, ${task.priority}) - completed ${task.completedAt?.toLocaleDateString()}`);
 
     const recentPendingTasks = input.recentTasks
       .filter(task => !task.completed)
       .slice(0, 10)
-      .map(task => `"${task.title}" (${task.category}, priority: ${task.priority})`);
+      .map(task => `"${task.title}" (${task.category}, ${task.priority}) - assigned to ${task.assignedTo}`);
+
+    const familyTaskPatterns = input.familyTasks
+      ?.slice(0, 20)
+      .reduce((acc, task) => {
+        const key = `${task.category}-${task.assignedTo}`;
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>) || {};
 
     const upcomingEventsText = input.upcomingEvents
       ?.slice(0, 5)
       .map(event => `"${event.title}" on ${event.date.toLocaleDateString()}`)
       .join(", ") || "None";
 
-    const prompt = `You are an AI task management assistant. Based on the user's task history and current context, suggest 3-5 personalized tasks that would be valuable and relevant.
+    const personalContext = input.personalContext || {};
+    const completionStreak = personalContext.recentCompletionStreak || 0;
+    const avgTasksPerDay = personalContext.averageTasksPerDay || 3;
 
-Current Context:
+    const prompt = `You are an advanced AI task management assistant with deep personalization capabilities. Generate 4-6 highly personalized task recommendations based on comprehensive user analysis.
+
+CURRENT CONTEXT:
 - Time: ${input.timeOfDay} on ${input.dayOfWeek}
+- Weather: ${input.currentWeather || "Unknown"}
 - Recent completed tasks: ${recentCompletedTasks.join(", ") || "None"}
 - Current pending tasks: ${recentPendingTasks.join(", ") || "None"}
 - Upcoming events: ${upcomingEventsText}
 
-User Preferences:
-- Working hours: ${input.userPreferences?.workingHours || "Not specified"}
-- Preferred categories: ${input.userPreferences?.categories?.join(", ") || "Not specified"}
-- Productivity style: ${input.userPreferences?.productivityStyle || "Not specified"}
+USER PROFILE:
+- Completion streak: ${completionStreak} days
+- Average tasks per day: ${avgTasksPerDay}
+- Working hours: ${input.userPreferences?.workingHours || "Flexible"}
+- Preferred categories: ${input.userPreferences?.categories?.join(", ") || "Mixed"}
+- Productivity style: ${input.userPreferences?.productivityStyle || "Adaptive"}
+- Focus duration: ${input.userPreferences?.focusDuration || "30-60 minutes"}
+- Energy levels: ${JSON.stringify(input.userPreferences?.energyLevels || {})}
 
-Guidelines for recommendations:
-1. Consider the time of day and suggest appropriate tasks
-2. Look for patterns in completed tasks to understand user preferences
-3. Suggest tasks that complement pending work
-4. Consider upcoming events and suggest preparatory tasks
-5. Mix different priorities and durations
-6. Avoid duplicating existing pending tasks
-7. Make tasks specific and actionable
+FAMILY DYNAMICS:
+- Family task patterns: ${JSON.stringify(familyTaskPatterns)}
+- Family collaboration opportunities: ${input.familyId ? "Available" : "N/A"}
+
+PERSONALIZATION INSIGHTS:
+- Preferred task types: ${personalContext.preferredTaskTypes?.join(", ") || "Learning from behavior"}
+- Avoidance patterns: ${personalContext.avoidancePatterns?.join(", ") || "None identified"}
+- Motivation triggers: ${personalContext.motivationalFactors?.join(", ") || "Achievement, progress"}
+
+ADVANCED PERSONALIZATION RULES:
+1. Analyze completion patterns to predict optimal task timing
+2. Consider user's energy and focus levels for current time
+3. Factor in family collaboration opportunities 
+4. Adapt difficulty based on recent completion streak
+5. Suggest tasks that build on recent successes
+6. Include variety while respecting preferences
+7. Consider weather and environmental factors
+8. Balance individual and family-oriented tasks
+9. Provide motivational context for each suggestion
+10. Include energy/focus requirements for each task
 
 Respond with JSON in this exact format:
 {
   "recommendations": [
     {
       "title": "Clear and specific task title",
-      "description": "Detailed description of what needs to be done",
-      "category": "Work|Personal|Health|Learning|Household|Family",
+      "description": "Detailed description with actionable steps",
+      "category": "Work|Personal|Health|Learning|Household|Family|Creative",
       "priority": "low|medium|high",
-      "estimatedDuration": "15 minutes|30 minutes|1 hour|2 hours",
-      "reasoning": "Why this task is recommended right now",
-      "bestTimeToComplete": "Now|Later today|This week|Weekend"
+      "estimatedDuration": "5 minutes|15 minutes|30 minutes|1 hour|2 hours|3+ hours",
+      "reasoning": "Personalized explanation based on user patterns and context",
+      "bestTimeToComplete": "Now|In 1 hour|Later today|Tomorrow morning|This week|Weekend",
+      "personalizedScore": 85,
+      "motivationTrigger": "How this connects to user's goals or patterns",
+      "suggestedSubtasks": ["Step 1", "Step 2", "Step 3"],
+      "collaborationOpportunity": true,
+      "energyLevelRequired": "low|medium|high",
+      "focusLevelRequired": "low|medium|high"
     }
   ]
 }`;
@@ -111,9 +172,18 @@ Respond with JSON in this exact format:
                   priority: { type: "string" },
                   estimatedDuration: { type: "string" },
                   reasoning: { type: "string" },
-                  bestTimeToComplete: { type: "string" }
+                  bestTimeToComplete: { type: "string" },
+                  personalizedScore: { type: "number" },
+                  motivationTrigger: { type: "string" },
+                  suggestedSubtasks: { 
+                    type: "array",
+                    items: { type: "string" }
+                  },
+                  collaborationOpportunity: { type: "boolean" },
+                  energyLevelRequired: { type: "string" },
+                  focusLevelRequired: { type: "string" }
                 },
-                required: ["title", "description", "category", "priority", "estimatedDuration", "reasoning", "bestTimeToComplete"]
+                required: ["title", "description", "category", "priority", "estimatedDuration", "reasoning", "bestTimeToComplete", "personalizedScore", "energyLevelRequired", "focusLevelRequired"]
               }
             }
           },

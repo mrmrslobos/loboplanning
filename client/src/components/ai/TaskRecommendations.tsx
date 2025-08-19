@@ -3,9 +3,10 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Clock, Plus, RefreshCw, TrendingUp } from "lucide-react";
+import { Sparkles, Clock, Plus, RefreshCw, TrendingUp, Zap, Brain, Users, Target } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { PersonalizedInsights } from "./PersonalizedInsights";
 
 interface TaskRecommendation {
   title: string;
@@ -15,6 +16,12 @@ interface TaskRecommendation {
   estimatedDuration: string;
   reasoning: string;
   bestTimeToComplete: string;
+  personalizedScore: number;
+  motivationTrigger?: string;
+  suggestedSubtasks?: string[];
+  collaborationOpportunity?: boolean;
+  energyLevelRequired: 'low' | 'medium' | 'high';
+  focusLevelRequired: 'low' | 'medium' | 'high';
 }
 
 interface ProductivityInsights {
@@ -58,6 +65,7 @@ export function TaskRecommendations() {
   });
 
   const recommendations: TaskRecommendation[] = recommendationsData?.recommendations || [];
+  const behaviorProfile = recommendationsData?.behaviorProfile || null;
   const productivityInsights: ProductivityInsights = insights || {
     productiveHours: [],
     preferredCategories: [],
@@ -88,6 +96,24 @@ export function TaskRecommendations() {
     if (rate >= 80) return 'text-green-600';
     if (rate >= 60) return 'text-yellow-600';
     return 'text-red-600';
+  };
+
+  const getEnergyIcon = (level: string) => {
+    switch (level) {
+      case 'high': return <Zap className="h-3 w-3 text-yellow-500" />;
+      case 'medium': return <Zap className="h-3 w-3 text-orange-500" />;
+      case 'low': return <Zap className="h-3 w-3 text-gray-400" />;
+      default: return <Zap className="h-3 w-3 text-gray-400" />;
+    }
+  };
+
+  const getFocusIcon = (level: string) => {
+    switch (level) {
+      case 'high': return <Brain className="h-3 w-3 text-blue-500" />;
+      case 'medium': return <Brain className="h-3 w-3 text-blue-400" />;
+      case 'low': return <Brain className="h-3 w-3 text-gray-400" />;
+      default: return <Brain className="h-3 w-3 text-gray-400" />;
+    }
   };
 
   return (
@@ -149,19 +175,49 @@ export function TaskRecommendations() {
                     </Button>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-xs flex-wrap">
                     <Badge variant={getPriorityColor(rec.priority)}>{rec.priority}</Badge>
                     <Badge variant="outline">{rec.category}</Badge>
                     <div className="flex items-center text-muted-foreground">
                       <Clock className="h-3 w-3 mr-1" />
                       {rec.estimatedDuration}
                     </div>
-                    <span className="text-muted-foreground">• Best time: {rec.bestTimeToComplete}</span>
+                    <div className="flex items-center space-x-1">
+                      {getEnergyIcon(rec.energyLevelRequired)}
+                      {getFocusIcon(rec.focusLevelRequired)}
+                    </div>
+                    {rec.collaborationOpportunity && (
+                      <div className="flex items-center text-purple-600">
+                        <Users className="h-3 w-3 mr-1" />
+                        <span>Team</span>
+                      </div>
+                    )}
+                    <div className="flex items-center text-blue-600">
+                      <Target className="h-3 w-3 mr-1" />
+                      <span>{rec.personalizedScore}/100</span>
+                    </div>
                   </div>
                   
-                  <p className="text-xs text-muted-foreground italic">
-                    💡 {rec.reasoning}
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground italic">
+                      💡 {rec.reasoning}
+                    </p>
+                    {rec.motivationTrigger && (
+                      <p className="text-xs text-blue-600 font-medium">
+                        🎯 {rec.motivationTrigger}
+                      </p>
+                    )}
+                    {rec.suggestedSubtasks && rec.suggestedSubtasks.length > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        <span className="font-medium">Quick steps:</span>
+                        <ul className="list-disc list-inside ml-2 mt-1 space-y-0.5">
+                          {rec.suggestedSubtasks.slice(0, 3).map((subtask, idx) => (
+                            <li key={idx}>{subtask}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -175,8 +231,16 @@ export function TaskRecommendations() {
         </CardContent>
       </Card>
 
-      {/* Productivity Insights */}
-      {isExpanded && (
+      {/* Enhanced Personalized Insights */}
+      {isExpanded && behaviorProfile && (
+        <PersonalizedInsights 
+          behaviorProfile={behaviorProfile}
+          isLoading={isLoadingInsights}
+        />
+      )}
+
+      {/* Legacy Productivity Insights */}
+      {isExpanded && !behaviorProfile && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center space-x-2">
