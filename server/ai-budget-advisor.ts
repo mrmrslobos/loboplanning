@@ -151,7 +151,7 @@ Generate comprehensive budget recommendations with calendar integration.`;
                   impact: { type: "string" },
                   timeframe: { type: "string" },
                   suggestedActions: { type: "array", items: { type: "string" } },
-                  potentialSavings: { type: "number" },
+                  potentialSavings: { type: "number", minimum: 0 },
                   calendarContext: { type: "string" }
                 }
               }
@@ -159,10 +159,10 @@ Generate comprehensive budget recommendations with calendar integration.`;
             cashFlowAnalysis: {
               type: "object",
               properties: {
-                nextWeekOutflow: { type: "number" },
-                nextMonthOutflow: { type: "number" },
-                riskLevel: { type: "string" },
-                bufferDays: { type: "number" }
+                nextWeekOutflow: { type: "number", minimum: 0 },
+                nextMonthOutflow: { type: "number", minimum: 0 },
+                riskLevel: { type: "string", enum: ["low", "medium", "high"] },
+                bufferDays: { type: "number", minimum: 0 }
               }
             },
             calendarBudgetTips: {
