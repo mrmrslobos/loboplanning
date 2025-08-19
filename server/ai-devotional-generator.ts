@@ -97,7 +97,12 @@ Ensure ALL fields are included with meaningful content.`;
 
     console.log("Generating devotional with prompt:", prompt.substring(0, 200) + "...");
     
-    const response = await ai.models.generateContent({
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Gemini API timeout after 30 seconds")), 30000);
+    });
+    
+    const geminiPromise = ai.models.generateContent({
       model: "gemini-2.5-flash",
       config: {
         responseMimeType: "application/json",
@@ -133,6 +138,8 @@ Ensure ALL fields are included with meaningful content.`;
       },
       contents: prompt,
     });
+    
+    const response = await Promise.race([geminiPromise, timeoutPromise]) as any;
 
     console.log("Received response from Gemini:", response.text?.substring(0, 500));
 
