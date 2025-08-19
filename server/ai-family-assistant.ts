@@ -114,8 +114,8 @@ export async function executeAssistantAction(
 ): Promise<any> {
   try {
     // Handle different action formats
-    let actionType = action.type || action.action;
-    let actionData = action.data;
+    let actionType = action.type || action.action || action.action_type;
+    let actionData = action.data || action;
     
     // If no type field, check if the action object has the type as a key
     if (!actionType) {
@@ -124,6 +124,14 @@ export async function executeAssistantAction(
         actionType = keys[0];
         actionData = action[actionType];
       }
+    }
+    
+    // For flat action structures, use the action itself as data
+    if (!action.data && actionType) {
+      actionData = { ...action };
+      delete actionData.type;
+      delete actionData.action;
+      delete actionData.action_type;
     }
     
     console.log('Processing action type:', actionType, 'with data:', actionData);
