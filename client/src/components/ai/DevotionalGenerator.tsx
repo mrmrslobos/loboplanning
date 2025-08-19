@@ -67,20 +67,29 @@ export function DevotionalGenerator() {
 
   const generateDaily = useMutation<DailyDevotional, Error, any>({
     mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/ai/daily-devotional', data);
-      return response as unknown as DailyDevotional;
+      console.log("Sending devotional request:", data);
+      try {
+        const response = await apiRequest('POST', '/api/ai/daily-devotional', data);
+        console.log("Received devotional response:", response);
+        return response as unknown as DailyDevotional;
+      } catch (error) {
+        console.error("Devotional generation error:", error);
+        throw error;
+      }
     },
     onSuccess: (data: DailyDevotional) => {
+      console.log("Devotional generated successfully:", data);
       setDevotional(data);
       toast({
         title: "Daily Devotional Generated!",
         description: "Your personalized devotional is ready.",
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
+      console.error("Generate daily error:", error);
       toast({
         title: "Generation Failed",
-        description: "Could not generate devotional. Please try again.",
+        description: error.message || "Could not generate devotional. Please try again.",
         variant: "destructive",
       });
     },

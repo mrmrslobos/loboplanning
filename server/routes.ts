@@ -1884,6 +1884,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate daily devotional
   app.post('/api/ai/daily-devotional', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      console.log('=== DAILY DEVOTIONAL REQUEST ===');
+      console.log('User:', req.user?.id);
+      console.log('Request body:', req.body);
+      
       const { theme, familySize, childrenAges, marriageYears, specificNeeds } = req.body;
       
       const devotionalRequest = {
@@ -1895,11 +1899,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         previousTopics: [] // Could track user's recent devotionals
       };
 
+      console.log('Calling generateDailyDevotional with:', devotionalRequest);
       const devotional = await generateDailyDevotional(devotionalRequest);
+      console.log('Generated devotional successfully:', devotional.title);
       res.json(devotional);
-    } catch (error) {
-      console.error('Daily devotional error:', error);
-      res.status(500).json({ error: 'Failed to generate daily devotional' });
+    } catch (error: any) {
+      console.error('=== DAILY DEVOTIONAL ERROR ===');
+      console.error('Error type:', error.constructor.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      res.status(500).json({ 
+        error: 'Failed to generate daily devotional',
+        details: error.message 
+      });
     }
   });
 

@@ -71,6 +71,8 @@ BIBLE VERSION: Use ESV (English Standard Version) for accuracy
 
 Generate a complete devotional that speaks to the heart while providing practical guidance for Christian family life.`;
 
+    console.log("Generating devotional with prompt:", prompt.substring(0, 200) + "...");
+    
     const response = await ai.models.generateContent({
       model: "gemini-2.5-pro",
       config: {
@@ -108,13 +110,35 @@ Generate a complete devotional that speaks to the heart while providing practica
       contents: prompt,
     });
 
-    const result = JSON.parse(response.text || "{}");
+    console.log("Received response from Gemini:", response.text?.substring(0, 300) + "...");
+
+    if (!response.text) {
+      throw new Error("No response text from Gemini API");
+    }
+
+    let result;
+    try {
+      result = JSON.parse(response.text);
+    } catch (parseError) {
+      console.error("Failed to parse JSON response:", parseError);
+      console.error("Raw response:", response.text);
+      throw new Error("Invalid JSON response from AI");
+    }
     
-    return {
+    const devotionalResult = {
       ...result,
       date: currentDate,
-      theme: request.theme
+      theme: request.theme,
+      // Ensure required fields exist
+      bibleVerse: result.bibleVerse || {
+        text: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.",
+        reference: "Jeremiah 29:11",
+        version: "ESV"
+      }
     };
+    
+    console.log("Generated devotional successfully:", devotionalResult.title);
+    return devotionalResult;
   } catch (error) {
     console.error("Error generating devotional:", error);
     throw new Error("Failed to generate daily devotional");
