@@ -96,7 +96,10 @@ Be helpful, family-friendly, and proactive in suggestions. Always maintain a war
                 type: "object",
                 properties: {
                   type: { type: "string" },
-                  data: { type: "object" },
+                  data: { 
+                    type: "object",
+                    additionalProperties: true
+                  },
                   description: { type: "string" }
                 }
               }
