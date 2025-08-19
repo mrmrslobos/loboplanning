@@ -166,10 +166,12 @@ export default function Budget() {
     mutationFn: async (data: TransactionForm) => {
       // Find selected category to determine transaction type
       const selectedCategory = categories.find(c => c.id === data.categoryId);
+      const transactionType = selectedCategory?.type || 'expense';
+      
       return await apiRequest("POST", "/api/budget/transactions", {
         ...data,
         amount: String(data.amount), // Convert to string for API
-        type: selectedCategory?.type || 'expense',
+        type: transactionType,
         userId: user?.id,
         familyId: data.familyId || null,
       });
@@ -485,8 +487,18 @@ export default function Budget() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="income">Income</SelectItem>
-                            <SelectItem value="expense">Expense</SelectItem>
+                            <SelectItem value="income">
+                              <div className="flex items-center gap-2">
+                                Income
+                                <TrendingUp className="w-3 h-3 text-green-500" />
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="expense">
+                              <div className="flex items-center gap-2">
+                                Expense
+                                <TrendingDown className="w-3 h-3 text-red-500" />
+                              </div>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

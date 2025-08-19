@@ -80,6 +80,7 @@ export const calendarEvents = pgTable("calendar_events", {
 export const budgetCategories = pgTable("budget_categories", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
+  type: text("type").notNull().default("expense"), // income, expense
   monthlyLimit: decimal("monthly_limit", { precision: 10, scale: 2 }),
   color: text("color").default("#3b82f6"),
   userId: varchar("user_id").notNull().references(() => users.id),
