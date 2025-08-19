@@ -69,12 +69,36 @@ DEVOTIONAL REQUIREMENTS:
 DATE: ${currentDate}
 BIBLE VERSION: Use ESV (English Standard Version) for accuracy
 
-Generate a complete devotional that speaks to the heart while providing practical guidance for Christian family life.`;
+Generate a complete devotional that speaks to the heart while providing practical guidance for Christian family life.
+
+IMPORTANT: Return a complete JSON object with ALL required fields:
+{
+  "title": "Devotional title",
+  "theme": "Theme name",
+  "bibleVerse": {
+    "text": "Complete Bible verse text",
+    "reference": "Book Chapter:Verse",
+    "version": "ESV"
+  },
+  "reflection": "Meaningful reflection paragraph",
+  "practicalApplication": "Practical application for daily life",
+  "prayer": "Heartfelt prayer",
+  "familyActivity": "Family activity suggestion",
+  "discussion": {
+    "coupleQuestions": ["Question 1", "Question 2"],
+    "familyQuestions": ["Question 1", "Question 2"],
+    "parentingInsights": ["Insight 1", "Insight 2"]
+  },
+  "encouragement": "Encouraging message",
+  "tags": ["tag1", "tag2", "tag3"]
+}
+
+Ensure ALL fields are included with meaningful content.`;
 
     console.log("Generating devotional with prompt:", prompt.substring(0, 200) + "...");
     
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       config: {
         responseMimeType: "application/json",
         responseSchema: {
