@@ -65,8 +65,11 @@ export function DevotionalGenerator() {
   const [specificTopic, setSpecificTopic] = useState("");
   const [additionalNeeds, setAdditionalNeeds] = useState("");
 
-  const generateDaily = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/ai/daily-devotional', data),
+  const generateDaily = useMutation<DailyDevotional, Error, any>({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/ai/daily-devotional', data);
+      return response as unknown as DailyDevotional;
+    },
     onSuccess: (data: DailyDevotional) => {
       setDevotional(data);
       toast({
@@ -83,8 +86,11 @@ export function DevotionalGenerator() {
     },
   });
 
-  const generateWeekly = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/ai/weekly-devotional-plan', data),
+  const generateWeekly = useMutation<WeeklyDevotionalPlan, Error, any>({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/ai/weekly-devotional-plan', data);
+      return response as unknown as WeeklyDevotionalPlan;
+    },
     onSuccess: (data: WeeklyDevotionalPlan) => {
       setWeeklyPlan(data);
       toast({
@@ -101,8 +107,11 @@ export function DevotionalGenerator() {
     },
   });
 
-  const generateTopical = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/ai/topical-devotional', data),
+  const generateTopical = useMutation<DailyDevotional, Error, any>({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/ai/topical-devotional', data);
+      return response as unknown as DailyDevotional;
+    },
     onSuccess: (data: DailyDevotional) => {
       setDevotional(data);
       toast({
@@ -119,8 +128,11 @@ export function DevotionalGenerator() {
     },
   });
 
-  const saveDevotional = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/devotionals/save', data),
+  const saveDevotional = useMutation<any, Error, any>({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/devotionals/save', data);
+      return response;
+    },
     onSuccess: () => {
       toast({
         title: "Devotional Saved!",
