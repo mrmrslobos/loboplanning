@@ -132,11 +132,19 @@ Respond with detailed JSON analysis:`
                 preferredTaskDuration: { type: "string" },
                 energyLevels: {
                   type: "object",
-                  additionalProperties: { type: "string" }
+                  properties: {
+                    morning: { type: "string" },
+                    afternoon: { type: "string" },
+                    evening: { type: "string" }
+                  }
                 },
                 focusPatterns: {
                   type: "object", 
-                  additionalProperties: { type: "string" }
+                  properties: {
+                    bestTimes: { type: "array", items: { type: "string" } },
+                    distractions: { type: "array", items: { type: "string" } },
+                    focusDuration: { type: "string" }
+                  }
                 }
               }
             },
