@@ -70,8 +70,15 @@ export function DevotionalGenerator() {
       console.log("Sending devotional request:", data);
       try {
         const response = await apiRequest('POST', '/api/ai/daily-devotional', data);
-        console.log("Received devotional response:", response);
-        return response as unknown as DailyDevotional;
+        const devotionalData = await response.json();
+        console.log("Received devotional response:", devotionalData);
+        
+        // Ensure we have a valid devotional object
+        if (!devotionalData || typeof devotionalData !== 'object') {
+          throw new Error(`Invalid response: ${JSON.stringify(devotionalData)}`);
+        }
+        
+        return devotionalData as DailyDevotional;
       } catch (error) {
         console.error("Devotional generation error:", error);
         throw error;
@@ -98,7 +105,8 @@ export function DevotionalGenerator() {
   const generateWeekly = useMutation<WeeklyDevotionalPlan, Error, any>({
     mutationFn: async (data: any) => {
       const response = await apiRequest('POST', '/api/ai/weekly-devotional-plan', data);
-      return response as unknown as WeeklyDevotionalPlan;
+      const weeklyData = await response.json();
+      return weeklyData as WeeklyDevotionalPlan;
     },
     onSuccess: (data: WeeklyDevotionalPlan) => {
       setWeeklyPlan(data);
@@ -119,7 +127,8 @@ export function DevotionalGenerator() {
   const generateTopical = useMutation<DailyDevotional, Error, any>({
     mutationFn: async (data: any) => {
       const response = await apiRequest('POST', '/api/ai/topical-devotional', data);
-      return response as unknown as DailyDevotional;
+      const topicalData = await response.json();
+      return topicalData as DailyDevotional;
     },
     onSuccess: (data: DailyDevotional) => {
       setDevotional(data);
