@@ -76,6 +76,7 @@ const transactionSchema = z.object({
   description: z.string().min(1, "Description is required"),
   categoryId: z.string().min(1, "Category is required"),
   date: z.string().min(1, "Date is required"),
+  type: z.enum(['income', 'expense']).default('expense'),
   familyId: z.string().optional(),
 });
 
@@ -122,6 +123,7 @@ export default function Budget() {
       description: "",
       categoryId: "",
       date: format(new Date(), 'yyyy-MM-dd'),
+      type: 'expense' as const,
       familyId: user?.familyId || undefined,
     },
   });
@@ -161,8 +163,12 @@ export default function Budget() {
   // Create transaction mutation
   const createTransactionMutation = useMutation({
     mutationFn: async (data: TransactionForm) => {
+      // Find selected category to determine transaction type
+      const selectedCategory = categories.find(c => c.id === data.categoryId);
       return await apiRequest("POST", "/api/budget/transactions", {
         ...data,
+        amount: String(data.amount), // Convert to string for API
+        type: selectedCategory?.type || 'expense',
         userId: user?.id,
         familyId: data.familyId || null,
       });

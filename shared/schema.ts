@@ -286,6 +286,10 @@ export const insertBudgetCategorySchema = createInsertSchema(budgetCategories).o
 export const insertBudgetTransactionSchema = createInsertSchema(budgetTransactions).omit({
   id: true,
   createdAt: true,
+}).extend({
+  amount: z.union([z.string(), z.number()]).transform((val) => String(val)),
+  date: z.union([z.string(), z.date()]).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  type: z.string().default("expense"),
 });
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({

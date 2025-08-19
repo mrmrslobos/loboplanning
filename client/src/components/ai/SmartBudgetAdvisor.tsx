@@ -64,6 +64,22 @@ export function SmartBudgetAdvisor() {
   const calendarTips = budgetAnalysis?.calendarBudgetTips || [];
   const alerts = budgetAlerts || [];
 
+  if (!budgetAnalysis) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl flex items-center space-x-2">
+            <DollarSign className="h-6 w-6 text-green-600" />
+            <span>AI Budget Advisor</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600">No budget data available yet. Add some categories and transactions to get AI insights.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const getRecommendationIcon = (type: string) => {
     switch (type) {
       case 'warning': return <AlertTriangle className="h-4 w-4 text-red-500" />;
