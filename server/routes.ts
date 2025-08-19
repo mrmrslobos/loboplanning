@@ -2025,8 +2025,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         familyName: family?.name
       };
 
-      const { processAssistantRequest } = await import('./ai-family-assistant');
+      const { processAssistantRequest, executeAssistantAction } = await import('./ai-family-assistant');
       const response = await processAssistantRequest(message, context);
+      
+      // Execute any actions that were suggested
+      if (response.actions && response.actions.length > 0) {
+        const actionResults = [];
+        for (const action of response.actions) {
+          try {
+            console.log('Executing action:', action);
+            const result = await executeAssistantAction(action, context);
+            actionResults.push({ action: action.type, success: true, result });
+          } catch (error) {
+            console.error('Failed to execute action:', action, error);
+            actionResults.push({ action: action.type, success: false, error: error.message });
+          }
+        }
+        response.actionResults = actionResults;
+      }
       
       res.json(response);
     } catch (error) {

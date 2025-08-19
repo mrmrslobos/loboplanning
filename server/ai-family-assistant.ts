@@ -110,10 +110,25 @@ export async function executeAssistantAction(
   context: AssistantContext
 ): Promise<any> {
   try {
-    switch (action.type) {
+    // Handle different action formats - sometimes it's action.type, sometimes the key is the type
+    let actionType = action.type;
+    let actionData = action.data;
+    
+    // If no type field, check if the action object has the type as a key
+    if (!actionType) {
+      const keys = Object.keys(action);
+      if (keys.length === 1) {
+        actionType = keys[0];
+        actionData = action[actionType];
+      }
+    }
+    
+    console.log('Processing action type:', actionType, 'with data:', actionData);
+
+    switch (actionType) {
       case 'create_task':
         const taskData = {
-          ...action.data,
+          ...actionData,
           userId: context.userId,
           familyId: context.familyId || null
         };
@@ -121,9 +136,9 @@ export async function executeAssistantAction(
 
       case 'create_event':
         const eventData = {
-          ...action.data,
-          startTime: new Date(action.data.startTime),
-          endTime: new Date(action.data.endTime),
+          ...actionData,
+          startTime: new Date(actionData.startTime),
+          endTime: new Date(actionData.endTime),
           userId: context.userId,
           familyId: context.familyId || null
         };
@@ -131,7 +146,7 @@ export async function executeAssistantAction(
 
       case 'add_budget_transaction':
         const transactionData = {
-          ...action.data,
+          ...actionData,
           date: new Date(),
           userId: context.userId,
           familyId: context.familyId || null
@@ -140,14 +155,14 @@ export async function executeAssistantAction(
 
       case 'create_list':
         const listData = {
-          ...action.data,
+          ...actionData,
           userId: context.userId,
           familyId: context.familyId || null
         };
         return await storage.createList(listData);
 
       default:
-        throw new Error(`Unknown action type: ${action.type}`);
+        throw new Error(`Unknown action type: ${actionType}. Available actions: create_task, create_event, add_budget_transaction, create_list`);
     }
   } catch (error) {
     console.error('Action execution error:', error);
