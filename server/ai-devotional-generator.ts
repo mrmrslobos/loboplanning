@@ -175,9 +175,13 @@ Ensure ALL fields are included with meaningful content.`;
     
     console.log("Final devotional result:", JSON.stringify(devotionalResult, null, 2));
     return devotionalResult;
-  } catch (error) {
-    console.error("Error generating devotional:", error);
-    throw new Error("Failed to generate daily devotional");
+  } catch (error: any) {
+    console.error("=== DEVOTIONAL GENERATION ERROR ===");
+    console.error("Error type:", error.constructor.name);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+    console.error("=== END ERROR ===");
+    throw error;
   }
 }
 
