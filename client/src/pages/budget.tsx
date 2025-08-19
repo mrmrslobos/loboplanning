@@ -202,9 +202,19 @@ export default function Budget() {
       return await apiRequest("DELETE", `/api/budget/transactions/${id}`);
     },
     onSuccess: () => {
+      // Invalidate multiple related queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: ['/api/budget/transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/budget-analysis'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai/budget-alerts'] });
       toast({ title: "Success", description: "Transaction deleted successfully" });
     },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error?.message || "Failed to delete transaction",
+        variant: "destructive" 
+      });
+    }
   });
 
   // Calculate monthly summaries
@@ -867,10 +877,15 @@ export default function Budget() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => deleteTransactionMutation.mutate(transaction.id)}
+                            onClick={() => {
+                              if (window.confirm('Are you sure you want to delete this transaction?')) {
+                                deleteTransactionMutation.mutate(transaction.id);
+                              }
+                            }}
+                            disabled={deleteTransactionMutation.isPending}
                             data-testid={`button-delete-transaction-${transaction.id}`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
                         </div>
                       </div>

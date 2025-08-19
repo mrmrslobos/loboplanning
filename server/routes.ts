@@ -959,6 +959,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/budget/categories/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteBudgetCategory(id);
+      if (!success) {
+        return res.status(404).json({ error: 'Category not found' });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Budget category deletion error:', error);
+      res.status(500).json({ error: 'Failed to delete category' });
+    }
+  });
+
   app.get('/api/budget/transactions', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const transactions = await storage.getBudgetTransactions(req.user!.id, req.user!.familyId);
@@ -980,6 +994,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Budget transaction error:', error);
       res.status(400).json({ error: 'Invalid input', details: error.message });
+    }
+  });
+
+  app.put('/api/budget/transactions/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const transaction = await storage.updateBudgetTransaction(id, req.body);
+      if (!transaction) {
+        return res.status(404).json({ error: 'Transaction not found' });
+      }
+      res.json(transaction);
+    } catch (error) {
+      console.error('Transaction update error:', error);
+      res.status(500).json({ error: 'Failed to update transaction' });
+    }
+  });
+
+  app.delete('/api/budget/transactions/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteBudgetTransaction(id);
+      if (!success) {
+        return res.status(404).json({ error: 'Transaction not found' });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Transaction deletion error:', error);
+      res.status(500).json({ error: 'Failed to delete transaction' });
     }
   });
 
