@@ -145,6 +145,11 @@ export interface IStorage {
   createFamilyAchievement(achievement: InsertFamilyAchievement): Promise<FamilyAchievement>;
   getAchievementProgress(familyId: string): Promise<AchievementProgress[]>;
   updateAchievementProgress(familyId: string, badgeId: string, progress: Partial<AchievementProgress>): Promise<AchievementProgress>;
+
+  // Devotional methods
+  getDevotionalPosts(userId: string, familyId?: string): Promise<DevotionalPost[]>;
+  createDevotionalPost(post: InsertDevotionalPost): Promise<DevotionalPost>;
+  deleteDevotionalPost(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -859,6 +864,28 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  // Devotional methods
+  async getDevotionalPosts(userId: string, familyId?: string): Promise<DevotionalPost[]> {
+    const filter = familyId 
+      ? or(eq(devotionalPosts.userId, userId), eq(devotionalPosts.familyId, familyId))
+      : eq(devotionalPosts.userId, userId);
+    
+    return await db.select().from(devotionalPosts).where(filter);
+  }
+
+  async createDevotionalPost(post: InsertDevotionalPost): Promise<DevotionalPost> {
+    const [created] = await db
+      .insert(devotionalPosts)
+      .values(post)
+      .returning();
+    return created;
+  }
+
+  async deleteDevotionalPost(id: string): Promise<boolean> {
+    const result = await db.delete(devotionalPosts).where(eq(devotionalPosts.id, id));
+    return result.rowCount! > 0;
   }
 
   // Admin method

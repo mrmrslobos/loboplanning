@@ -1978,19 +1978,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Save devotional to user's collection
   app.post('/api/devotionals/save', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      console.log('Saving devotional:', req.body);
+      
+      // Transform AI devotional format to database schema
       const devotionalData = {
-        ...req.body,
+        title: req.body.title,
+        reading: req.body.bibleVerse ? `${req.body.bibleVerse.text} - ${req.body.bibleVerse.reference}` : null,
+        topic: req.body.theme || null,
+        questions: req.body.discussion ? JSON.stringify(req.body.discussion) : null,
+        prayer: req.body.prayer || null,
+        date: new Date(req.body.date || new Date().toISOString()),
         userId: req.user!.id,
-        familyId: req.user!.familyId,
-        savedAt: new Date().toISOString()
+        familyId: req.user!.familyId || null,
       };
 
-      // This would save to database if devotionals table exists
-      // For now, just return success
+      const savedDevotional = await storage.createDevotionalPost(devotionalData);
+      console.log('Devotional saved to database:', savedDevotional.id);
+      
       res.json({ 
         success: true, 
         message: 'Devotional saved successfully',
-        devotional: devotionalData 
+        devotional: savedDevotional 
       });
     } catch (error) {
       console.error('Save devotional error:', error);
