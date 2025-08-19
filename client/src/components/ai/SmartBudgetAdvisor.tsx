@@ -58,11 +58,11 @@ export function SmartBudgetAdvisor() {
     );
   }
 
-  const recommendations: BudgetRecommendation[] = budgetAnalysis?.recommendations || [];
-  const cashFlow: CashFlowAnalysis = budgetAnalysis?.cashFlowAnalysis || {};
-  const spendingInsights = budgetAnalysis?.spendingInsights || {};
-  const calendarTips = budgetAnalysis?.calendarBudgetTips || [];
-  const alerts = budgetAlerts || [];
+  const recommendations: BudgetRecommendation[] = (budgetAnalysis as any)?.recommendations || [];
+  const cashFlow: CashFlowAnalysis = (budgetAnalysis as any)?.cashFlowAnalysis || { nextWeekOutflow: 0, nextMonthOutflow: 0, riskLevel: 'low', bufferDays: 0 };
+  const spendingInsights = (budgetAnalysis as any)?.spendingInsights || { trends: [], patterns: [], optimizations: [] };
+  const calendarTips = (budgetAnalysis as any)?.calendarBudgetTips || [];
+  const alerts = (budgetAlerts as any) || [];
 
   if (!budgetAnalysis) {
     return (
@@ -88,6 +88,17 @@ export function SmartBudgetAdvisor() {
       case 'action': return <CheckCircle className="h-4 w-4 text-blue-500" />;
       default: return <BarChart3 className="h-4 w-4 text-gray-500" />;
     }
+  };
+
+  const formatCurrency = (value: number | string | undefined): string => {
+    if (value === undefined || value === null) return '$0.00';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return isNaN(numValue) ? '$0.00' : `$${numValue.toFixed(2)}`;
+  };
+
+  const safeReplace = (text: string | undefined, searchValue: string | RegExp, replaceValue: string): string => {
+    if (!text || typeof text !== 'string') return '';
+    return text.replace(searchValue, replaceValue);
   };
 
   const getImpactColor = (impact: string) => {
@@ -166,7 +177,7 @@ export function SmartBudgetAdvisor() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {alerts.slice(0, 5).map((alert, idx) => (
+              {alerts.slice(0, 5).map((alert: any, idx: number) => (
                 <Alert key={idx} className={`${alert.urgency === 'high' ? 'border-red-200 bg-red-50' : alert.urgency === 'medium' ? 'border-yellow-200 bg-yellow-50' : 'border-blue-200 bg-blue-50'}`}>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
@@ -261,7 +272,7 @@ export function SmartBudgetAdvisor() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {calendarTips.slice(0, 4).map((tip, idx) => (
+              {calendarTips.slice(0, 4).map((tip: any, idx: number) => (
                 <div key={idx} className="border-l-4 border-blue-400 pl-4 py-2">
                   <div className="font-medium text-sm">{tip.eventTitle}</div>
                   <div className="text-xs text-muted-foreground mb-1">
@@ -270,7 +281,7 @@ export function SmartBudgetAdvisor() {
                   <div className="text-xs text-blue-600">{tip.budgetImpact}</div>
                   {tip.suggestions.length > 0 && (
                     <ul className="text-xs text-gray-600 mt-1 space-y-0.5">
-                      {tip.suggestions.slice(0, 2).map((suggestion, suggestionIdx) => (
+                      {tip.suggestions.slice(0, 2).map((suggestion: any, suggestionIdx: number) => (
                         <li key={suggestionIdx}>• {suggestion}</li>
                       ))}
                     </ul>
@@ -295,7 +306,7 @@ export function SmartBudgetAdvisor() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {spendingInsights.trends.slice(0, 4).map((trend, idx) => (
+                  {spendingInsights.trends.slice(0, 4).map((trend: any, idx: number) => (
                     <li key={idx} className="text-sm flex items-start">
                       <TrendingUp className="h-3 w-3 mr-2 mt-1 text-green-500 flex-shrink-0" />
                       <span>{trend}</span>
@@ -316,7 +327,7 @@ export function SmartBudgetAdvisor() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {spendingInsights.optimizations.slice(0, 4).map((optimization, idx) => (
+                  {spendingInsights.optimizations.slice(0, 4).map((optimization: any, idx: number) => (
                     <li key={idx} className="text-sm flex items-start">
                       <CheckCircle className="h-3 w-3 mr-2 mt-1 text-pink-500 flex-shrink-0" />
                       <span>{optimization}</span>
