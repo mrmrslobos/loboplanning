@@ -66,7 +66,7 @@ function AuthenticatedApp() {
             <Route path="/events" component={Events} />
             <Route path="/meal-planning" component={MealPlanning} />
             <Route path="/achievements" component={Achievements} />
-
+            <Route path="/assistant" component={Assistant} />
             <Route component={NotFound} />
           </Switch>
         </main>

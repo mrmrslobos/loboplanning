@@ -1,26 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Bot, 
-  Send, 
-  User, 
-  Sparkles, 
-  CheckCircle2, 
-  Calendar, 
-  DollarSign, 
-  List, 
-  BookOpen,
-  Lightbulb,
-  Clock
-} from "lucide-react";
+import { Bot, Send, User, CheckCircle2, Calendar, DollarSign, List, BookOpen, Lightbulb } from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -50,18 +36,12 @@ export default function AssistantPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: user } = useQuery({
     queryKey: ['/api/auth/me'],
   });
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   // Send message to AI assistant
   const sendMessage = useMutation<AssistantResponse, Error, string>({
@@ -231,88 +211,82 @@ export default function AssistantPage() {
           )}
 
           {/* Messages */}
-          <ScrollArea className="flex-1 pr-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
+          <div className="flex-1 max-h-96 overflow-y-auto space-y-4 mb-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
                 <div
-                  key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`max-w-[80%] rounded-lg p-3 ${
+                    message.type === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800'
+                  }`}
                 >
-                  <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
-                      message.type === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800'
-                    }`}
-                  >
-                    <div className="flex items-start space-x-2">
-                      {message.type === 'assistant' && (
-                        <Bot className="h-4 w-4 mt-0.5 text-blue-600" />
+                  <div className="flex items-start space-x-2">
+                    {message.type === 'assistant' && (
+                      <Bot className="h-4 w-4 mt-0.5 text-blue-600" />
+                    )}
+                    {message.type === 'user' && (
+                      <User className="h-4 w-4 mt-0.5" />
+                    )}
+                    <div className="flex-1">
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      
+                      {/* Actions */}
+                      {message.actions && message.actions.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          <p className="text-xs font-medium">Suggested Actions:</p>
+                          {message.actions.map((action, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <Button
+                                size="sm"
+                                variant={action.executed ? "secondary" : "outline"}
+                                onClick={() => !action.executed && executeAction.mutate(action)}
+                                disabled={action.executed || executeAction.isPending}
+                                className="text-xs h-7"
+                                data-testid={`action-${action.type}-${index}`}
+                              >
+                                {getActionIcon(action.type)}
+                                <span className="ml-1">
+                                  {action.executed ? 'Completed' : action.description}
+                                </span>
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
                       )}
-                      {message.type === 'user' && (
-                        <User className="h-4 w-4 mt-0.5" />
-                      )}
-                      <div className="flex-1">
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        
-                        {/* Actions */}
-                        {message.actions && message.actions.length > 0 && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-xs font-medium">Suggested Actions:</p>
-                            {message.actions.map((action, index) => (
-                              <div key={index} className="flex items-center space-x-2">
-                                <Button
-                                  size="sm"
-                                  variant={action.executed ? "secondary" : "outline"}
-                                  onClick={() => !action.executed && executeAction.mutate(action)}
-                                  disabled={action.executed || executeAction.isPending}
-                                  className="text-xs h-7"
-                                  data-testid={`action-${action.type}-${index}`}
-                                >
-                                  {getActionIcon(action.type)}
-                                  <span className="ml-1">
-                                    {action.executed ? 'Completed' : action.description}
-                                  </span>
-                                </Button>
-                              </div>
+
+                      {/* Suggestions */}
+                      {message.suggestions && message.suggestions.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs font-medium mb-2">You might also ask:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {message.suggestions.map((suggestion, index) => (
+                              <Badge
+                                key={index}
+                                variant="secondary"
+                                className="text-xs cursor-pointer hover:bg-blue-100"
+                                onClick={() => handleQuickSuggestion(suggestion)}
+                                data-testid={`message-suggestion-${index}`}
+                              >
+                                {suggestion}
+                              </Badge>
                             ))}
                           </div>
-                        )}
-
-                        {/* Suggestions */}
-                        {message.suggestions && message.suggestions.length > 0 && (
-                          <div className="mt-3">
-                            <p className="text-xs font-medium mb-2">You might also ask:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {message.suggestions.map((suggestion, index) => (
-                                <Badge
-                                  key={index}
-                                  variant="secondary"
-                                  className="text-xs cursor-pointer hover:bg-blue-100"
-                                  onClick={() => handleQuickSuggestion(suggestion)}
-                                  data-testid={`message-suggestion-${index}`}
-                                >
-                                  {suggestion}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex items-center space-x-1 mt-2">
-                          <Clock className="h-3 w-3 opacity-50" />
-                          <span className="text-xs opacity-50">
-                            {message.timestamp.toLocaleTimeString()}
-                          </span>
                         </div>
+                      )}
+
+                      <div className="text-xs opacity-50 mt-2">
+                        {message.timestamp.toLocaleTimeString()}
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-            <div ref={messagesEndRef} />
-          </ScrollArea>
+              </div>
+            ))}
+          </div>
 
           {/* Input */}
           <div className="mt-4 flex space-x-2">
