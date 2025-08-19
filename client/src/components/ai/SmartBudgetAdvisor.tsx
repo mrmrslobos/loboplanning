@@ -64,6 +64,18 @@ export function SmartBudgetAdvisor() {
   const calendarTips = (budgetAnalysis as any)?.calendarBudgetTips || [];
   const alerts = (budgetAlerts as any) || [];
 
+  // Safe string replacement function
+  const safeReplace = (str: string, searchValue: string, replaceValue: string): string => {
+    if (!str || typeof str !== 'string') return '';
+    return str.replace(new RegExp(searchValue, 'g'), replaceValue);
+  };
+
+  // Format currency safely
+  const formatCurrency = (amount: number | undefined | null): string => {
+    if (typeof amount !== 'number' || isNaN(amount)) return '$0.00';
+    return `$${amount.toFixed(2)}`;
+  };
+
   if (!budgetAnalysis) {
     return (
       <Card>
@@ -90,16 +102,9 @@ export function SmartBudgetAdvisor() {
     }
   };
 
-  const formatCurrency = (value: number | string | undefined): string => {
-    if (value === undefined || value === null) return '$0.00';
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    return isNaN(numValue) ? '$0.00' : `$${numValue.toFixed(2)}`;
-  };
 
-  const safeReplace = (text: string | undefined, searchValue: string | RegExp, replaceValue: string): string => {
-    if (!text || typeof text !== 'string') return '';
-    return text.replace(searchValue, replaceValue);
-  };
+
+
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
@@ -219,7 +224,7 @@ export function SmartBudgetAdvisor() {
                       {getRecommendationIcon(rec.type)}
                       <div>
                         <h4 className="font-medium">{rec.title}</h4>
-                        <p className="text-sm text-muted-foreground">{rec.description}</p>
+                        <p className="text-sm text-muted-foreground">{rec.description || 'No description available'}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -227,7 +232,7 @@ export function SmartBudgetAdvisor() {
                         {rec.impact} impact
                       </div>
                       <Badge variant="outline" className="text-xs">
-                        {rec.timeframe.replace('_', ' ')}
+                        {safeReplace(rec.timeframe || '', '_', ' ')}
                       </Badge>
                     </div>
                   </div>
@@ -240,16 +245,16 @@ export function SmartBudgetAdvisor() {
 
                   {rec.potentialSavings && (
                     <div className="text-xs text-green-600 font-medium">
-                      💰 Potential savings: ${rec.potentialSavings.toFixed(2)}
+                      💰 Potential savings: {formatCurrency(rec.potentialSavings)}
                     </div>
                   )}
 
-                  {rec.suggestedActions.length > 0 && (
+                  {rec.suggestedActions && rec.suggestedActions.length > 0 && (
                     <div className="text-xs">
                       <span className="font-medium text-gray-700">Action items:</span>
                       <ul className="list-disc list-inside ml-2 mt-1 space-y-0.5 text-gray-600">
-                        {rec.suggestedActions.slice(0, 3).map((action, actionIdx) => (
-                          <li key={actionIdx}>{action}</li>
+                        {(rec.suggestedActions || []).slice(0, 3).map((action, actionIdx) => (
+                          <li key={actionIdx}>{action || ''}</li>
                         ))}
                       </ul>
                     </div>
@@ -274,15 +279,15 @@ export function SmartBudgetAdvisor() {
             <div className="space-y-3">
               {calendarTips.slice(0, 4).map((tip: any, idx: number) => (
                 <div key={idx} className="border-l-4 border-blue-400 pl-4 py-2">
-                  <div className="font-medium text-sm">{tip.eventTitle}</div>
+                  <div className="font-medium text-sm">{tip.eventTitle || 'Event'}</div>
                   <div className="text-xs text-muted-foreground mb-1">
-                    {new Date(tip.eventDate).toDateString()}
+                    {tip.eventDate ? new Date(tip.eventDate).toDateString() : 'No date'}
                   </div>
-                  <div className="text-xs text-blue-600">{tip.budgetImpact}</div>
-                  {tip.suggestions.length > 0 && (
+                  <div className="text-xs text-blue-600">{tip.budgetImpact || ''}</div>
+                  {tip.suggestions && tip.suggestions.length > 0 && (
                     <ul className="text-xs text-gray-600 mt-1 space-y-0.5">
-                      {tip.suggestions.slice(0, 2).map((suggestion: any, suggestionIdx: number) => (
-                        <li key={suggestionIdx}>• {suggestion}</li>
+                      {(tip.suggestions || []).slice(0, 2).map((suggestion: any, suggestionIdx: number) => (
+                        <li key={suggestionIdx}>• {suggestion || ''}</li>
                       ))}
                     </ul>
                   )}
@@ -306,10 +311,10 @@ export function SmartBudgetAdvisor() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {spendingInsights.trends.slice(0, 4).map((trend: any, idx: number) => (
+                  {(spendingInsights.trends || []).slice(0, 4).map((trend: any, idx: number) => (
                     <li key={idx} className="text-sm flex items-start">
                       <TrendingUp className="h-3 w-3 mr-2 mt-1 text-green-500 flex-shrink-0" />
-                      <span>{trend}</span>
+                      <span>{trend || ''}</span>
                     </li>
                   ))}
                 </ul>
@@ -327,10 +332,10 @@ export function SmartBudgetAdvisor() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {spendingInsights.optimizations.slice(0, 4).map((optimization: any, idx: number) => (
+                  {(spendingInsights.optimizations || []).slice(0, 4).map((optimization: any, idx: number) => (
                     <li key={idx} className="text-sm flex items-start">
                       <CheckCircle className="h-3 w-3 mr-2 mt-1 text-pink-500 flex-shrink-0" />
-                      <span>{optimization}</span>
+                      <span>{optimization || ''}</span>
                     </li>
                   ))}
                 </ul>
