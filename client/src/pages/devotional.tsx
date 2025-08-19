@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DevotionalGenerator } from "@/components/ai/DevotionalGenerator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -383,7 +384,7 @@ export default function Devotional() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Daily Devotional</h1>
-            <p className="mt-1 text-sm text-gray-600">Grow together in faith through daily verses, reflections, and prayer</p>
+            <p className="mt-1 text-sm text-gray-600">AI-generated spiritual guidance tailored for your family's faith journey</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Button 
@@ -406,6 +407,11 @@ export default function Devotional() {
           </div>
         </div>
       </header>
+
+      {/* AI Devotional Generator */}
+      <div className="p-4 lg:p-6">
+        <DevotionalGenerator />
+      </div>
 
       <div className="space-y-4 lg:space-y-6 p-4 lg:p-6">
         {/* Daily Verse Card */}

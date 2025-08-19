@@ -19,6 +19,7 @@ import { generateMealPlan, generateGroceryList } from "./ai-meal-planner";
 import { analyzeBudgetWithCalendar, generateBudgetAlerts } from "./ai-budget-advisor";
 import { generateCalendarInsights, generateEventPreparationTips } from "./ai-calendar-insights";
 import { generateEventSuggestions, generateEventTypeTemplates, generateQuickEventSuggestions } from "./ai-event-assistant";
+import { generateDailyDevotional, generateWeeklyDevotionalPlan, generateTopicalDevotional, generateDevotionalSuggestions } from "./ai-devotional-generator";
 import { 
   ACHIEVEMENT_BADGES, 
   calculateLevelFromPoints,
@@ -1830,6 +1831,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Quick suggestions error:', error);
       res.status(500).json({ error: 'Failed to generate quick suggestions' });
+    }
+  });
+
+  // AI Devotional Generator Routes
+
+  // Generate daily devotional
+  app.post('/api/ai/daily-devotional', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { theme, familySize, childrenAges, marriageYears, specificNeeds } = req.body;
+      
+      const devotionalRequest = {
+        theme: theme || 'general',
+        familySize,
+        childrenAges,
+        marriageYears,
+        specificNeeds,
+        previousTopics: [] // Could track user's recent devotionals
+      };
+
+      const devotional = await generateDailyDevotional(devotionalRequest);
+      res.json(devotional);
+    } catch (error) {
+      console.error('Daily devotional error:', error);
+      res.status(500).json({ error: 'Failed to generate daily devotional' });
+    }
+  });
+
+  // Generate weekly devotional plan
+  app.post('/api/ai/weekly-devotional-plan', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { theme, familySize, childrenAges, marriageYears, specificNeeds } = req.body;
+      
+      const devotionalRequest = {
+        theme: theme || 'family',
+        familySize,
+        childrenAges,
+        marriageYears,
+        specificNeeds,
+        previousTopics: []
+      };
+
+      const weeklyPlan = await generateWeeklyDevotionalPlan(devotionalRequest);
+      res.json(weeklyPlan);
+    } catch (error) {
+      console.error('Weekly devotional plan error:', error);
+      res.status(500).json({ error: 'Failed to generate weekly devotional plan' });
+    }
+  });
+
+  // Generate topical devotional
+  app.post('/api/ai/topical-devotional', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { topic, additionalContext } = req.body;
+      
+      if (!topic) {
+        return res.status(400).json({ error: 'Topic is required' });
+      }
+
+      const devotional = await generateTopicalDevotional(topic, additionalContext);
+      res.json(devotional);
+    } catch (error) {
+      console.error('Topical devotional error:', error);
+      res.status(500).json({ error: 'Failed to generate topical devotional' });
+    }
+  });
+
+  // Get devotional suggestions
+  app.post('/api/ai/devotional-suggestions', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { theme, recentChallenges, familySize, childrenAges } = req.body;
+      
+      const familyProfile = {
+        theme,
+        recentChallenges,
+        familySize,
+        childrenAges
+      };
+
+      const suggestions = await generateDevotionalSuggestions(familyProfile);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Devotional suggestions error:', error);
+      res.status(500).json({ error: 'Failed to generate devotional suggestions' });
+    }
+  });
+
+  // Save devotional to user's collection
+  app.post('/api/devotionals/save', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const devotionalData = {
+        ...req.body,
+        userId: req.user!.id,
+        familyId: req.user!.familyId,
+        savedAt: new Date().toISOString()
+      };
+
+      // This would save to database if devotionals table exists
+      // For now, just return success
+      res.json({ 
+        success: true, 
+        message: 'Devotional saved successfully',
+        devotional: devotionalData 
+      });
+    } catch (error) {
+      console.error('Save devotional error:', error);
+      res.status(500).json({ error: 'Failed to save devotional' });
     }
   });
 

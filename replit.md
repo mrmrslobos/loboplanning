@@ -35,6 +35,15 @@ LoboHub is a comprehensive family hub web application providing a centralized di
 - **Family Collaboration**: Event planning tasks are designed for family participation and role assignment
 - **Emergency Planning**: Includes contingency plans and quick suggestions for last-minute events
 
+### AI-Powered Devotional System (August 2025)
+- **Intelligent Daily Devotionals**: AI generates personalized daily devotionals with Bible verses, reflections, prayers, and family activities
+- **Theme-Based Content**: Specialized devotionals for marriage, parenting, family life, children's faith, and relationships
+- **Weekly Devotional Plans**: Comprehensive 7-day devotional journeys with cohesive themes and memory verses
+- **Topical Devotionals**: On-demand devotionals for specific topics like forgiveness, patience, trust, and communication
+- **Family-Centered Approach**: Content tailored to family size, children's ages, marriage years, and specific spiritual needs
+- **Practical Application**: Each devotional includes actionable steps, discussion questions, and family activities
+- **Scripture Integration**: Accurate Bible verses with proper references using ESV (English Standard Version)
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
