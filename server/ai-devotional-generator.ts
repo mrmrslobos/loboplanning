@@ -110,7 +110,7 @@ Generate a complete devotional that speaks to the heart while providing practica
       contents: prompt,
     });
 
-    console.log("Received response from Gemini:", response.text?.substring(0, 300) + "...");
+    console.log("Received response from Gemini:", response.text?.substring(0, 500));
 
     if (!response.text) {
       throw new Error("No response text from Gemini API");
@@ -125,19 +125,31 @@ Generate a complete devotional that speaks to the heart while providing practica
       throw new Error("Invalid JSON response from AI");
     }
     
+    console.log("Parsed result from Gemini:", JSON.stringify(result, null, 2));
+    
     const devotionalResult = {
-      ...result,
-      date: currentDate,
+      title: result.title || "Daily Devotional",
       theme: request.theme,
-      // Ensure required fields exist
+      date: currentDate,
       bibleVerse: result.bibleVerse || {
         text: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.",
         reference: "Jeremiah 29:11",
         version: "ESV"
-      }
+      },
+      reflection: result.reflection || "God's love sustains us through every challenge.",
+      practicalApplication: result.practicalApplication || "Take time today to reflect on God's faithfulness in your life.",
+      prayer: result.prayer || "Dear Lord, help us to trust in Your perfect plan for our lives. Amen.",
+      familyActivity: result.familyActivity || "Share one thing you're grateful for as a family today.",
+      discussion: result.discussion || {
+        coupleQuestions: ["How can we support each other better today?"],
+        familyQuestions: ["What is one blessing we can count today?"],
+        parentingInsights: ["Children learn from our example of faith and perseverance."]
+      },
+      encouragement: result.encouragement || "God is with you in every season of life.",
+      tags: result.tags || ["faith", "family", "hope"]
     };
     
-    console.log("Generated devotional successfully:", devotionalResult.title);
+    console.log("Final devotional result:", JSON.stringify(devotionalResult, null, 2));
     return devotionalResult;
   } catch (error) {
     console.error("Error generating devotional:", error);

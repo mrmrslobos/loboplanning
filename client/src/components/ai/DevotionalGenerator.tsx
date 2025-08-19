@@ -407,7 +407,7 @@ export function DevotionalGenerator() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleCopyText(`${devotional.title}\n\n${devotional.bibleVerse.text}\n- ${devotional.bibleVerse.reference}\n\n${devotional.reflection}`)}
+                  onClick={() => handleCopyText(`${devotional.title}\n\n${devotional.bibleVerse?.text || ''}\n- ${devotional.bibleVerse?.reference || ''}\n\n${devotional.reflection || ''}`)}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -426,10 +426,10 @@ export function DevotionalGenerator() {
             {/* Bible Verse */}
             <div className="p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
               <blockquote className="text-lg font-medium italic text-blue-900 mb-2">
-                "{devotional.bibleVerse.text}"
+                "{devotional.bibleVerse?.text || 'Loading...'}"
               </blockquote>
               <cite className="text-blue-700 font-medium">
-                - {devotional.bibleVerse.reference} ({devotional.bibleVerse.version})
+                - {devotional.bibleVerse?.reference || ''} ({devotional.bibleVerse?.version || 'ESV'})
               </cite>
             </div>
 
@@ -576,7 +576,7 @@ export function DevotionalGenerator() {
                   <CardContent className="pt-0">
                     <div className="space-y-3">
                       <div className="text-sm bg-gray-50 p-3 rounded">
-                        <strong>Verse:</strong> "{daily.bibleVerse.text}" - {daily.bibleVerse.reference}
+                        <strong>Verse:</strong> "{daily.bibleVerse?.text || 'Loading...'}" - {daily.bibleVerse?.reference || ''}
                       </div>
                       <p className="text-sm text-gray-700">{daily.reflection.substring(0, 200)}...</p>
                       <Button
