@@ -178,8 +178,28 @@ export async function executeAssistantAction(
         if (actionData.description) {
           const items = actionData.description.split('\n').filter(item => item.trim());
           for (const itemText of items) {
+            const title = itemText.trim();
+            const titleLower = title.toLowerCase();
+            
+            // Auto-categorize grocery items
+            let category = 'General';
+            if (['milk', 'cheese', 'butter', 'yogurt', 'cream'].some(item => titleLower.includes(item))) {
+              category = 'Dairy';
+            } else if (['bread', 'pasta', 'rice', 'cereal', 'flour'].some(item => titleLower.includes(item))) {
+              category = 'Grains';
+            } else if (['apple', 'banana', 'orange', 'berry', 'grape', 'lemon'].some(item => titleLower.includes(item))) {
+              category = 'Fruits';
+            } else if (['carrot', 'potato', 'onion', 'tomato', 'lettuce', 'spinach'].some(item => titleLower.includes(item))) {
+              category = 'Vegetables';
+            } else if (['chicken', 'beef', 'pork', 'fish', 'meat'].some(item => titleLower.includes(item))) {
+              category = 'Meat';
+            } else if (['soap', 'shampoo', 'toothpaste', 'tissue', 'toilet paper'].some(item => titleLower.includes(item))) {
+              category = 'Personal Care';
+            }
+            
             const itemData = {
-              text: itemText.trim(),
+              title: title,
+              category: category,
               completed: false,
               listId: newList.id,
               userId: context.userId,
@@ -194,8 +214,28 @@ export async function executeAssistantAction(
       case 'add_list_item':
         // Handle nested action data structure
         const listItemInfo = actionData.add_list_item || actionData;
+        
+        // Auto-categorize grocery items
+        const itemTitle = listItemInfo.text.toLowerCase();
+        let category = 'General';
+        
+        if (['milk', 'cheese', 'butter', 'yogurt', 'cream'].some(item => itemTitle.includes(item))) {
+          category = 'Dairy';
+        } else if (['bread', 'pasta', 'rice', 'cereal', 'flour'].some(item => itemTitle.includes(item))) {
+          category = 'Grains';
+        } else if (['apple', 'banana', 'orange', 'berry', 'grape', 'lemon'].some(item => itemTitle.includes(item))) {
+          category = 'Fruits';
+        } else if (['carrot', 'potato', 'onion', 'tomato', 'lettuce', 'spinach'].some(item => itemTitle.includes(item))) {
+          category = 'Vegetables';
+        } else if (['chicken', 'beef', 'pork', 'fish', 'meat'].some(item => itemTitle.includes(item))) {
+          category = 'Meat';
+        } else if (['soap', 'shampoo', 'toothpaste', 'tissue', 'toilet paper'].some(item => itemTitle.includes(item))) {
+          category = 'Personal Care';
+        }
+        
         const itemData = {
           title: listItemInfo.text,
+          category: category,
           completed: false,
           listId: listItemInfo.listId,
           userId: context.userId,
