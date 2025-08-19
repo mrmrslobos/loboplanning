@@ -20,6 +20,13 @@ LoboHub is a comprehensive family hub web application providing a centralized di
 - **Real-Time Achievement Notifications**: Instant feedback when achievements are unlocked during task completion
 - **Achievement Categories**: Task completion, collaboration, milestones, consistency, and special achievements
 
+### Cross-Feature AI Integration (August 2025)
+- **AI Meal Planning**: Smart meal recommendations considering calendar events, budget constraints, dietary preferences, and family size
+- **AI Budget Advisor**: Intelligent financial analysis with calendar integration, bill due date tracking, spending pattern recognition, and cash flow optimization
+- **AI Calendar Insights**: Cross-feature scheduling intelligence that considers tasks, meals, budget obligations, and family events
+- **Smart Integrations**: Meal planning considers budget constraints and busy calendar days; budget analysis factors in calendar events and meal costs; calendar insights optimize timing for all family activities
+- **Real-Time Intelligence**: AI adapts recommendations based on current family context, energy levels, time constraints, and financial status
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

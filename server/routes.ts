@@ -15,6 +15,9 @@ import {
 import { categorizeItem } from "./ai-categorizer";
 import { generateTaskRecommendations, analyzeProductivityPatterns } from "./ai-task-recommender";
 import { analyzeBehaviorPatterns, generateContextualInsights } from "./user-behavior-analyzer";
+import { generateMealPlan, generateGroceryList } from "./ai-meal-planner";
+import { analyzeBudgetWithCalendar, generateBudgetAlerts } from "./ai-budget-advisor";
+import { generateCalendarInsights, generateEventPreparationTips } from "./ai-calendar-insights";
 import { 
   ACHIEVEMENT_BADGES, 
   calculateLevelFromPoints,
@@ -1472,6 +1475,228 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting reaction:', error);
       res.status(500).json({ error: 'Failed to delete reaction' });
+    }
+  });
+
+  // Enhanced AI Integration Routes
+
+  // AI Meal Planning with Calendar & Budget Integration
+  app.post('/api/ai/meal-plan', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Get budget information
+      const budgetItems = await storage.getBudgetItems(req.user!.id, req.user!.familyId);
+      const groceryBudget = budgetItems.find(item => 
+        item.category.toLowerCase().includes('grocery') || item.category.toLowerCase().includes('food')
+      );
+
+      // Get upcoming events
+      const events = await storage.getEvents(req.user!.id, req.user!.familyId);
+      const upcomingEvents = events.filter(event => {
+        const eventDate = new Date(event.date);
+        const twoWeeks = new Date();
+        twoWeeks.setDate(twoWeeks.getDate() + 14);
+        return eventDate <= twoWeeks && eventDate >= new Date();
+      });
+
+      // Get current meal plans
+      const currentMeals = await storage.getMealPlans(req.user!.id, req.user!.familyId);
+
+      const mealPlanInput = {
+        userId: req.user!.id,
+        familyId: req.user!.familyId,
+        budget: groceryBudget ? {
+          monthlyGroceryBudget: groceryBudget.budgeted,
+          currentSpending: groceryBudget.budgeted - groceryBudget.remaining,
+          upcomingBills: budgetItems.filter(item => item.dueDate).map(item => ({
+            name: item.description || item.category,
+            amount: item.amount,
+            dueDate: new Date(item.dueDate!)
+          }))
+        } : undefined,
+        calendar: {
+          upcomingEvents: upcomingEvents.map(event => ({
+            title: event.title,
+            date: new Date(event.date),
+            type: event.type || 'event'
+          })),
+          busyDays: upcomingEvents
+            .filter(event => event.type === 'meeting' || event.type === 'work')
+            .map(event => new Date(event.date).toDateString())
+        },
+        preferences: {
+          dietaryRestrictions: [],
+          favoriteCuisines: ['Italian', 'Mexican', 'American'],
+          cookingSkillLevel: 'intermediate' as const,
+          prepTimePreference: '30-45 minutes',
+          familySize: 4 // Could be stored in user profile
+        },
+        currentMeals: currentMeals.map(meal => ({
+          title: meal.title,
+          date: new Date(meal.date),
+          mealType: meal.mealType as 'breakfast' | 'lunch' | 'dinner' | 'snack'
+        }))
+      };
+
+      const mealPlan = await generateMealPlan(mealPlanInput);
+      res.json(mealPlan);
+    } catch (error) {
+      console.error('AI meal planning error:', error);
+      res.status(500).json({ error: 'Failed to generate AI meal plan' });
+    }
+  });
+
+  // AI Budget Analysis with Calendar Integration
+  app.get('/api/ai/budget-analysis', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const budgetItems = await storage.getBudgetItems(req.user!.id, req.user!.familyId);
+      const events = await storage.getEvents(req.user!.id, req.user!.familyId);
+
+      // Calculate budget categories
+      const categories = budgetItems.reduce((acc, item) => {
+        const category = item.category;
+        if (!acc[category]) {
+          acc[category] = { budgeted: 0, spent: 0 };
+        }
+        acc[category].budgeted += item.budgeted;
+        acc[category].spent += (item.budgeted - item.remaining);
+        return acc;
+      }, {} as Record<string, { budgeted: number; spent: number }>);
+
+      const budgetAnalysisInput = {
+        userId: req.user!.id,
+        familyId: req.user!.familyId,
+        currentBudget: {
+          totalIncome: Object.values(categories).reduce((sum, cat) => sum + cat.budgeted, 0),
+          categories: Object.entries(categories).map(([name, data]) => ({
+            name,
+            budgeted: data.budgeted,
+            spent: data.spent,
+            remaining: data.budgeted - data.spent
+          }))
+        },
+        upcomingBills: budgetItems
+          .filter(item => item.dueDate)
+          .map(item => ({
+            name: item.description || item.category,
+            amount: item.amount,
+            dueDate: new Date(item.dueDate!),
+            category: item.category,
+            recurring: false // Could be added to schema
+          })),
+        calendarEvents: events.map(event => ({
+          title: event.title,
+          date: new Date(event.date),
+          type: event.type || 'event',
+          estimatedCost: 0 // Could be added to event schema
+        }))
+      };
+
+      const analysis = await analyzeBudgetWithCalendar(budgetAnalysisInput);
+      res.json(analysis);
+    } catch (error) {
+      console.error('Budget analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze budget' });
+    }
+  });
+
+  // AI Calendar Insights with Cross-Feature Integration
+  app.get('/api/ai/calendar-insights', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const events = await storage.getEvents(req.user!.id, req.user!.familyId);
+      const tasks = await storage.getTasks(req.user!.id, req.user!.familyId);
+      const budgetItems = await storage.getBudgetItems(req.user!.id, req.user!.familyId);
+      const mealPlans = await storage.getMealPlans(req.user!.id, req.user!.familyId);
+
+      const calendarAnalysisInput = {
+        userId: req.user!.id,
+        familyId: req.user!.familyId,
+        events: events.map(event => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          date: new Date(event.date),
+          type: event.type || 'event',
+          attendees: [],
+          location: event.location
+        })),
+        tasks: tasks.map(task => ({
+          title: task.title,
+          dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+          priority: task.priority || 'medium',
+          category: task.category || 'general',
+          completed: task.completed
+        })),
+        budget: {
+          categories: budgetItems.map(item => ({
+            name: item.category,
+            remaining: item.remaining
+          })),
+          upcomingBills: budgetItems
+            .filter(item => item.dueDate)
+            .map(item => ({
+              name: item.description || item.category,
+              amount: item.amount,
+              dueDate: new Date(item.dueDate!)
+            }))
+        },
+        mealPlan: mealPlans.map(meal => ({
+          title: meal.title,
+          date: new Date(meal.date),
+          mealType: meal.mealType
+        }))
+      };
+
+      const insights = await generateCalendarInsights(calendarAnalysisInput);
+      res.json(insights);
+    } catch (error) {
+      console.error('Calendar insights error:', error);
+      res.status(500).json({ error: 'Failed to generate calendar insights' });
+    }
+  });
+
+  // AI Budget Alerts
+  app.get('/api/ai/budget-alerts', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const budgetItems = await storage.getBudgetItems(req.user!.id, req.user!.familyId);
+
+      const categories = budgetItems.reduce((acc, item) => {
+        const category = item.category;
+        if (!acc[category]) {
+          acc[category] = { budgeted: 0, spent: 0 };
+        }
+        acc[category].budgeted += item.budgeted;
+        acc[category].spent += (item.budgeted - item.remaining);
+        return acc;
+      }, {} as Record<string, { budgeted: number; spent: number }>);
+
+      const budgetAlertsInput = {
+        userId: req.user!.id,
+        familyId: req.user!.familyId,
+        currentBudget: {
+          totalIncome: Object.values(categories).reduce((sum, cat) => sum + cat.budgeted, 0),
+          categories: Object.entries(categories).map(([name, data]) => ({
+            name,
+            budgeted: data.budgeted,
+            spent: data.spent,
+            remaining: data.budgeted - data.spent
+          }))
+        },
+        upcomingBills: budgetItems
+          .filter(item => item.dueDate)
+          .map(item => ({
+            name: item.description || item.category,
+            amount: item.amount,
+            dueDate: new Date(item.dueDate!),
+            category: item.category,
+            recurring: false
+          }))
+      };
+
+      const alerts = await generateBudgetAlerts(budgetAlertsInput);
+      res.json(alerts);
+    } catch (error) {
+      console.error('Budget alerts error:', error);
+      res.status(500).json({ error: 'Failed to generate budget alerts' });
     }
   });
 

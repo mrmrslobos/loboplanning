@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SmartMealPlanner } from "@/components/ai/SmartMealPlanner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -316,6 +317,11 @@ export default function MealPlanning() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* AI Meal Planner */}
+      <div className="mb-8">
+        <SmartMealPlanner />
+      </div>
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Meal Planning</h1>
         <div className="flex gap-2">

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SmartBudgetAdvisor } from "@/components/ai/SmartBudgetAdvisor";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -407,6 +408,11 @@ export default function Budget() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* AI Budget Advisor */}
+      <div className="mb-8">
+        <SmartBudgetAdvisor />
+      </div>
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Budget</h1>
         <div className="flex gap-2">
