@@ -1902,6 +1902,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Calling generateDailyDevotional with:', devotionalRequest);
       const devotional = await generateDailyDevotional(devotionalRequest);
       console.log('Generated devotional successfully:', devotional.title);
+      console.log('Sending devotional response:', JSON.stringify(devotional, null, 2));
       res.json(devotional);
     } catch (error: any) {
       console.error('=== DAILY DEVOTIONAL ERROR ===');
