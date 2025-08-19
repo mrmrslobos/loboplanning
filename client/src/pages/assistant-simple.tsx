@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { apiRequest } from "@/lib/queryClient";
 import { Bot, Send, Lightbulb } from "lucide-react";
 
 export default function AssistantPage() {
@@ -23,21 +24,12 @@ export default function AssistantPage() {
     
     setLoading(true);
     try {
-      const response = await fetch('/api/ai/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ message })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setResponse(data.message || "I received your message!");
-      } else {
-        setResponse("Sorry, I'm having trouble responding right now.");
-      }
+      const response = await apiRequest('POST', '/api/ai/assistant', { message });
+      const data = await response.json();
+      setResponse(data.message || "I received your message and I'm ready to help!");
     } catch (error) {
-      setResponse("Sorry, I'm having trouble responding right now.");
+      console.error('Assistant error:', error);
+      setResponse("Sorry, I'm having trouble connecting right now. Please check that you're logged in and try again.");
     }
     setLoading(false);
   };
