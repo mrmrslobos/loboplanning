@@ -181,20 +181,20 @@ export async function executeAssistantAction(
             const title = itemText.trim();
             const titleLower = title.toLowerCase();
             
-            // Auto-categorize grocery items
-            let category = 'General';
-            if (['milk', 'cheese', 'butter', 'yogurt', 'cream'].some(item => titleLower.includes(item))) {
-              category = 'Dairy';
-            } else if (['bread', 'pasta', 'rice', 'cereal', 'flour'].some(item => titleLower.includes(item))) {
-              category = 'Grains';
+            // Auto-categorize grocery items to match frontend categories
+            let category = 'Other';
+            if (['milk', 'cheese', 'butter', 'yogurt', 'cream', 'egg'].some(item => titleLower.includes(item))) {
+              category = 'Dairy & Eggs';
+            } else if (['bread', 'pasta', 'rice', 'cereal', 'flour', 'sauce', 'pesto'].some(item => titleLower.includes(item))) {
+              category = 'Pantry & Canned Goods';
             } else if (['apple', 'banana', 'orange', 'berry', 'grape', 'lemon'].some(item => titleLower.includes(item))) {
-              category = 'Fruits';
+              category = 'Produce';
             } else if (['carrot', 'potato', 'onion', 'tomato', 'lettuce', 'spinach'].some(item => titleLower.includes(item))) {
-              category = 'Vegetables';
+              category = 'Produce';
             } else if (['chicken', 'beef', 'pork', 'fish', 'meat'].some(item => titleLower.includes(item))) {
-              category = 'Meat';
+              category = 'Meat & Seafood';
             } else if (['soap', 'shampoo', 'toothpaste', 'tissue', 'toilet paper'].some(item => titleLower.includes(item))) {
-              category = 'Personal Care';
+              category = 'Health & Beauty';
             }
             
             const itemData = {
@@ -215,22 +215,22 @@ export async function executeAssistantAction(
         // Handle nested action data structure
         const listItemInfo = actionData.add_list_item || actionData;
         
-        // Auto-categorize grocery items
+        // Auto-categorize grocery items to match frontend categories
         const itemTitle = listItemInfo.text.toLowerCase();
-        let category = 'General';
+        let category = 'Other';
         
-        if (['milk', 'cheese', 'butter', 'yogurt', 'cream'].some(item => itemTitle.includes(item))) {
-          category = 'Dairy';
-        } else if (['bread', 'pasta', 'rice', 'cereal', 'flour'].some(item => itemTitle.includes(item))) {
-          category = 'Grains';
+        if (['milk', 'cheese', 'butter', 'yogurt', 'cream', 'egg'].some(item => itemTitle.includes(item))) {
+          category = 'Dairy & Eggs';
+        } else if (['bread', 'pasta', 'rice', 'cereal', 'flour', 'sauce', 'pesto'].some(item => itemTitle.includes(item))) {
+          category = 'Pantry & Canned Goods';
         } else if (['apple', 'banana', 'orange', 'berry', 'grape', 'lemon'].some(item => itemTitle.includes(item))) {
-          category = 'Fruits';
+          category = 'Produce';
         } else if (['carrot', 'potato', 'onion', 'tomato', 'lettuce', 'spinach'].some(item => itemTitle.includes(item))) {
-          category = 'Vegetables';
+          category = 'Produce';
         } else if (['chicken', 'beef', 'pork', 'fish', 'meat'].some(item => itemTitle.includes(item))) {
-          category = 'Meat';
+          category = 'Meat & Seafood';
         } else if (['soap', 'shampoo', 'toothpaste', 'tissue', 'toilet paper'].some(item => itemTitle.includes(item))) {
-          category = 'Personal Care';
+          category = 'Health & Beauty';
         }
         
         const itemData = {
