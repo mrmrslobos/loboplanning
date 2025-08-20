@@ -13,6 +13,13 @@ import TasksScreen from './src/screens/TasksScreen';
 import ListsScreen from './src/screens/ListsScreen';
 import AssistantScreen from './src/screens/AssistantScreen';
 import BudgetScreen from './src/screens/BudgetScreen';
+import CalendarScreen from './src/screens/CalendarScreen';
+import ChatScreen from './src/screens/ChatScreen';
+import MealPlanningScreen from './src/screens/MealPlanningScreen';
+import EventsScreen from './src/screens/EventsScreen';
+import DevotionalScreen from './src/screens/DevotionalScreen';
+import AchievementsScreen from './src/screens/AchievementsScreen';
+import MoreHomeScreen from './src/screens/MoreHomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 
 // Context
@@ -25,7 +32,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const queryClient = new QueryClient();
 
-function AuthenticatedTabs() {
+function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -40,8 +47,8 @@ function AuthenticatedTabs() {
             iconName = focused ? 'list' : 'list-outline';
           } else if (route.name === 'Assistant') {
             iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-          } else if (route.name === 'Budget') {
-            iconName = focused ? 'card' : 'card-outline';
+          } else if (route.name === 'More') {
+            iconName = focused ? 'ellipsis-horizontal' : 'ellipsis-horizontal-outline';
           } else {
             iconName = 'help-outline';
           }
@@ -57,9 +64,28 @@ function AuthenticatedTabs() {
       <Tab.Screen name="Tasks" component={TasksScreen} />
       <Tab.Screen name="Lists" component={ListsScreen} />
       <Tab.Screen name="Assistant" component={AssistantScreen} />
-      <Tab.Screen name="Budget" component={BudgetScreen} />
+      <Tab.Screen name="More" component={MoreScreen} />
     </Tab.Navigator>
   );
+}
+
+function MoreScreen() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MoreHome" component={MoreHomeScreen} />
+      <Stack.Screen name="Budget" component={BudgetScreen} />
+      <Stack.Screen name="Calendar" component={CalendarScreen} />
+      <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="MealPlanning" component={MealPlanningScreen} />
+      <Stack.Screen name="Events" component={EventsScreen} />
+      <Stack.Screen name="Devotional" component={DevotionalScreen} />
+      <Stack.Screen name="Achievements" component={AchievementsScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function AuthenticatedTabs() {
+  return <MainTabs />;
 }
 
 function AppNavigator() {
