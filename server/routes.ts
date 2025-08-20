@@ -715,6 +715,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const items = await storage.getListItems(id);
+      // Disable caching to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.json(items);
     } catch (error) {
       res.status(500).json({ error: 'Server error' });
