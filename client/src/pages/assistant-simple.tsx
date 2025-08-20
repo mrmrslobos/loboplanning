@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Bot, Send, Lightbulb } from "lucide-react";
+import { Bot, Send, Lightbulb, Mic, MicOff } from "lucide-react";
 
 export default function AssistantPage() {
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null);
 
   const quickSuggestions = [
     "What tasks should I focus on today?",
@@ -18,6 +20,51 @@ export default function AssistantPage() {
     "How are we doing with our budget this month?",
     "Generate a devotional for our family"
   ];
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+      recognitionInstance.lang = 'en-US';
+      
+      recognitionInstance.onstart = () => {
+        setIsListening(true);
+      };
+      
+      recognitionInstance.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setMessage(transcript);
+        setIsListening(false);
+      };
+      
+      recognitionInstance.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+      
+      setRecognition(recognitionInstance);
+    }
+  }, []);
+
+  const startListening = () => {
+    if (recognition && !isListening) {
+      recognition.start();
+    }
+  };
+
+  const stopListening = () => {
+    if (recognition && isListening) {
+      recognition.stop();
+    }
+  };
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -97,14 +144,27 @@ export default function AssistantPage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask me anything about managing your family..."
+              placeholder={isListening ? "Listening..." : "Ask me anything about managing your family..."}
               disabled={loading}
               data-testid="assistant-input"
+              className={isListening ? "border-blue-500 bg-blue-50 dark:bg-blue-950" : ""}
             />
+            {recognition && (
+              <Button
+                onClick={isListening ? stopListening : startListening}
+                disabled={loading}
+                variant={isListening ? "destructive" : "outline"}
+                data-testid="voice-button"
+                className="shrink-0"
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+            )}
             <Button
               onClick={handleSend}
               disabled={!message.trim() || loading}
               data-testid="send-message-button"
+              className="shrink-0"
             >
               <Send className="h-4 w-4" />
             </Button>
