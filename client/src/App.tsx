@@ -21,6 +21,7 @@ import FamilySetup from "@/components/family/family-setup";
 import NotFound from "@/pages/not-found";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileHeader } from "@/components/layout/mobile-header";
+import { InstallPrompt } from "@/components/ui/install-prompt";
 import { useState } from "react";
 
 function AuthenticatedApp() {
@@ -71,6 +72,7 @@ function AuthenticatedApp() {
           </Switch>
         </main>
       </div>
+      <InstallPrompt />
     </div>
   );
 }

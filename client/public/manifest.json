@@ -4,10 +4,35 @@
   "description": "Comprehensive family hub for communication, organization, and shared experiences",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay"],
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "scope": "/",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "AI Assistant",
+      "short_name": "Assistant",
+      "description": "Quick access to AI Family Assistant",
+      "url": "/assistant",
+      "icons": [{"src": "/icons/icon-192x192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Shopping Lists",
+      "short_name": "Lists",
+      "description": "Manage family shopping lists",
+      "url": "/lists",
+      "icons": [{"src": "/icons/icon-192x192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Family Tasks",
+      "short_name": "Tasks",
+      "description": "View and manage family tasks",
+      "url": "/tasks",
+      "icons": [{"src": "/icons/icon-192x192.png", "sizes": "192x192"}]
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
