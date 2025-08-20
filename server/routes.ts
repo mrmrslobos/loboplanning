@@ -715,12 +715,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const items = await storage.getListItems(id);
-      // Disable caching to ensure fresh data
+      console.log(`Fetching items for list ${id}, found ${items.length} items:`, items.map(i => i.title));
+      // Disable all caching
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
+      res.set('ETag', ''); // Remove ETag to prevent 304 responses
       res.json(items);
     } catch (error) {
+      console.error('List items error:', error);
       res.status(500).json({ error: 'Server error' });
     }
   });
