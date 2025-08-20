@@ -31,8 +31,14 @@ export default function AssistantPage() {
       // Invalidate cache if actions were performed
       if (data.actionResults && data.actionResults.some((result: any) => result.success)) {
         queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
-        // Also invalidate list items for all lists
-        queryClient.invalidateQueries({ queryKey: ["/api/lists", undefined, "items"] });
+        // Invalidate all list item queries
+        queryClient.invalidateQueries({ 
+          predicate: (query) => 
+            Array.isArray(query.queryKey) && 
+            query.queryKey.length >= 3 && 
+            query.queryKey[0] === "/api/lists" && 
+            query.queryKey[2] === "items"
+        });
       }
     } catch (error) {
       console.error('Assistant error:', error);
