@@ -1,89 +1,40 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PaperProvider, Button, Card, Title, Paragraph } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        <SafeAreaView style={styles.container}>
-          <StatusBar style="auto" />
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-            
-            {/* Header */}
-            <View style={styles.header}>
-              <MaterialIcons name="family-restroom" size={48} color="#1f2937" />
-              <Text style={styles.title}>LoboHub Mobile</Text>
-              <Text style={styles.subtitle}>Family Management App</Text>
-            </View>
-
-            {/* Feature Cards */}
-            <View style={styles.featuresContainer}>
-              <Card style={styles.card}>
-                <Card.Content>
-                  <Title>✓ Complete Self-Contained App</Title>
-                  <Paragraph>Works 100% offline with local data storage</Paragraph>
-                </Card.Content>
-              </Card>
-
-              <Card style={styles.card}>
-                <Card.Content>
-                  <Title>✓ Family Sharing</Title>
-                  <Paragraph>Share data via invite codes and export/import files</Paragraph>
-                </Card.Content>
-              </Card>
-
-              <Card style={styles.card}>
-                <Card.Content>
-                  <Title>✓ Full Feature Set</Title>
-                  <Paragraph>Tasks, Lists, Budget, Calendar, Chat, AI Assistant, and more</Paragraph>
-                </Card.Content>
-              </Card>
-
-              <Card style={styles.card}>
-                <Card.Content>
-                  <Title>✓ App Store Ready</Title>
-                  <Paragraph>No backend servers required - completely independent</Paragraph>
-                </Card.Content>
-              </Card>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.buttonContainer}>
-              <Button 
-                mode="contained" 
-                style={styles.button}
-                onPress={() => console.log('Get Started pressed')}
-              >
-                Get Started
-              </Button>
-              
-              <Button 
-                mode="outlined" 
-                style={styles.button}
-                onPress={() => console.log('Learn More pressed')}
-              >
-                Learn More
-              </Button>
-            </View>
-
-            {/* Status */}
-            <View style={styles.statusContainer}>
-              <Text style={styles.statusText}>
-                🎉 Mobile app is working! This proves Expo and React Native are properly configured.
-              </Text>
-              <Text style={styles.statusSubtext}>
-                Next step: Enable full featured app with all screens and AI integration
-              </Text>
-            </View>
-
-          </ScrollView>
-        </SafeAreaView>
-      </PaperProvider>
-    </SafeAreaProvider>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>🏠 LoboHub Mobile</Text>
+        <Text style={styles.subtitle}>Family Management App</Text>
+        
+        <View style={styles.feature}>
+          <Text style={styles.featureTitle}>✅ Self-Contained</Text>
+          <Text style={styles.featureText}>Works 100% offline with local storage</Text>
+        </View>
+        
+        <View style={styles.feature}>
+          <Text style={styles.featureTitle}>✅ Family Sharing</Text>
+          <Text style={styles.featureText}>Share data via invite codes and file export</Text>
+        </View>
+        
+        <View style={styles.feature}>
+          <Text style={styles.featureTitle}>✅ Complete Features</Text>
+          <Text style={styles.featureText}>Tasks, Budget, Calendar, AI Assistant & more</Text>
+        </View>
+        
+        <View style={styles.feature}>
+          <Text style={styles.featureTitle}>✅ App Store Ready</Text>
+          <Text style={styles.featureText}>No backend servers required</Text>
+        </View>
+        
+        <View style={styles.status}>
+          <Text style={styles.statusText}>🎉 Mobile app is working!</Text>
+          <Text style={styles.statusSubtext}>Ready for full feature activation</Text>
+        </View>
+      </ScrollView>
+      <StatusBar style="auto" />
+    </View>
   );
 }
 
@@ -92,61 +43,63 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f9fafb',
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
+  content: {
     padding: 20,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
-    paddingTop: 20,
+    paddingTop: 60,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
-    color: '#1f2937',
     textAlign: 'center',
+    marginBottom: 8,
+    color: '#1f2937',
   },
   subtitle: {
     fontSize: 18,
-    color: '#6b7280',
     textAlign: 'center',
+    marginBottom: 40,
+    color: '#6b7280',
   },
-  featuresContainer: {
-    marginBottom: 30,
-  },
-  card: {
-    marginBottom: 15,
+  feature: {
     backgroundColor: 'white',
+    padding: 20,
+    marginBottom: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  buttonContainer: {
-    marginBottom: 30,
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#1f2937',
   },
-  button: {
-    marginBottom: 10,
+  featureText: {
+    fontSize: 14,
+    color: '#6b7280',
+    lineHeight: 20,
   },
-  statusContainer: {
+  status: {
     backgroundColor: '#f0f9ff',
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 12,
+    marginTop: 20,
     borderLeftWidth: 4,
     borderLeftColor: '#0ea5e9',
   },
   statusText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#0f172a',
-    marginBottom: 8,
     textAlign: 'center',
+    marginBottom: 8,
+    color: '#0f172a',
   },
   statusSubtext: {
     fontSize: 14,
-    color: '#64748b',
     textAlign: 'center',
-    lineHeight: 20,
+    color: '#64748b',
   },
 });
