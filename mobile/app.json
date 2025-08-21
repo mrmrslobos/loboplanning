@@ -4,7 +4,7 @@
     "slug": "lobohub-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "sdkVersion": "53.0.0",
+    "sdkVersion": "51.0.0",
     "platforms": ["ios", "android", "web"],
     "userInterfaceStyle": "light",
     "splash": {
@@ -21,6 +21,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF"
       }
-    }
+    },
+    "jsEngine": "jsc"
   }
 }
