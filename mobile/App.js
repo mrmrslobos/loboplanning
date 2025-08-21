@@ -6,7 +6,8 @@ import {
   View, 
   ScrollView, 
   TouchableOpacity, 
-  SafeAreaView 
+  SafeAreaView,
+  AppRegistry 
 } from 'react-native';
 
 // Simple navigation state management
@@ -446,3 +447,6 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
 });
+
+// Register the app component
+AppRegistry.registerComponent('main', () => App);
