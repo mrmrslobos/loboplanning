@@ -8,7 +8,8 @@ import {
   TouchableOpacity, 
   SafeAreaView,
   TextInput,
-  Alert
+  Alert,
+  AppRegistry
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -307,9 +308,14 @@ function AppContent() {
 }
 
 // Root App Component - Simple version without React Query
-export default function SimpleApp() {
+function SimpleApp() {
   return <AppContent />;
 }
+
+// Register the component
+AppRegistry.registerComponent('main', () => SimpleApp);
+
+export default SimpleApp;
 
 const styles = StyleSheet.create({
   appContainer: {
