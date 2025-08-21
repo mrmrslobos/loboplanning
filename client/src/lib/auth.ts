@@ -15,13 +15,16 @@ class AuthService {
   private user: User | null = null;
 
   constructor() {
-    this.token = localStorage.getItem('auth_token');
-    const userStr = localStorage.getItem('auth_user');
-    if (userStr) {
-      try {
-        this.user = JSON.parse(userStr);
-      } catch {
-        this.logout();
+    // Check if we're in a browser environment
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      this.token = localStorage.getItem('auth_token');
+      const userStr = localStorage.getItem('auth_user');
+      if (userStr) {
+        try {
+          this.user = JSON.parse(userStr);
+        } catch {
+          this.logout();
+        }
       }
     }
   }
@@ -75,7 +78,9 @@ class AuthService {
 
       const data = await response.json();
       this.user = data.user;
-      localStorage.setItem('auth_user', JSON.stringify(this.user));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('auth_user', JSON.stringify(this.user));
+      }
       return this.user;
     } catch {
       this.logout();
@@ -86,15 +91,19 @@ class AuthService {
   private setAuth(data: AuthResponse): void {
     this.token = data.token;
     this.user = data.user;
-    localStorage.setItem('auth_token', this.token);
-    localStorage.setItem('auth_user', JSON.stringify(this.user));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('auth_token', this.token);
+      localStorage.setItem('auth_user', JSON.stringify(this.user));
+    }
   }
 
   logout(): void {
     this.token = null;
     this.user = null;
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+    }
   }
 
   getToken(): string | null {
@@ -112,7 +121,9 @@ class AuthService {
   updateUser(userData: Partial<User>): void {
     if (this.user) {
       this.user = { ...this.user, ...userData };
-      localStorage.setItem('auth_user', JSON.stringify(this.user));
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem('auth_user', JSON.stringify(this.user));
+      }
     }
   }
 }
