@@ -12,7 +12,7 @@ import {
   Modal
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { QueryClient, QueryClientProvider, useQuery, useMutation } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
 // Create QueryClient
 const queryClient = new QueryClient({
@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 2,
       staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
+      gcTime: 10 * 60 * 1000, // Changed from cacheTime to gcTime for v5
     },
   },
 });
@@ -211,6 +211,7 @@ function DashboardScreen() {
     queryKey: ['tasks'],
     queryFn: () => apiClient.getTasks(),
     enabled: !!user,
+    retry: false, // Disable retry for now to avoid errors
   });
 
   const pendingTasks = tasks.filter(task => task.status === 'pending').length;
