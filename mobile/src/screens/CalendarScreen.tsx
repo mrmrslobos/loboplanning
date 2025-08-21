@@ -28,7 +28,7 @@ export default function CalendarScreen() {
   });
 
   const createEventMutation = useMutation({
-    mutationFn: offlineApiClient.calendar.createEvent,
+    mutationFn: (event: any) => offlineApiClient.calendar.createEvent(event),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['calendar', 'events'] });
       setShowAddModal(false);

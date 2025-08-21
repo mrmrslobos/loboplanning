@@ -50,7 +50,7 @@ export default function DevotionalScreen() {
   });
 
   const generateMutation = useMutation({
-    mutationFn: offlineApiClient.devotional.generate,
+    mutationFn: (preferences: any) => offlineApiClient.devotional.generate(preferences),
     onSuccess: (response) => {
       setCurrentDevotional(response.data);
       setShowGenerateModal(false);
@@ -61,7 +61,7 @@ export default function DevotionalScreen() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: offlineApiClient.devotional.saveEntry,
+    mutationFn: (devotional: any) => offlineApiClient.devotional.saveEntry(devotional),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['devotional', 'entries'] });
       setCurrentDevotional(null);

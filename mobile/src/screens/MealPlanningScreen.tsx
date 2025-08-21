@@ -34,7 +34,7 @@ export default function MealPlanningScreen() {
   });
 
   const generateAIPlanMutation = useMutation({
-    mutationFn: offlineApiClient.mealPlanning.generateAIPlan,
+    mutationFn: (preferences: any) => offlineApiClient.mealPlanning.generateAIPlan(preferences),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-planning'] });
       setShowAIModal(false);

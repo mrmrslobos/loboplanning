@@ -38,7 +38,7 @@ export default function EventsScreen() {
   });
 
   const createEventMutation = useMutation({
-    mutationFn: offlineApiClient.events.createEvent,
+    mutationFn: (event: any) => offlineApiClient.events.createEvent(event),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       setShowCreateModal(false);
@@ -50,7 +50,7 @@ export default function EventsScreen() {
   });
 
   const generatePlanMutation = useMutation({
-    mutationFn: offlineApiClient.events.generateEventPlan,
+    mutationFn: (eventData: any) => offlineApiClient.events.generateEventPlan(eventData),
     onSuccess: () => {
       Alert.alert('Success', 'AI has generated a comprehensive plan for your event!');
       queryClient.invalidateQueries({ queryKey: ['events'] });

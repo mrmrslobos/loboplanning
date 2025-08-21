@@ -25,7 +25,7 @@ export default function ChatScreen() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: offlineApiClient.chat.sendMessage,
+    mutationFn: (message: any) => offlineApiClient.chat.sendMessage(message),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat', 'messages'] });
       setNewMessage('');

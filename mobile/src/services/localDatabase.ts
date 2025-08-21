@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { v4 as uuidv4 } from 'uuid';
 
 // Local database interface - replaces server API calls
 class LocalDatabase {
@@ -36,7 +35,8 @@ class LocalDatabase {
 
   async addItem<T extends { id?: string }>(collection: string, item: T): Promise<T> {
     const items = await this.getCollection<T>(collection);
-    const newItem = { ...item, id: item.id || uuidv4(), createdAt: new Date().toISOString() };
+    const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    const newItem = { ...item, id: item.id || generateId(), createdAt: new Date().toISOString() };
     items.push(newItem as T);
     await this.saveCollection(collection, items);
     return newItem as T;
@@ -66,12 +66,13 @@ class LocalDatabase {
   async createUser(userData: any): Promise<any> {
     const users = await AsyncStorage.getItem('all_users');
     const allUsers = users ? JSON.parse(users) : [];
+    const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
     
     const newUser = {
-      id: uuidv4(),
+      id: generateId(),
       ...userData,
       createdAt: new Date().toISOString(),
-      familyId: userData.familyId || uuidv4(), // Create new family if none provided
+      familyId: userData.familyId || generateId(), // Create new family if none provided
     };
 
     allUsers.push(newUser);
