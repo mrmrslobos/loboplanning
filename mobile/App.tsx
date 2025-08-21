@@ -19,6 +19,7 @@ import MealPlanningScreen from './src/screens/MealPlanningScreen';
 import EventsScreen from './src/screens/EventsScreen';
 import DevotionalScreen from './src/screens/DevotionalScreen';
 import AchievementsScreen from './src/screens/AchievementsScreen';
+import FamilySharingScreen from './src/screens/FamilySharingScreen';
 import MoreHomeScreen from './src/screens/MoreHomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 
@@ -80,6 +81,7 @@ function MoreScreen() {
       <Stack.Screen name="Events" component={EventsScreen} />
       <Stack.Screen name="Devotional" component={DevotionalScreen} />
       <Stack.Screen name="Achievements" component={AchievementsScreen} />
+      <Stack.Screen name="FamilySharing" component={FamilySharingScreen} />
     </Stack.Navigator>
   );
 }

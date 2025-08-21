@@ -12,13 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../services/api';
-
-const devotionalApi = {
-  getDevotionals: () => apiClient.get('/devotional/entries'),
-  generateDevotional: (preferences: any) => apiClient.post('/devotional/generate', preferences),
-  saveDevotional: (devotional: any) => apiClient.post('/devotional/entries', devotional),
-};
+import { offlineApiClient } from '../services/offlineApi';
 
 const devotionalTypes = [
   'Daily Devotional',
@@ -52,11 +46,11 @@ export default function DevotionalScreen() {
 
   const { data: devotionals = [] } = useQuery({
     queryKey: ['devotional', 'entries'],
-    queryFn: () => devotionalApi.getDevotionals().then(res => res.data),
+    queryFn: () => offlineApiClient.devotional.getEntries().then(res => res.data),
   });
 
   const generateMutation = useMutation({
-    mutationFn: devotionalApi.generateDevotional,
+    mutationFn: offlineApiClient.devotional.generate,
     onSuccess: (response) => {
       setCurrentDevotional(response.data);
       setShowGenerateModal(false);
@@ -67,7 +61,7 @@ export default function DevotionalScreen() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: devotionalApi.saveDevotional,
+    mutationFn: offlineApiClient.devotional.saveEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['devotional', 'entries'] });
       setCurrentDevotional(null);

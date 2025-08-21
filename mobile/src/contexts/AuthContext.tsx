@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { apiClient } from '../services/api';
+import { offlineApiClient } from '../services/offlineApi';
 
 interface User {
   id: string;
@@ -30,8 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = await SecureStore.getItemAsync('auth_token');
       if (token) {
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const response = await apiClient.get('/auth/me');
+        const response = await offlineApiClient.auth.me();
         setUser(response.data.user);
       }
     } catch (error) {
@@ -44,14 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await apiClient.post('/auth/login', {
-        username,
-        password,
-      });
-
+      const response = await offlineApiClient.auth.login(username, password);
       const { user, token } = response.data;
       await SecureStore.setItemAsync('auth_token', token);
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
     } catch (error) {
       throw error;
@@ -60,14 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (username: string, password: string) => {
     try {
-      const response = await apiClient.post('/auth/register', {
-        username,
-        password,
-      });
-
+      const response = await offlineApiClient.auth.register(username, password);
       const { user, token } = response.data;
       await SecureStore.setItemAsync('auth_token', token);
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
     } catch (error) {
       throw error;
@@ -76,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await SecureStore.deleteItemAsync('auth_token');
-    delete apiClient.defaults.headers.common['Authorization'];
+    await offlineApiClient.auth.logout();
     setUser(null);
   };
 

@@ -51,6 +51,12 @@ export default function MoreHomeScreen() {
       icon: 'trophy',
       screen: 'Achievements',
     },
+    {
+      title: 'Family Sharing',
+      description: 'Connect with family and sync data',
+      icon: 'people',
+      screen: 'FamilySharing',
+    },
   ];
 
   return (

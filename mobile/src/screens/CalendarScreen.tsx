@@ -13,12 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../services/api';
-
-const calendarApi = {
-  getEvents: () => apiClient.get('/calendar/events'),
-  createEvent: (event: any) => apiClient.post('/calendar/events', event),
-};
+import { offlineApiClient } from '../services/offlineApi';
 
 export default function CalendarScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -29,11 +24,11 @@ export default function CalendarScreen() {
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['calendar', 'events'],
-    queryFn: () => calendarApi.getEvents().then(res => res.data),
+    queryFn: () => offlineApiClient.calendar.getEvents().then(res => res.data),
   });
 
   const createEventMutation = useMutation({
-    mutationFn: calendarApi.createEvent,
+    mutationFn: offlineApiClient.calendar.createEvent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['calendar', 'events'] });
       setShowAddModal(false);

@@ -4,12 +4,7 @@ import { Card, Text, Chip, ProgressBar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '../services/api';
-
-const achievementsApi = {
-  getProgress: () => apiClient.get('/achievements/progress'),
-  getBadges: () => apiClient.get('/achievements/badges'),
-};
+import { offlineApiClient } from '../services/offlineApi';
 
 const achievementCategories = [
   { name: 'Task Completion', color: '#3b82f6', icon: 'checkmark-circle' },
@@ -22,12 +17,12 @@ const achievementCategories = [
 export default function AchievementsScreen() {
   const { data: progress } = useQuery({
     queryKey: ['achievements', 'progress'],
-    queryFn: () => achievementsApi.getProgress().then(res => res.data),
+    queryFn: () => offlineApiClient.achievements.getProgress().then(res => res.data),
   });
 
   const { data: badges = [] } = useQuery({
     queryKey: ['achievements', 'badges'],
-    queryFn: () => achievementsApi.getBadges().then(res => res.data),
+    queryFn: () => offlineApiClient.achievements.getBadges().then(res => res.data),
   });
 
   const unlockedBadges = badges.filter((badge: any) => badge.unlocked);

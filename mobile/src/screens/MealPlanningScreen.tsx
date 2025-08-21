@@ -12,14 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../services/api';
-
-const mealPlanningApi = {
-  getMealPlans: () => apiClient.get('/meal-planning/plans'),
-  getRecipes: () => apiClient.get('/meal-planning/recipes'),
-  createMealPlan: (plan: any) => apiClient.post('/meal-planning/plans', plan),
-  generateAIPlan: (preferences: any) => apiClient.post('/meal-planning/generate-ai-plan', preferences),
-};
+import { offlineApiClient } from '../services/offlineApi';
 
 const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
@@ -32,16 +25,16 @@ export default function MealPlanningScreen() {
 
   const { data: mealPlans = [] } = useQuery({
     queryKey: ['meal-planning', 'plans'],
-    queryFn: () => mealPlanningApi.getMealPlans().then(res => res.data),
+    queryFn: () => offlineApiClient.mealPlanning.getMealPlans().then(res => res.data),
   });
 
   const { data: recipes = [] } = useQuery({
     queryKey: ['meal-planning', 'recipes'],
-    queryFn: () => mealPlanningApi.getRecipes().then(res => res.data),
+    queryFn: () => offlineApiClient.mealPlanning.getRecipes().then(res => res.data),
   });
 
   const generateAIPlanMutation = useMutation({
-    mutationFn: mealPlanningApi.generateAIPlan,
+    mutationFn: offlineApiClient.mealPlanning.generateAIPlan,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meal-planning'] });
       setShowAIModal(false);

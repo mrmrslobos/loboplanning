@@ -13,13 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../services/api';
-
-const eventsApi = {
-  getEvents: () => apiClient.get('/events'),
-  createEvent: (event: any) => apiClient.post('/events', event),
-  generateEventPlan: (eventData: any) => apiClient.post('/events/generate-plan', eventData),
-};
+import { offlineApiClient } from '../services/offlineApi';
 
 const eventTypes = [
   { label: 'Birthday Party', icon: 'gift', color: '#f59e0b' },
@@ -40,11 +34,11 @@ export default function EventsScreen() {
 
   const { data: events = [] } = useQuery({
     queryKey: ['events'],
-    queryFn: () => eventsApi.getEvents().then(res => res.data),
+    queryFn: () => offlineApiClient.events.getEvents().then(res => res.data),
   });
 
   const createEventMutation = useMutation({
-    mutationFn: eventsApi.createEvent,
+    mutationFn: offlineApiClient.events.createEvent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       setShowCreateModal(false);
@@ -56,7 +50,7 @@ export default function EventsScreen() {
   });
 
   const generatePlanMutation = useMutation({
-    mutationFn: eventsApi.generateEventPlan,
+    mutationFn: offlineApiClient.events.generateEventPlan,
     onSuccess: () => {
       Alert.alert('Success', 'AI has generated a comprehensive plan for your event!');
       queryClient.invalidateQueries({ queryKey: ['events'] });

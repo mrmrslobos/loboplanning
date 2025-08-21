@@ -10,13 +10,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../services/api';
+import { offlineApiClient } from '../services/offlineApi';
 import { useAuth } from '../contexts/AuthContext';
-
-const chatApi = {
-  getMessages: () => apiClient.get('/chat/messages'),
-  sendMessage: (message: any) => apiClient.post('/chat/messages', message),
-};
 
 export default function ChatScreen() {
   const [newMessage, setNewMessage] = useState('');
@@ -25,12 +20,12 @@ export default function ChatScreen() {
 
   const { data: messages = [] } = useQuery({
     queryKey: ['chat', 'messages'],
-    queryFn: () => chatApi.getMessages().then(res => res.data),
+    queryFn: () => offlineApiClient.chat.getMessages().then(res => res.data),
     refetchInterval: 3000, // Poll every 3 seconds for new messages
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: chatApi.sendMessage,
+    mutationFn: offlineApiClient.chat.sendMessage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat', 'messages'] });
       setNewMessage('');
