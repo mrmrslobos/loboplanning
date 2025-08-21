@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "LoboHub",
-    "slug": "lobohub-family",
+    "name": "LoboHub Mobile",
+    "slug": "lobohub-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -15,30 +15,16 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.lobohub.family"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      },
-      "package": "com.lobohub.family"
+      }
     },
     "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
-    },
-    "scheme": "lobohub",
-    "development": {
-      "client": {
-        "silentLaunch": true
-      }
-    },
-    "extra": {
-      "eas": {
-        "projectId": "your-project-id-here"
-      }
+      "favicon": "./assets/favicon.png"
     }
   }
 }
