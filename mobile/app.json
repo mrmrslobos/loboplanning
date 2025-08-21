@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "LoboHub",
-    "slug": "lobohub-mobile",
+    "slug": "lobohub-family",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,37 +9,35 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#3b82f6"
+      "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lobohub.mobile"
+      "bundleIdentifier": "com.lobohub.family"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#3b82f6"
+        "backgroundColor": "#FFFFFF"
       },
-      "package": "com.lobohub.mobile",
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.INTERNET",
-        "android.permission.VIBRATE",
-        "android.permission.RECEIVE_BOOT_COMPLETED"
-      ]
+      "package": "com.lobohub.family"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
-    "plugins": [
-      "expo-notifications"
-    ],
+    "scheme": "lobohub",
+    "development": {
+      "client": {
+        "silentLaunch": true
+      }
+    },
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "your-project-id-here"
       }
     }
   }
