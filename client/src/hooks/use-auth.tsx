@@ -13,12 +13,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(authService.getUser());
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Initialize user from storage first
+        const storedUser = authService.getUser();
+        if (storedUser) {
+          setUser(storedUser);
+        }
+        
+        // Then verify with server
         const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
       } catch (error) {
