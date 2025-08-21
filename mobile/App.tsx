@@ -1,7 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Pressable } from 'react-native';
+import { useState } from 'react';
 
 export default function App() {
+  const [buttonPressed, setButtonPressed] = useState(false);
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -27,6 +30,15 @@ export default function App() {
           <Text style={styles.featureTitle}>✅ App Store Ready</Text>
           <Text style={styles.featureText}>No backend servers required</Text>
         </View>
+        
+        <Pressable 
+          style={[styles.button, buttonPressed && styles.buttonPressed]}
+          onPressIn={() => setButtonPressed(true)}
+          onPressOut={() => setButtonPressed(false)}
+          onPress={() => console.log('Get Started pressed')}
+        >
+          <Text style={styles.buttonText}>Get Started</Text>
+        </Pressable>
         
         <View style={styles.status}>
           <Text style={styles.statusText}>🎉 Mobile app is working!</Text>
@@ -81,6 +93,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     lineHeight: 20,
+  },
+  button: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    marginVertical: 20,
+    alignItems: 'center',
+  },
+  buttonPressed: {
+    backgroundColor: '#2563eb',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   status: {
     backgroundColor: '#f0f9ff',

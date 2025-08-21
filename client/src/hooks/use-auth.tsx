@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { authService, type User } from "@/lib/auth";
 
 interface AuthContextType {
@@ -12,7 +12,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,9 +20,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkAuth = async () => {
       try {
         // Initialize user from storage first
-        const storedUser = authService.getUser();
-        if (storedUser) {
-          setUser(storedUser);
+        if (typeof window !== 'undefined') {
+          const storedUser = authService.getUser();
+          if (storedUser) {
+            setUser(storedUser);
+          }
         }
         
         // Then verify with server
